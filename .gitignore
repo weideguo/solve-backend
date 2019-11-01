@@ -106,9 +106,9 @@ venv.bak/
 bak/
 *.bak/
 playbook/
-migrations/
 
 # ignore some file
 *.bak
 *.swp
 *.pid
+*_initial.py
