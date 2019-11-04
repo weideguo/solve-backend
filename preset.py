@@ -44,9 +44,13 @@ def redis_set():
 
 
 def file_root_set():
-    cp=getcp()
-    file_root=cp.get('common','file_root')
-    os.makedirs(file_root)
+    try:
+        cp=getcp()
+        file_root=cp.get('common','file_root')
+        os.makedirs(file_root)
+    except:
+        print('mkdir [ %s ] failed, maybe has exist, check manually' % file_root)
+
     return file_root
 
 
@@ -58,6 +62,6 @@ if __name__ == "__main__":
 
     print("-----------------------------------------make dirs-----------------------------------------")
     r=file_root_set()
-    print("-----------------------------------------make dirs success: %s -----------------------------------------" % r)
+    print("-----------------------------------------make dirs done-----------------------------------------")
 
 
