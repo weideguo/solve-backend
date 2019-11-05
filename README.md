@@ -1,5 +1,5 @@
-solve-backend
---------------
+# solve-backend #
+
 
 使用solve的web后端。通过jwt记录账号登陆状态。
 
@@ -24,7 +24,7 @@ export LC_ALL=en_US.UTF-8           #中文支持
 
 ### start ###
 ```shell
-nohup /data/gameTools/dba_new/env/python/bin/python manage.py runserver 127.0.0.1:8000 &
+nohup python manage.py runserver 127.0.0.1:8000 &
 
 #正式环境使用gunicorn 提供更好性能
 gunicorn settingConf.wsgi:application -b 0.0.0.0:8000 
