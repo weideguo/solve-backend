@@ -6,8 +6,10 @@ prefix_log="log_"                   #日志的开头
                                     #重新运行/继续运行需要在上一次提交时间的以下两个时间内执行 分别对session/global参数限制
 #redis manage
 key_solve_config="solve_config"     #存储配置信息的key    
+prefix_config="config_"             #单项配置key的开头
 target_types="target_types"
 job_types="job_types"
+job_rerun="rerun"                   #用于标记重新运行的任务类型
 
 prefix_exec="exec"                  #可执行任务key的开头
 prefix_exec_tmpl="tmpl"             #任务模板key的开头
@@ -37,7 +39,7 @@ playbook_prefix_session="session"   #playbook中输入变量的开头 输入变�
 prefix_job="job_"                   #每个任务的信息 job_<job id> 插入 key_job_list 
 
 #redis log
-prefix_log_cluster="log_cluster_"   #每个执行对象执行命令的队列key
+prefix_log_target="log_target_"   #每个执行对象执行命令的队列key
 prefix_sum="sum_"                   #每次每个执行对象所执行的汇总
 
 

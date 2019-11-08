@@ -7,7 +7,7 @@ import redis
 
 solve_config="solve_config"
 config=[
-        ("job_types","config_qrkueihtklhoiuou",["default","update","test","rerun"]),
+        ("job_types","config_qrkueihtklhoiuou",["default","update","test"]),
         ("target_types","config_qrkueihtklhoiuou111",["host", "server", "cluster", "container"]),
         ("tmpl_const","config_tmpl_const", {"name":"必须const开头 存储常量key的名字 由英文以及下划线组成"}),
         ("tmpl_realhost","config_tmpl_realhost", {"ip":"与管理机网络互通的ip" ,"user":"ssh登录以及执行命令账号" ,"passwd":"账号密码" ,"ssh_port":"ssh端口号","name":"必须严格为 realhost_<ip>"}),

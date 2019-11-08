@@ -103,3 +103,7 @@ curl  "http://127.0.0.1:8000/api/v1/file/?path=./" -F "file=@/root/xxx.sh"  -H "
 #config
 curl  "http://127.0.0.1:8000/api/v1/config?key=job_types" -H "Authorization:JWT ${xx}"
 
+#如何直接提提交数组？ js的axios模块可以直接提交数组
+#curl  "http://127.0.0.1:8000/api/v1/config?key=job_werwerqqdddd&type=list" -H "Authorization:JWT ${xx}" -X POST -d "[\"a在\",\"b\",\"c\"]"
+curl  "http://127.0.0.1:8000/api/v1/config?key=job_werwerqqqq&type=string" -H "Authorization:JWT ${xx}" -X POST -d "中文也可以"
+curl  "http://127.0.0.1:8000/api/v1/config?key=job_werwerq" -H "Authorization:JWT ${xx}" -X POST -d "id=1111&opid=123"

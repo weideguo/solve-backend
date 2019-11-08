@@ -60,29 +60,31 @@ class order(baseview.BaseView):
                 data=[]
                 job_info=redis_log_client.hgetall(config.prefix_log+work_id)
                 
-                if (job_info): 
-                    for c in eval(job_info.get('log_cluster')):
+                if (job_info):
+                    for c in eval(job_info.get('log')):
                         x={}
-                        x['cluster_str']=c[0].split('_'+c[0].split('_')[-1])[0]
-                        x['cluster_id']=c[0].split('_')[-1]
+                        x['target']=c[0].split('_'+c[0].split('_')[-1])[0]
+                        x['target_id']=c[0].split('_')[-1]
                         x['playbook_rownum']=job_info.get('playbook_rownum')    
                         x['exe_rownum']=redis_log_client.llen(c[1])
                         
-                        log_cluster_sum=redis_log_client.hgetall('sum_'+x['cluster_id'])
-                        x['begin_date']=log_cluster_sum.get('begin_timestamp')
-                        x['end_date']=log_cluster_sum.get('end_timestamp')
+                        log_target_sum=redis_log_client.hgetall('sum_'+x['target_id'])
+                        x['begin_date']=log_target_sum.get('begin_timestamp')
+                        x['end_date']=log_target_sum.get('end_timestamp')
                         if x['begin_date'] and x['end_date']:
                             x['endure']=float(x['end_date'])-float(x['begin_date'])
 
-                        if log_cluster_sum.get('stop_str'):
-                            x['exe_status']=log_cluster_sum.get('stop_str')
+                        if log_target_sum.get('stop_str'):
+                            x['exe_status']=log_target_sum.get('stop_str')
                         else:
                             x['exe_status']='executing'
 
                         data.append(x)
                 return data
-            
-            data=get_summary(work_id)
+            try:
+                data=get_summary(work_id)
+            except:
+                return Response({'status':-1, 'msg':safe_decode('获取日志信息失败')})
             
             rerun_str=redis_log_client.hget(config.prefix_log+work_id,'rerun')
             if not rerun_str:
@@ -92,7 +94,7 @@ class order(baseview.BaseView):
                 r_data=get_summary(r_work_id)
                 for i in data:
                     for j in r_data:
-                        if i['cluster_str'] == j['cluster_str']:
+                        if i['target'] == j['target']:
                             data.remove(i)
                             data.append(j)
 
@@ -108,16 +110,16 @@ class order(baseview.BaseView):
 
 
         elif args=='abort':
-            cluster_id = request.GET['cluster_id']
+            target_id = request.GET['target_id']
 
-            abort_time=redis_send_client.get(config.prefix_kill+cluster_id)
+            abort_time=redis_send_client.get(config.prefix_kill+target_id)
             if not abort_time:
                 abort_time=str(time.time())
 
-                redis_log_client.hset(config.prefix_sum+cluster_id,'stop_str','killing')
+                redis_log_client.hset(config.prefix_sum+target_id,'stop_str','killing')
 
-                redis_send_client.set(config.prefix_kill+cluster_id,abort_time)                
-                #redis_send_client.expire('kill_'+cluster_id,60)
+                redis_send_client.set(config.prefix_kill+target_id,abort_time)                
+                #redis_send_client.expire('kill_'+target_id,60)
 
                 return Response({'status':1,'abort_time':0})
             else:
@@ -128,12 +130,13 @@ class order(baseview.BaseView):
             '''
             获取执行日志的id列表
             '''
-            cluster_id = request.GET['id']
+            target_id = request.GET['id']
 
-            l_len=redis_log_client.llen(cluster_id)
+            target_id = config.prefix_log_target+target_id
+            l_len=redis_log_client.llen(target_id)
             exelist=[]
             if l_len:
-                exelist=redis_log_client.lrange(cluster_id,0,l_len-1)                
+                exelist=redis_log_client.lrange(target_id,0,l_len-1)                
 
             return Response({'status':1,'exelist':exelist})
         
@@ -152,30 +155,30 @@ class order(baseview.BaseView):
             summary=[]
             job_id = request.GET['workid']
             
-            log_cluster=redis_log_client.hget(config.prefix_log+job_id,'log_cluster')
+            log_target=redis_log_client.hget(config.prefix_log+job_id,'log')
         
-            if log_cluster: 
-                log_cluster_list=eval(log_cluster)
+            if log_target: 
+                log_target_list=eval(log_target)
             else:
-                log_cluster_list=[]
+                log_target_list=[]
 
 
             job_rerun=redis_log_client.hget(config.prefix_log+job_id,'rerun')
             if job_rerun:
                 for j in job_rerun.split(','):
-                    log_cluster_list +=eval(redis_log_client.hget('log_'+j,'log_cluster'))   
+                    log_target_list +=eval(redis_log_client.hget('log_'+j,'log'))   
                         
 
             tmp_summary={}
-            for c in log_cluster_list:
+            for c in log_target_list:
                 x = {}
-                x['cluster_str'] = c[0].split('_'+c[0].split('_')[-1])[0]
-                x['cluster_id']  = c[0].split('_')[-1]
-                x['last_stdout'] = redis_log_client.hget(config.prefix_sum+x['cluster_id'],'last_stdout')          
+                x['target'] = c[0].split('_'+c[0].split('_')[-1])[0]
+                x['target_id']  = c[0].split('_')[-1]
+                x['last_stdout'] = redis_log_client.hget(config.prefix_sum+x['target_id'],'last_stdout')          
                 if not x['last_stdout']:
                     x['last_stdout'] = ''
                 
-                last_uuid= redis_log_client.hget(config.prefix_sum+x['cluster_id'],'last_uuid')
+                last_uuid= redis_log_client.hget(config.prefix_sum+x['target_id'],'last_uuid')
                 if not last_uuid:                
                     pass
                 elif not redis_log_client.hgetall(last_uuid):            
@@ -186,7 +189,7 @@ class order(baseview.BaseView):
                         x['last_stdout'] = 'stderr: '+stderr
                     else:
                         x['last_stdout'] = 'stderr: null'
-                tmp_summary[x['cluster_str']]=x
+                tmp_summary[x['target']]=x
 
             for k in tmp_summary.keys():
                 summary.append(tmp_summary[k])           

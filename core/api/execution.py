@@ -94,7 +94,7 @@ class myexecution(baseview.BaseView):
     def get(self, request, args = None):
 
         old_job_id = request.GET['work_id']
-        cluster_str = request.GET['cluster_str']  
+        target = request.GET['target']  
 
         job_info = redis_job_client.hgetall(old_job_id)
         job_id = uuid.uuid1().hex
@@ -109,25 +109,25 @@ class myexecution(baseview.BaseView):
             redis_config_client.expire(new_session_name,config.session_var_expire_sec)
 
         if args == 'rerun':
-            cluster_id = request.GET['cluster_id']
+            target_id = request.GET['target_id']
             begin_host = request.GET.get('begin_host','')
             begin_line = int(request.GET.get('begin_line',0))
  
-            new_cluster_id = uuid.uuid1().hex
+            new_target_id = uuid.uuid1().hex
             
-            redis_config_client.hmset(cluster_str+'_'+new_cluster_id,redis_config_client.hgetall(cluster_str+'_'+cluster_id))
-            global_data=redis_config_client.hgetall(config.prefix_global+cluster_id)
+            redis_config_client.hmset(target+'_'+new_target_id,redis_config_client.hgetall(target+'_'+target_id))
+            global_data=redis_config_client.hgetall(config.prefix_global+target_id)
             if global_data:
-                redis_config_client.hmset(config.prefix_global+new_cluster_id,global_data)
-                #在此提前设置过期时间 防止执行到一半失败是global_xxx一直存在 命令分发后端会在执行结束后再设置一次
-                redis_config_client.expire(config.prefix_global+new_cluster_id,config.global_var_expire_sec)
+                redis_config_client.hmset(config.prefix_global+new_target_id,global_data)
+                #在此提前设置过期时间 防止执行到一半失败时global_xxx一直存在 命令分发后端会在执行结束后再设置一次
+                redis_config_client.expire(config.prefix_global+new_target_id,config.global_var_expire_sec)
 
             job_name = config.prefix_job+job_id
                         
-            job_info['cluster_str'] = cluster_str+config.cmd_spliter+new_cluster_id
+            job_info['target'] = target+config.cmd_spliter+new_target_id
             job_info['begin_time'] = time.time() 
-            job_info['job_type'] = 'rerun'
-            job_info['_number'] = len(cluster_str.split(','))
+            job_info['job_type'] = config.job_rerun
+            job_info['number'] = len(target.split(','))
             if begin_host:
                 job_info['begin_host'] = begin_host
             if begin_line:
@@ -136,12 +136,12 @@ class myexecution(baseview.BaseView):
             redis_job_client.hmset(job_name,job_info)
             
             rerun_str=''
-            if redis_log_client.hget(config.prefix_log+old_job_id,'rerun'):
-                rerun_str=redis_log_client.hget(config.prefix_log+old_job_id,'rerun')+','+job_name
+            if redis_log_client.hget(config.prefix_log+old_job_id, config.job_rerun):
+                rerun_str=redis_log_client.hget(config.prefix_log+old_job_id,config.job_rerun)+','+job_name
             else:
                 rerun_str=job_name
 
-            redis_log_client.hset(config.prefix_log+old_job_id,'rerun',rerun_str)
+            redis_log_client.hset(config.prefix_log+old_job_id,config.job_rerun,rerun_str)
             
             redis_send_client.rpush(config.key_job_list,job_name) 
 
@@ -149,7 +149,7 @@ class myexecution(baseview.BaseView):
 
             
         elif args == 'rerun_info':
-            cluster_id = request.GET.get('cluster_id','')  
+            target_id = request.GET.get('target_id','')  
 
             rerun_info={}
             _rerun_info=redis_config_client.hgetall(job_info.get(config.playbook_prefix_session,''))  
@@ -157,16 +157,16 @@ class myexecution(baseview.BaseView):
             
             readonly={}
             readonly['playbook']=job_info['playbook']
-            readonly['cluster_str']=cluster_str            
+            readonly['target']=target            
             rerun_info['readonly']=readonly
 
             changable={}
-            _len=int(redis_log_client.llen(config.prefix_log_cluster+cluster_id))
+            _len=int(redis_log_client.llen(config.prefix_log_target+target_id))
             changable['begin_line']=_len
             
             begin_host=''
-            if cluster_id:
-                begin_host=redis_log_client.hget(redis_log_client.lrange(config.prefix_log_cluster+cluster_id,_len-1,_len)[0],'exe_host') 
+            if target_id:
+                begin_host=redis_log_client.hget(redis_log_client.lrange(config.prefix_log_target+target_id,_len-1,_len)[0],'exe_host') 
             changable['begin_host']=begin_host
 
             rerun_info['changable']=changable

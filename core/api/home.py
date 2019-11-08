@@ -1,5 +1,6 @@
 #coding:utf8
 import re
+import copy
 import datetime
 import redis
 from rest_framework.response import Response
@@ -35,12 +36,12 @@ class home(baseview.BaseView):
             for t in target_types:
                 all_target += redis_config_client.keys(t+'*')
 
+            real_all_target=[]
             for k in all_target:
-                if re.match('^\S{32}$',k.split('_')[-1]):
-                    all_target.remove(k)    
+                if not re.match('^\S{32}$',k.split('_')[-1]):
+                    real_all_target.append(k)    
 
-            info['target'] = len(all_target)
-
+            info['target'] = len(real_all_target)
             return Response(info) 
 
             
@@ -52,6 +53,7 @@ class home(baseview.BaseView):
             for i in reversed(range(time_gap)):
                 tmp_date = (now_time +datetime.timedelta(days=-i)).strftime("%m-%d")     
                 stats[tmp_date] = {}
+
 
             for j in job_list:
                 j_timestamp=redis_job_client.hget(j,'begin_time')
@@ -78,9 +80,10 @@ class home(baseview.BaseView):
             job_types=redis_manage_client.lrange(job_types_key,0,redis_manage_client.llen(job_types_key))
 
             mytime=sorted(stats.keys())
- 
+
             import copy
             all_types=copy.deepcopy(job_types)
+            all_types.append(config.job_rerun)
             all_types.append('all')
 
             r={}
