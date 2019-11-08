@@ -30,7 +30,8 @@ class home(baseview.BaseView):
             all_target = []
 
             target_types_key=redis_manage_client.hget(config.key_solve_config,config.target_types)
-            target_types=redis_manage_client.lrange(target_types_key,0,redis_manage_client.llen(target_types_key))
+            # target_types=redis_manage_client.lrange(target_types_key,0,redis_manage_client.llen(target_types_key))
+            target_types=redis_manage_client.smembers(target_types_key)
 
             all_target=[]
             for t in target_types:
@@ -77,12 +78,13 @@ class home(baseview.BaseView):
                     stats[j_time]=tmp_dict
                    
             job_types_key=redis_manage_client.hget(config.key_solve_config,config.job_types)
-            job_types=redis_manage_client.lrange(job_types_key,0,redis_manage_client.llen(job_types_key))
+            #job_types=redis_manage_client.lrange(job_types_key,0,redis_manage_client.llen(job_types_key))
+            job_types=redis_manage_client.smembers(job_types_key)
 
             mytime=sorted(stats.keys())
 
             import copy
-            all_types=copy.deepcopy(job_types)
+            all_types=list(copy.deepcopy(job_types))
             all_types.append(config.job_rerun)
             all_types.append('all')
 
