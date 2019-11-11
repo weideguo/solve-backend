@@ -4,8 +4,11 @@
 使用solve的web后端。通过jwt记录账号登陆状态。
 
 
-Running
+running
 --------------
+### dependency servers ###
+* redis (>= 2.0.0)
+* solve
 
 ### version support ###
 * python 2.7
