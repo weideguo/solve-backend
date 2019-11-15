@@ -7,8 +7,8 @@ import redis
 
 solve_config="solve_config"
 config=[
-        ("job_types","config_qrkueihtklhoiuou",["default","update","test"]),
-        ("target_types","config_qrkueihtklhoiuou111",["host", "server", "cluster", "container"]),
+        ("job_types","config_qrkueihtklhoiuou",set(["default","update","test"])),
+        ("target_types","config_qrkueihtklhoiuou111",set(["host", "server", "cluster", "container"])),
         ("tmpl_const","config_tmpl_const", {"name":"必须const开头 存储常量key的名字 由英文以及下划线组成"}),
         ("tmpl_realhost","config_tmpl_realhost", {"ip":"与管理机网络互通的ip" ,"user":"ssh登录以及执行命令账号" ,"passwd":"账号密码" ,"ssh_port":"ssh端口号","name":"必须严格为 realhost_<ip>"}),
         ("tmpl_host","config_tmpl_host", {"name":"host开头 以_分层级","realhost":"对应的真实主机realhost"}),
@@ -36,9 +36,15 @@ def redis_set():
         redis_manage_client.hset(solve_config,c[0],c[1]) 
         if isinstance(c[2],str):  
             redis_manage_client.set(c[1],c[2]) 
+
         if isinstance(c[2],list):
             for k in c[2]:
-                redis_manage_client.rpush(c[1],k) 
+                redis_manage_client.rpush(c[1],k)
+
+        if isinstance(c[2],set):
+            for k in list(c[2]):
+                redis_manage_client.sadd(c[1],k)
+
         if isinstance(c[2],dict):  
             redis_manage_client.hmset(c[1],c[2]) 
 

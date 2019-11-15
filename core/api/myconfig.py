@@ -45,6 +45,7 @@ class myconfig(baseview.BaseView):
     def post(self, request, args = None):
         """
         提交的数据可以为 string list set hash格式，如果为string list set则需要明确指定格式
+        提交时设置header Content-Type: application/json 
         """
         key=request.GET['key']
         key_type=request.GET.get('type','hash')
@@ -59,11 +60,6 @@ class myconfig(baseview.BaseView):
 
         def update_config(info):
             if key_type == 'list':
-                # 如果以字典格式组织则
-                # info="[\"a\", \"b\", \"c\"]"
-                # info='["a", "b", "c"]'
-                # 即输入的字符穿不应该存在单引号
-                # info=json.loads(info.keys()[0])
                 # 可以直接获取list格式的数据
                 redis_manage_client.delete(key_name)
                 for k in info:
@@ -74,9 +70,10 @@ class myconfig(baseview.BaseView):
                 redis_manage_client.delete(key_name)
                 for k in info:
                     redis_manage_client.sadd(key_name,k)
-                
+
                 return Response({'status':1,'key':key,'type':key_type,'data':info})
             elif key_type == 'string':
+                #Content-Type: application/x-www-form-urlencoded
                 info=info.keys()[0]
                 redis_manage_client.set(key_name,info)
                 return Response({'status':1,'key':key,'type':key_type,'data':info})
@@ -85,7 +82,7 @@ class myconfig(baseview.BaseView):
                 redis_manage_client.hmset(key_name,info)
                 return Response({'status':1,'key':key,'type':key_type,'data':info})
             else:
-                return Response({'status':-1,'msg':safe_decode('type必须为string list dict之一')})  
+                return Response({'status':-1,'msg':safe_decode('type必须为string list set hash之一')})  
 
 
         key_name=redis_manage_client.hget(config.key_solve_config,key)    
