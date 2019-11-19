@@ -81,6 +81,7 @@ class order(baseview.BaseView):
 
                         data.append(x)
                 return data
+
             try:
                 data=get_summary(work_id)
             except:
@@ -97,8 +98,10 @@ class order(baseview.BaseView):
                         if i['target'] == j['target']:
                             data.remove(i)
                             data.append(j)
+            
+            playbook=redis_job_client.hget(work_id,'playbook')
 
-            return Response({'status':1, 'data': data})
+            return Response({'status':1, 'data': data, 'playbook':playbook})
 
 
         elif args=='del':
