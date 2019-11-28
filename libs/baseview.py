@@ -9,6 +9,9 @@ from rest_framework.views import APIView
 
 
 class BaseView(APIView):
+    """
+    settings.py REST_FRAMEWORK 模块设置的验证方法
+    """
     permission_classes = (IsAuthenticated,)
     #permission_classes = ()
     #authentication_classes = ()

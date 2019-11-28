@@ -105,3 +105,13 @@ class home(baseview.BaseView):
             return Response(r)
         else:
             return HttpResponse(status=404)
+
+
+class test(baseview.AnyLogin):
+    '''
+    首页的信息
+    '''
+    @error_capture 
+    def get(self, request, args = None):
+        r=request
+        return Response({'r':'','a':args}) 

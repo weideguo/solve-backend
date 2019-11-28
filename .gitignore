@@ -112,3 +112,4 @@ playbook/
 *.swp
 *.pid
 *_initial.py
+nohup.out
