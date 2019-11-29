@@ -36,8 +36,9 @@ AUTH_USER_MODEL = 'core.Account'
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
+    'rest_framework',
+    'django.contrib.sessions',
     'core.apps.CoreConfig',
-    'rest_framework'
 ]
 
 MIDDLEWARE = [
@@ -45,7 +46,8 @@ MIDDLEWARE = [
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'corsheaders.middleware.CorsMiddleware',
-    'django.middleware.common.CommonMiddleware'
+    'django.middleware.common.CommonMiddleware',
+    'django.contrib.sessions.middleware.SessionMiddleware',
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 CSRF_ORIGIN_ALLOW_ALL = True
@@ -181,3 +183,20 @@ LOGGING = {
 
     }
 }
+
+
+
+# session
+#SESSION_ENGINE = 'django.contrib.sessions.backends.file'           # 文件存储session
+SESSION_ENGINE = 'django.contrib.sessions.backends.cache'          # 缓存存储session
+#SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'      # 数据库+缓存存储session
+#SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'  # 加密cookie存储session
+#SESSION_ENGINE = 'django.contrib.sessions.backends.db'             # 数据库存储session
+SESSION_COOKIE_NAME = "sessionidx"                       # Session的cookie保存在浏览器上时的key，即：sessionid＝随机字符串（默认）
+SESSION_COOKIE_PATH = "/"                               # Session的cookie保存的路径（默认）
+SESSION_COOKIE_DOMAIN = None                             # Session的cookie保存的域名（默认）
+SESSION_COOKIE_SECURE = False                            # 是否Https传输cookie（默认）
+SESSION_COOKIE_HTTPONLY = True                           # 是否Session的cookie只支持http传输（默认）
+SESSION_COOKIE_AGE = 1209600                             # Session的cookie失效日期（2周）（默认）
+SESSION_EXPIRE_AT_BROWSER_CLOSE = False                  # 是否关闭浏览器使得Session过期（默认）
+SESSION_SAVE_EVERY_REQUEST = False                       # 是否每次请求都保存Session，默认修改之后才保存（默认）

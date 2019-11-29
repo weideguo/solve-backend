@@ -61,3 +61,23 @@ class AnyLogin(APIView):
 
     def delete(self, request, args = None):
         pass
+
+
+class SessionView(APIView):
+    """
+    用于设置与校验session/cookie 从而实现登陆状态的验证
+    """
+    permission_classes = ()
+    authentication_classes = ()
+
+    def get(self, request, args = None):
+        pass
+
+    def post(self, request, args = None):
+        pass
+
+    def put(self, request, args = None):
+        pass
+
+    def delete(self, request, args = None):
+        pass
