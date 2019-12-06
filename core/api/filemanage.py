@@ -6,11 +6,11 @@ from rest_framework.response import Response
 from django.http import FileResponse
 
 from libs import baseview, util, redis_pool
-from libs.util import error_capture,getcp,safe_decode
+from libs.wrapper import error_capture
 from conf import config
 
 #file_root=config.file_root
-cp=getcp()
+cp=util.getcp()
 file_root=cp.get('common','file_root')
 
 class filemanage(baseview.BaseView):
@@ -26,7 +26,7 @@ class filemanage(baseview.BaseView):
         #print filename 
         save_path=os.path.join(file_root,'./'+path)
         if os.path.isfile(save_path):
-            msg=safe_decode('路径为文件')
+            msg=util.safe_decode('路径为文件')
             status=-1
             return Response({'file':save_path,'msg':msg,'status':status})
         elif not os.path.exists(save_path):
@@ -43,7 +43,7 @@ class filemanage(baseview.BaseView):
                f.write(chunk) 
 
             status=1
-            msg=safe_decode('上传成功')
+            msg=util.safe_decode('上传成功')
 
         return Response({'status':status,'file':full_path,'msg':msg})
 
@@ -62,7 +62,7 @@ class filemanage(baseview.BaseView):
                 response['Content-Disposition']='attachment;filename="%s' % name.encode('utf8')   #inline 和 attachment inline 在浏览器中显示
                 return response
             else:
-                return Response({'status':-1,'file':filename,'msg':safe_decode('路径不为文件')})
+                return Response({'status':-1,'file':filename,'msg':util.safe_decode('路径不为文件')})
        
 
         if args == 'list':
@@ -82,7 +82,7 @@ class filemanage(baseview.BaseView):
                 dirs.sort()
                 return Response({'status':1,'path':root_path,'files':files,'dirs':dirs})
             else:
-                return Response({'status':-1,'path':root_path,'msg':safe_decode('路径不为目录')}) 
+                return Response({'status':-1,'path':root_path,'msg':util.safe_decode('路径不为目录')}) 
 
 
         if args == 'create':
@@ -91,10 +91,10 @@ class filemanage(baseview.BaseView):
             try:
                 os.makedirs(create_path)
                 status=1
-                msg=safe_decode('创建成功')
+                msg=util.safe_decode('创建成功')
             except OSError:
                 status=-1
-                msg=safe_decode('创建失败')
+                msg=util.safe_decode('创建失败')
 
             return Response({'status':status,'path':create_path,'msg':msg})
 

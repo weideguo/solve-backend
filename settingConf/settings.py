@@ -36,8 +36,8 @@ AUTH_USER_MODEL = 'core.Account'
 INSTALLED_APPS = [
     'django.contrib.auth',
     'django.contrib.contenttypes',
-    'rest_framework',
     'django.contrib.sessions',
+    'rest_framework',
     'core.apps.CoreConfig',
 ]
 
@@ -51,6 +51,7 @@ MIDDLEWARE = [
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 CSRF_ORIGIN_ALLOW_ALL = True
+CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = (
     'DELETE',
     'GET',
@@ -58,6 +59,8 @@ CORS_ALLOW_METHODS = (
     'POST',
     'PUT',
 )
+
+CORS_ORIGIN_WHITELIST = ['192.168.58.1','192.168.58.132']
 
 ROOT_URLCONF = 'settingConf.urls'
 
@@ -122,6 +125,10 @@ REST_FRAMEWORK = {
     'DEFAULT_AUTHENTICATION_CLASSES': (
         'rest_framework_jwt.authentication.JSONWebTokenAuthentication',
     ),
+    'DEFAULT_RENDERER_CLASSES': (
+        'rest_framework.renderers.JSONRenderer',
+        'rest_framework.renderers.BrowsableAPIRenderer',
+    ),
 }
 
 JWT_AUTH = {
@@ -184,19 +191,16 @@ LOGGING = {
     }
 }
 
+# CAS
+# if don't use, set: CAS_URL=''
+CAS_URL='http://192.168.59.132:9095/cas'
+#CAS_URL=''
+"""
+CAS协议提供的接口：
+login                #登陆(前端使用)
+logout               #登出(前端使用)
+validate             #验证ticket 返回text格式 (后端使用)
+serviceValidate      #验证ticket 返回xml格式  (后端使用)
+"""
 
 
-# session
-#SESSION_ENGINE = 'django.contrib.sessions.backends.file'           # 文件存储session
-SESSION_ENGINE = 'django.contrib.sessions.backends.cache'          # 缓存存储session
-#SESSION_ENGINE = 'django.contrib.sessions.backends.cached_db'      # 数据库+缓存存储session
-#SESSION_ENGINE = 'django.contrib.sessions.backends.signed_cookies'  # 加密cookie存储session
-#SESSION_ENGINE = 'django.contrib.sessions.backends.db'             # 数据库存储session
-SESSION_COOKIE_NAME = "sessionidx"                       # Session的cookie保存在浏览器上时的key，即：sessionid＝随机字符串（默认）
-SESSION_COOKIE_PATH = "/"                               # Session的cookie保存的路径（默认）
-SESSION_COOKIE_DOMAIN = None                             # Session的cookie保存的域名（默认）
-SESSION_COOKIE_SECURE = False                            # 是否Https传输cookie（默认）
-SESSION_COOKIE_HTTPONLY = True                           # 是否Session的cookie只支持http传输（默认）
-SESSION_COOKIE_AGE = 1209600                             # Session的cookie失效日期（2周）（默认）
-SESSION_EXPIRE_AT_BROWSER_CLOSE = False                  # 是否关闭浏览器使得Session过期（默认）
-SESSION_SAVE_EVERY_REQUEST = False                       # 是否每次请求都保存Session，默认修改之后才保存（默认）

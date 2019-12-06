@@ -7,7 +7,7 @@ import uuid
 from rest_framework.response import Response
 
 from libs import baseview, util, redis_pool
-from libs.util import error_capture,safe_decode,HashCURD
+from libs.wrapper import error_capture,HashCURD
 from conf import config
 
 
@@ -78,9 +78,9 @@ class host(baseview.BaseView):
                 deletelist = redis_send_client.keys('*'+ip+'*')
                 for d in deletelist:
                     redis_send_client.delete(d)
-                return  Response({'status':1, 'msg':safe_decode('断开成功'), 'delete_list':deletelist}) 
+                return  Response({'status':1, 'msg':util.safe_decode('断开成功'), 'delete_list':deletelist}) 
             else:
-                return  Response({'status':-1, 'msg':safe_decode('断开失败')})
+                return  Response({'status':-1, 'msg':util.safe_decode('断开失败')})
 
         
         elif args=='conn': 
@@ -95,13 +95,13 @@ class host(baseview.BaseView):
 
             exit_code=redis_log_client.hget(conn_uuid,'exit_code')
             if exit_code=='0':
-                return  Response({'status':1, 'msg':safe_decode('连接成功')})
+                return  Response({'status':1, 'msg':util.safe_decode('连接成功')})
             elif exit_code:
-                return  Response({'status':-1, 'msg': safe_decode(exit_code)})
+                return  Response({'status':-1, 'msg': util.safe_decode(exit_code)})
             elif conn_counter<100:
-                return  Response({'status':1, 'msg':safe_decode('连接成功')})
+                return  Response({'status':1, 'msg':util.safe_decode('连接成功')})
             else:
-                return  Response({'status':-2, 'msg':safe_decode('连接超时')})
+                return  Response({'status':-2, 'msg':util.safe_decode('连接超时')})
 
 
 

@@ -8,7 +8,7 @@ import base64
 from rest_framework.response import Response
 
 from libs import baseview, util, redis_pool
-from libs.util import error_capture,HashCURD
+from libs.wrapper import error_capture,HashCURD
 from conf import config
 
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()

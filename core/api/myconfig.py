@@ -6,7 +6,7 @@ import json
 from rest_framework.response import Response
 
 from libs import baseview, util, redis_pool
-from libs.util import error_capture,safe_decode
+from libs.wrapper import error_capture
 from conf import config
 
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
@@ -23,7 +23,7 @@ class myconfig(baseview.BaseView):
         if key_name:
             key_type=redis_manage_client.type(key_name)
         else:
-            return Response({'status':-1,'data':'','msg':safe_decode('key不存在')})            
+            return Response({'status':-1,'data':'','msg':util.safe_decode('key不存在')})            
         
 
         data=None
@@ -36,7 +36,7 @@ class myconfig(baseview.BaseView):
         elif key_type=='string':
             data=redis_manage_client.get(key_name)         
         else:
-            return Response({'status':-2,'data':'','msg':safe_decode('key在redis中的存储类型错误')})
+            return Response({'status':-2,'data':'','msg':util.safe_decode('key在redis中的存储类型错误')})
             
 
         return Response({'status':1,'data':data})
@@ -55,7 +55,7 @@ class myconfig(baseview.BaseView):
             info = request.data
         
         if not info:
-            return Response({'status':-2,'msg':safe_decode('提交信息不能为空')})    
+            return Response({'status':-2,'msg':util.safe_decode('提交信息不能为空')})    
 
 
         def update_config(info):
@@ -82,7 +82,7 @@ class myconfig(baseview.BaseView):
                 redis_manage_client.hmset(key_name,info)
                 return Response({'status':1,'key':key,'type':key_type,'data':info})
             else:
-                return Response({'status':-1,'msg':safe_decode('type必须为string list set hash之一')})  
+                return Response({'status':-1,'msg':util.safe_decode('type必须为string list set hash之一')})  
 
 
         key_name=redis_manage_client.hget(config.key_solve_config,key)    
@@ -92,7 +92,7 @@ class myconfig(baseview.BaseView):
             if o_key_type == key_type or (o_key_type=='none'):
                 return update_config(info)
             else:
-                return Response({'status':-2,'msg':safe_decode('type类型不匹配')})  
+                return Response({'status':-2,'msg':util.safe_decode('type类型不匹配')})  
         else:
             key_name=config.prefix_config+uuid.uuid1().hex
             redis_manage_client.hset(config.key_solve_config,key,key_name)

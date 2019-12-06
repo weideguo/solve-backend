@@ -4,11 +4,10 @@ import copy
 import datetime
 import redis
 from rest_framework.response import Response
-from django.http import HttpResponse
 
 from core.models import Account
 from libs import baseview, util, redis_pool
-from libs.util import error_capture
+from libs.wrapper import error_capture
 from conf import config
 
 
@@ -108,10 +107,52 @@ class home(baseview.BaseView):
 
 
 class test(baseview.AnyLogin):
+#class test(baseview.BaseView):
     '''
     首页的信息
     '''
     @error_capture 
     def get(self, request, args = None):
-        r=request
-        return Response({'r':'','a':args}) 
+        #r=str(request.user)
+        #r=request.META
+        #r=request.session.exists()
+        #session_key_o=request.META['HTTP_AUTHORIZATION']
+        #request.session.session_key=session_key_o
+        #session_key=session_key_o.split('sessionidx=')[-1]
+        #r=request.session.exists(session_key)
+        #v=request.session.get(session_key)
+        #如何获取对应session的值
+        # 暗黑用法 session_id 同时作为 session_key????
+        #django-session.objects.filter(session_id
+        #request.session.delete(session_key)
+        #r=request.session._session
+        #r=request.session._session
+        #r={}
+        #a=request.session.keys()
+        
+        #return Response({'r':r})
+        """
+        if 'HTTP_X_FORWARDED_FOR' in request.META:
+            r='xxxx'
+        else:
+            r='yyyy'
+
+        from django.http import HttpResponse
+        return HttpResponse(str({'r':r}))
+        """
+        if args == 'validate' or args == 'serviceValidate':
+            from django.http import HttpResponse
+            from django.conf import settings
+            import requests
+            cas_url=settings.CAS_URL
+            ticket=request.GET.get('ticket')
+            service=request.GET.get('service')
+            pgtUrl=request.GET.get('pgtUrl')
+            r=requests.get("%s/%s?ticket=%s&service=%s&pgtUrl=%s" % (cas_url,args,ticket,service,pgtUrl)) 
+
+            from django.http import HttpResponse
+            return HttpResponse(r.text)
+        else:
+            from libs.wrapper import get_service_token
+            token,msg=get_service_token('https://192.168.59.128:9000')
+            return HttpResponse(str({'r':token,'msg':msg}))

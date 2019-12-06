@@ -4,7 +4,7 @@ import redis
 from rest_framework.response import Response
 
 from libs import baseview, util, redis_pool
-from libs.util import error_capture,safe_decode
+from libs.wrapper import error_capture
 from conf import config
 
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
@@ -85,7 +85,7 @@ class order(baseview.BaseView):
             try:
                 data=get_summary(work_id)
             except:
-                return Response({'status':-1, 'msg':safe_decode('获取日志信息失败')})
+                return Response({'status':-1, 'msg':util.safe_decode('获取日志信息失败')})
             
             rerun_str=redis_log_client.hget(config.prefix_log+work_id,'rerun')
             if not rerun_str:
@@ -126,7 +126,7 @@ class order(baseview.BaseView):
 
                 return Response({'status':1,'abort_time':0})
             else:
-                return Response({'status':-1,'abort_time':abort_time,'msg':safe_decode('已经存在终止操作')})
+                return Response({'status':-1,'abort_time':abort_time,'msg':util.safe_decode('已经存在终止操作')})
             
             
         elif args=='exelist':
