@@ -106,7 +106,11 @@ venv.bak/
 bak/
 *.bak/
 playbook/
-core/migrations/
+#auth_new/migrations/*py
+auth_new/migrations/0002_auto_20191209_1613.py
+auth_new/migrations/0003_auto_20191209_1624.py
+auth_new/migrations/0004_auto_20191209_1636.py
+
 
 # ignore some file
 *.bak

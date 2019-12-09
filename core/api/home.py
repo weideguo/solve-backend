@@ -5,8 +5,9 @@ import datetime
 import redis
 from rest_framework.response import Response
 
-from core.models import Account
-from libs import baseview, util, redis_pool
+from auth_new.models import Account
+from auth_new import baseview
+from libs import util, redis_pool
 from libs.wrapper import error_capture
 from conf import config
 

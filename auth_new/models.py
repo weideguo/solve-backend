@@ -14,14 +14,13 @@ class Account(AbstractUser):
 
 
 
-class Cas_Proxy_Pgt(models.Model):
-    #replace into cas_proxy_pgt values(pgtIou,service,pgtId
+class CASProxyPgt(models.Model):
     pgtIou = models.CharField(max_length=200, primary_key=True)
-    service = models.CharField(max_length=200,null=True)
     pgtId = models.CharField(max_length=200,null=True)
+    date_generate = models.DateTimeField('获取时间',auto_now = True)
 
 
-class Cas_Proxy_Token(models.Model):
+class CASProxyToken(models.Model):
     id = models.AutoField(primary_key=True)
     service = models.CharField(max_length=200,unique=True)
     token = models.CharField(max_length=200,null=True)

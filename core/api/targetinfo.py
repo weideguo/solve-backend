@@ -6,7 +6,8 @@ import time
 import uuid
 from rest_framework.response import Response
 
-from libs import baseview, util, redis_pool
+from auth_new import baseview
+from libs import util, redis_pool
 from libs.wrapper import error_capture,HashCURD
 from conf import config
 

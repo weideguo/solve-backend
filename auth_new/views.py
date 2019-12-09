@@ -12,10 +12,10 @@ from django.contrib.auth import authenticate
 from django.shortcuts import redirect
 from django.conf import settings
 
-from core.models import Account
-from core.serializers import UserINFO
-from libs import baseview, util
-from libs.wrapper import error_capture,set_gpt
+from . import baseview,util
+from .models import Account,CASProxyPgt
+from .serializers import UserINFO
+from .wrapper import error_capture
 
 
 
@@ -23,7 +23,7 @@ jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
-class userinfo(baseview.BaseView):
+class UserInfo(baseview.BaseView):
     '''
     用户信息的增删改查    
       
@@ -76,7 +76,7 @@ class userinfo(baseview.BaseView):
         return Response({'status':1,'data':util.safe_decode('%s 用户删除成功!') % username})
 
 
-class login_auth(baseview.AnyLogin):
+class LoginAuth(baseview.AnyLogin):
     @error_capture
     def post(self, request, args = None):
 
@@ -122,7 +122,7 @@ def get_cas_user_token(user):
     return token
 
 
-class auth_cas(baseview.AnyLogin):
+class AuthCAS(baseview.AnyLogin):
     """
     使用cas系统的登陆
     """
@@ -174,39 +174,47 @@ class auth_cas(baseview.AnyLogin):
             if pgtUrl:
                 # 要调用其它连接相同cas的app的接口时使用
                 r=requests.get("%s/%s?ticket=%s&service=%s&pgtUrl=%s" % (cas_url,args,ticket,service,pgtUrl), verify=verify) 
-                flag, user, msg = util.cas_info_parser(r.text)
-                pgtIou=msg.get('proxyGrantingTicket')
-                set_gpt(pgtIou,service=service)
+                flag, user, msg = util.cas_info_parser(r.text,'authenticationSuccess')
+                """
+                if isinstance(msg,dict) and 'proxyGrantingTicket' in msg:
+                    pgtIou=msg.get('proxyGrantingTicket')
+                    targetService='/'.join(pgtUrl.split('/')[3])      #获取url的根路径
+                    set_gpt(pgtIou,service=targetService)
+                """
 
             else:
                 r=requests.get("%s/%s?ticket=%s&service=%s" % (cas_url,args,ticket,service), verify=verify)    
 
-                flag, user, msg = util.cas_info_parser(r.text)
+                flag, user, msg = util.cas_info_parser(r.text,'authenticationSuccess')
 
             #通过则设置session
             if flag:
                 # 前后端分离不适合使用cookie/session验证模式，使用jwt代替 
                 token=get_cas_user_token(user)
-                return Response({'status':1,'user':user,'token':token})
+                return Response({'status':1,'user':user,'token':token,'msg':msg})
             else:
                 return Response({'status':-1,'msg':msg})
 
 
-class cas_proxy(baseview.AnyLogin):
+class ProxyCAS(baseview.AnyLogin):
 
     @error_capture
     def get(self, request, args = None):
         """
         在作为代理时(即该服务要访问其他app的接口)，用于接收cas的回调
         """
-        pgtId=request.GET['pgtId']
-        pgtIou=request.GET['pgtIou']
-        set_gpt(pgtIou,pgtId=pgtId)
+        #print(request.GET)
+        pgtId=request.GET.get('pgtId')
+        pgtIou=request.GET.get('pgtIou')
 
-        return Response({'status':1})
+        if pgtId and pgtIou:
+            CASProxyPgt.objects.create(pgtIou=pgtIou,pgtId=pgtId)
+            return Response({'status':1})
+        else:
+            return Response({'status':-1})
 
 
-class logout_cas(baseview.BaseView):
+class LogoutCAS(baseview.BaseView):
     """
     登出 将对应的session清除 需要验证是否已经登陆
     """

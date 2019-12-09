@@ -115,59 +115,6 @@ class HashCURD():
 
 
 
-#使用cas proxy连接其他app时增加的函数
 
-def set_gpt(pgtIou,service=None,pgtId=None):
-    # 将获取的信息存储到数据库
-    # pgtIou 主键
-    # replace into cas_proxy_pgt values(pgtIou,service,pgtId)
-    print(pgtIou,service,pgtId)
-
-def get_token(service):
-    # select token from cas_proxy_token where service='service'
-    print(service)
-
-def get_pgtId(service):
-    # select pgtId from cas_proxy_pgt where service='service'
-    print(service)
-
-
-def set_token(service,token):
-    # replace into cas_proxy_token(service,token) values('service','token')
-    pass
-
-
-
-def get_service_token(targetService):
-    """
-    获取请求service的jwt
-    每次对其他app的接口发起请求前调用
-    """
-    token=get_token(targetService)            #token 可以复用 从数据库中获取
-    if not token:
-        pgtId=get_pgtId(targetService)        #pgtId 可以复用 从数据库中获取
-        if pgtId:
-            r=requests.get("%s/cas/proxy?pgt=%s&targetService=%s" %(cas_url,pgtId,targetService))
-            x,y,msg=util.cas_info_parser(r.text)     #解析xml
-            if ('proxyTicket' in msg) and isinstance(msg,dict):
-                proxyTicket=msg['proxyTicket']
-
-                # 请求其他服务的接口获取token
-                service_proxyValidate_url="%s/api/v1/cas/proxyValidate" % targetService
-                r=requests.get("%s?service=%s&ticket=%s" % (service_proxyValidate_url,targetService,proxyTicket))
-                if 'token' in r.text:
-                    token=r.text['token']
-                    set_token(targetService,token)
-                    msg=''
-                else:
-                    token=''
-                    msg=r.text['msg']
-                
-            else:
-                return '',msg
-        else:
-            return '','you should login again'
-    
-    return token,msg
 
 

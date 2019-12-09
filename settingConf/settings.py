@@ -29,7 +29,7 @@ DEBUG = True
 # ALLOWED_HOSTS
 ALLOWED_HOSTS = ['*']
 
-AUTH_USER_MODEL = 'core.Account'
+AUTH_USER_MODEL = 'auth_new.Account'
 
 # Application definition
 
@@ -38,6 +38,7 @@ INSTALLED_APPS = [
     'django.contrib.contenttypes',
     'django.contrib.sessions',
     'rest_framework',
+    'auth_new.apps.AuthNewConfig',
     'core.apps.CoreConfig',
 ]
 
@@ -191,7 +192,10 @@ LOGGING = {
     }
 }
 
-# CAS
+##############
+
+# 用于auth_new模块
+# 使用CAS
 # if don't use, set: CAS_URL=''
 CAS_URL='http://192.168.59.132:9095/cas'
 #CAS_URL=''
@@ -203,4 +207,8 @@ validate             #验证ticket 返回text格式 (后端使用)
 serviceValidate      #验证ticket 返回xml格式  (后端使用)
 """
 
+# 用于auth_new模块
+# 用于接口函数错误捕获的装饰器  
+ERROR_CAPTURE='libs.wrapper.error_capture'
+#ERROR_CAPTURE=''
 

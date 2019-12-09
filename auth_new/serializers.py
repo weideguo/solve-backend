@@ -1,5 +1,5 @@
 #coding:utf8
-from core.models import Account
+from auth_new.models import Account
 from rest_framework import serializers
 
 
