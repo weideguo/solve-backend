@@ -14,7 +14,7 @@ from conf import config
 cp=util.getcp()
 file_root=cp.get('common','file_root')
 
-class filemanage(baseview.BaseView):
+class File(baseview.BaseView):
     '''
     关于文件的操作
     中文路径 文件名支持 export LC_ALL=en_US.UTF-8

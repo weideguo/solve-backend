@@ -12,7 +12,7 @@ from conf import config
 
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
-class myconfig(baseview.BaseView):
+class Config(baseview.BaseView):
     """
     可以动态设置的配置信息
     """

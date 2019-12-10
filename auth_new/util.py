@@ -12,7 +12,6 @@ def safe_decode(string):
         #python3是字符都是以unicode存储 不能再转换
         return string
 
-################################CAS相关函数#########################################################################
 
 def cas_info_parser(cas_info,attrib):
     """

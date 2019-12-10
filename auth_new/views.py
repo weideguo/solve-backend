@@ -25,8 +25,7 @@ jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 class UserInfo(baseview.BaseView):
     '''
-    用户信息的增删改查    
-      
+    用户信息的增删改查
     '''
     @error_capture
     def get(self, request, args=None):
@@ -79,7 +78,6 @@ class UserInfo(baseview.BaseView):
 class LoginAuth(baseview.AnyLogin):
     @error_capture
     def post(self, request, args = None):
-
         '''
         登录验证
         :return: jwt token
@@ -123,9 +121,9 @@ def get_cas_user_token(user):
 
 
 class AuthCAS(baseview.AnyLogin):
-    """
+    '''
     使用cas系统的登陆
-    """
+    '''
     @error_capture
     def get(self, request, args = None):
 
@@ -133,12 +131,11 @@ class AuthCAS(baseview.AnyLogin):
         if not cas_url:
             return Response({'status':-3,'msg':util.safe_decode('必须先在后端设置CAS的地址才能使用')})
 
-        service=request.GET['service']
-
         if args == 'login':
-            """
+            '''
             返回重定向到cas的信息
-            """
+            '''
+            service=request.GET['service']
             cas_login_url='%s/login?service=%s' %(cas_url,service)
 
             #直接返回重定向信息让浏览器跳转到cas
@@ -148,7 +145,7 @@ class AuthCAS(baseview.AnyLogin):
             return Response({'status':1,'cas_login_url':cas_login_url})
 
         if args == 'validate' or args == 'serviceValidate' or args == 'proxyValidate':
-            """
+            '''
             验证后返回 jwt token给前端
             前后端分离不适合使用cookie/session验证模式
             
@@ -158,34 +155,30 @@ class AuthCAS(baseview.AnyLogin):
                 service 前端请求cas时的service
                 pgtUrl  可选，用于接受cas回调的接口，由此接口接收PGTID，必须是https
                         接受的请求如 
-                            "GET 
+                            'GET 
                                 ?pgtId=PGT-1575617661-dIjdNxjsTyPNUx0DIlq0ohHbPIaFrIah
-                                &pgtIou=PGTIOU-1575617661-ZHwypOEaklsvDsszDVrPGDuWnCGHctDh"
+                                &pgtIou=PGTIOU-1575617661-ZHwypOEaklsvDsszDVrPGDuWnCGHctDh'
 
             proxyValidate
                 使用cas proxy的登陆验证，用于验证其他app的登陆状态
                 ticket  其他app获取到的proxyTicket
-                service 其他app获取proxyTicket指定的targetService，即这个服的url，必须使用https
-            """
+                service 其他app获取proxyTicket指定的targetService，必须使用https
+            '''
             ticket=request.GET['ticket']
+            service=request.GET['service']
             verify=request.GET.get('verify',True)
             pgtUrl=request.GET.get('pgtUrl')
 
             if pgtUrl:
                 # 要调用其它连接相同cas的app的接口时使用
-                r=requests.get("%s/%s?ticket=%s&service=%s&pgtUrl=%s" % (cas_url,args,ticket,service,pgtUrl), verify=verify) 
-                flag, user, msg = util.cas_info_parser(r.text,'authenticationSuccess')
-                """
-                if isinstance(msg,dict) and 'proxyGrantingTicket' in msg:
-                    pgtIou=msg.get('proxyGrantingTicket')
-                    targetService='/'.join(pgtUrl.split('/')[3])      #获取url的根路径
-                    set_gpt(pgtIou,service=targetService)
-                """
-
+                url='%s/%s?ticket=%s&service=%s&pgtUrl=%s' % (cas_url,args,ticket,service,pgtUrl)
             else:
-                r=requests.get("%s/%s?ticket=%s&service=%s" % (cas_url,args,ticket,service), verify=verify)    
-
-                flag, user, msg = util.cas_info_parser(r.text,'authenticationSuccess')
+                url='%s/%s?ticket=%s&service=%s' % (cas_url,args,ticket,service)
+            
+            url=url.replace('#','%23')
+            r=requests.get(url, verify=verify)    
+            
+            flag, user, msg = util.cas_info_parser(r.text,'authenticationSuccess')
 
             #通过则设置session
             if flag:
@@ -195,34 +188,30 @@ class AuthCAS(baseview.AnyLogin):
             else:
                 return Response({'status':-1,'msg':msg})
 
+        if args == 'callback':
+            '''
+            在作为代理时(即该服务要访问其他app的接口)，用于接收cas的回调
+            '''
+            #print(request.GET)
+            pgtId=request.GET.get('pgtId')
+            pgtIou=request.GET.get('pgtIou')
 
-class ProxyCAS(baseview.AnyLogin):
-
-    @error_capture
-    def get(self, request, args = None):
-        """
-        在作为代理时(即该服务要访问其他app的接口)，用于接收cas的回调
-        """
-        #print(request.GET)
-        pgtId=request.GET.get('pgtId')
-        pgtIou=request.GET.get('pgtIou')
-
-        if pgtId and pgtIou:
-            CASProxyPgt.objects.create(pgtIou=pgtIou,pgtId=pgtId)
-            return Response({'status':1})
-        else:
-            return Response({'status':-1})
+            if pgtId and pgtIou:
+                CASProxyPgt.objects.create(pgtIou=pgtIou,pgtId=pgtId)
+                return Response({'status':1})
+            else:
+                return Response({'status':-1})
 
 
 class LogoutCAS(baseview.BaseView):
-    """
+    '''
     登出 将对应的session清除 需要验证是否已经登陆
-    """
+    '''
     
     @error_capture
     def get(self, request, args = None):
         cas_url=settings.CAS_URL
-        #service="http://192.168.59.132:8080/#/about"      #从请求获取前端的信息
+        #service='http://192.168.59.132:8080/#/about'      #从请求获取前端的信息
         service=request.GET['service']
 
         username=str(request.user)

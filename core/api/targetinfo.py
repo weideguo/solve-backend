@@ -14,7 +14,7 @@ from conf import config
 
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
-class targetinfo(baseview.BaseView):
+class Target(baseview.BaseView):
     '''
     执行对象的增删改查 
     '''    
@@ -26,7 +26,7 @@ class targetinfo(baseview.BaseView):
     def post(self, request, args = None):
         return HashCURD.post(redis_config_client,request, args)
 
-class host(baseview.BaseView):
+class Host(baseview.BaseView):
     '''
     主机
     '''

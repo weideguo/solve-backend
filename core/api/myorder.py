@@ -10,7 +10,7 @@ from conf import config
 
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
-class myorder(baseview.BaseView):
+class OrderInfo(baseview.BaseView):
     '''
     获取工单列表
 
@@ -46,7 +46,7 @@ class myorder(baseview.BaseView):
         return Response({'status':1,'data': data,'page': page_number})
 
 
-class order(baseview.BaseView):
+class Order(baseview.BaseView):
     '''
     :argument 执行工单详细信息的查询 删除 终止 
 

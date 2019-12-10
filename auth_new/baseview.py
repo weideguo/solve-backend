@@ -9,9 +9,9 @@ from rest_framework.views import APIView
 
 
 class BaseView(APIView):
-    """
+    '''
     settings.py REST_FRAMEWORK 模块设置的验证方法
-    """
+    '''
     permission_classes = (IsAuthenticated,)
     #permission_classes = ()
     #authentication_classes = ()
@@ -64,9 +64,10 @@ class AnyLogin(APIView):
 
 
 class SessionView(APIView):
-    """
+    '''
     用于设置与校验session/cookie 从而实现登陆状态的验证
-    """
+    前后端分离不适用
+    '''
     permission_classes = ()
     authentication_classes = ()
 

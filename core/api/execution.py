@@ -15,7 +15,7 @@ from conf import config
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
 
-class mysession(baseview.BaseView):
+class Session(baseview.BaseView):
     '''
     获取playbook的session参数
     '''
@@ -48,7 +48,7 @@ class mysession(baseview.BaseView):
         return Response({'status':1,'vars':session_info})
 
    
-class myexecution(baseview.BaseView): 
+class Execution(baseview.BaseView): 
     '''
     执行任务
     '''
@@ -175,7 +175,7 @@ class myexecution(baseview.BaseView):
             return Response({'status':1,'data':rerun_info}) 
             
             
-class executioninfo(baseview.BaseView): 
+class ExecutionInfo(baseview.BaseView): 
     '''
     任务、任务模板的增删改查 
     '''    
