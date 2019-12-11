@@ -17,13 +17,13 @@ class Account(AbstractUser):
 class CASProxyPgt(models.Model):
     pgtIou = models.CharField(max_length=200, primary_key=True)
     pgtId = models.CharField(max_length=200,null=True)
-    date_generate = models.DateTimeField('获取时间',auto_now = True)
+    date_generate = models.DateTimeField(auto_now = True)
 
 
 class CASProxyToken(models.Model):
     id = models.AutoField(primary_key=True)
     service = models.CharField(max_length=200,unique=True)
-    token = models.CharField(max_length=200,null=True)
+    token = models.CharField(max_length=300,null=True)
 
     class Meta:
         pass
