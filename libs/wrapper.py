@@ -7,7 +7,7 @@ from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 
 from libs import util
-from libs.util import MYLOGGER,MYLOGERROR
+from libs.util import MYLOGGER,MYLOGERROR,safe_decode
 
 
 def error_capture(func):
