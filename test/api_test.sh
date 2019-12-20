@@ -2,11 +2,11 @@
 #################  部分api的测试  #################
 
 #登录 
-curl "http://127.0.0.1:8000/api/v1/api-token-auth/" -d "username=admin&password=weideguo"
+curl "http://127.0.0.1:8000/api/v1/login/" -d "username=admin&password=weideguo"
 
-curl -H "Content-Type:application/json" -H "Accept:application/json"  -d "{\"username\":\"admin\",\"password\":\"weideguo\"}" "http://127.0.0.1:8000/api-token-auth/"
+curl -H "Content-Type:application/json" -H "Accept:application/json"  -d "{\"username\":\"admin\",\"password\":\"weideguo\"}" "http://127.0.0.1:8000/login/"
 
-xx=`curl "http://127.0.0.1:8000/api/v1/api-token-auth/" -d "username=admin&password=weideguo" | grep -oP "(?<=token\":\").*?(?=\")"`
+xx=`curl "http://127.0.0.1:8000/api/v1/login/" -d "username=admin&password=weideguo" | grep -oP "(?<=token\":\").*?(?=\")"`
 
 ###############################################################################################################
 #首页
@@ -80,12 +80,12 @@ curl "http://127.0.0.1:8000/api/v1/hostmanage/online" -H "Authorization:JWT ${xx
 
 #执行管理
 curl "http://127.0.0.1:8000/api/v1/mysession/?filter=xxxx" -H "Authorization:JWT ${xx}"
-
+curl "http://127.0.0.1:8000/api/v1/mysession/extend?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}"
 
 curl "http://127.0.0.1:8000/api/v1/myexecution/?filter=eweas123124" -H "Authorization:JWT ${xx}" -X POST -d "name=server_db12334987sd&a=daf&b=af"
 
 
-
+curl "http://127.0.0.1:8000/api/v1/mysession/?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}" -d "cmd=ls -altr /root"
 
 
 #文件管理

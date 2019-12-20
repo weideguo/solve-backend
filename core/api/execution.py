@@ -1,7 +1,9 @@
 #coding:utf8
 import re
+import sys
 import uuid
 import time
+import yaml
 import redis
 import json
 import base64
@@ -15,6 +17,31 @@ from conf import config
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
 
+def get_session(pre_job_name):
+    tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
+    playbook = redis_manage_client.hget(tmpl_key,'playbook')
+    session_vars=[]
+    with open(playbook,'r') as f:   
+        l=f.readline()
+        #存在bug 注释被获取,如            echo xxx # {{session.YYYY}}
+        #但不应排除#只后的字符串 如   echo '#' {{session.YYYY}}
+        while l:
+            if not re.match('^#',l):
+                session_vars=session_vars+re.findall('(?<={{'+config.playbook_prefix_session+'\.).*?(?=}})',l)
+            l=f.readline()     
+    
+    session_vars = list(set(session_vars))
+    #print session_vars
+    
+    session_tag = config.prefix_session
+    session_info = {}
+    old_session_info = redis_config_client.hgetall(session_tag+pre_job_name)
+    for v in session_vars:
+        session_info[v] = old_session_info.get(v,'')
+
+    return session_info
+
+
 class Session(baseview.BaseView):
     '''
     获取playbook的session参数
@@ -22,30 +49,76 @@ class Session(baseview.BaseView):
     @error_capture 
     def get(self, request, args = None):
         pre_job_name = request.GET['filter']
+        if not args:
         
-        tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
-        playbook = redis_manage_client.hget(tmpl_key,'playbook')
+            session_info = get_session(pre_job_name)  
 
-        session_vars=[]
-        with open(playbook,'r') as f:   
-            l=f.readline()
-            #存在bug 注释被获取,如            echo xxx # {{session.YYYY}}
-            #但不应排除#只后的字符串 如   echo "#" {{session.YYYY}}
-            while l:
-                if not re.match('^#',l):
-                    session_vars=session_vars+re.findall('(?<={{'+config.playbook_prefix_session+'\.).*?(?=}})',l)
-                l=f.readline()     
-        
-        session_vars = list(set(session_vars))
-        #print session_vars
-        
+            return Response({'status':1,'vars':session_info})
+
+        if args == 'extend':
+            '''
+            获取更完善的session
+            '''
+            tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
+            playbook = redis_manage_client.hget(tmpl_key,'playbook')
+            playbook_str =  open(playbook).read()
+
+            yaml_str_raw=re.findall('#CONTENT-BEGIN([\\w|\\W]*?)#CONTENT-END',playbook_str)
+            if yaml_str_raw:
+                yaml_str=yaml_str_raw[0].replace('\n#','\n')
+            else:
+                try:
+                    yaml_str =  open(playbook+'.conf').read()
+                except:
+                    yaml_str =  ""
+
+            if sys.version_info>(3,0):
+                from io import StringIO
+                f=StringIO(yaml_str)
+                yaml_dict=yaml.load(f,Loader=yaml.FullLoader)
+            else:
+                from StringIO import StringIO
+                f=StringIO(yaml_str)
+                yaml_dict=yaml.load(f)            
+
+            if not yaml_dict:
+                yaml_dict = {}
+
+            var=get_session(pre_job_name)
+
+            sesion_list=[]
+            if 'session' in yaml_dict:
+                for k1 in yaml_dict['session']:
+                    for k2 in var.keys():
+                        if k1['key']==k2:
+                            k1['value']=var[k2]
+                    if 'value' in k1:
+                        sesion_list.append(k1)
+                
+                key_constrict=[]
+                for k1 in yaml_dict['session']:
+                    key_constrict.append(k1['key'])
+                
+                for k2 in var.keys():
+                    if not k2 in key_constrict:
+                        sesion_list.append({'key':k2,'value':var[k2]})
+            else:
+                for k2 in var.keys():
+                    sesion_list.append({'key':k2,'value':var[k2]})
+
+            return Response({'status':1,'session':sesion_list})
+
+
+    @error_capture
+    def post(self, request, args = None):
+        filter = request.GET['filter']
+        data = request.data
+
         session_tag = config.prefix_session
-        session_info = {}
-        old_session_info = redis_config_client.hgetall(session_tag+pre_job_name)
-        for v in session_vars:
-            session_info[v] = old_session_info.get(v,'')            
+        if data:
+            redis_config_client.hmset(session_tag+filter,data)
 
-        return Response({'status':1,'vars':session_info})
+        return Response({'status':1,'vars':data})
 
    
 class Execution(baseview.BaseView): 
@@ -57,7 +130,7 @@ class Execution(baseview.BaseView):
 
         filter = request.GET['filter']
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
-        #jwt_str =jwt_str_raw.split('.')[1]+"=="     
+        #jwt_str =jwt_str_raw.split('.')[1]+'=='     
         #user=json.loads(base64.b64decode(jwt_str))['username']
         #print user 
         user=str(request.user)

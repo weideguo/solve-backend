@@ -20,7 +20,7 @@ urlpatterns = [
     url(r'^api/v1/hostmanage/(.*)', Host.as_view()),
     url(r'^api/v1/executioninfo/(.*)', ExecutionInfo.as_view()),
     url(r'^api/v1/myexecution/(.*)', Execution.as_view()),
-    url(r'^api/v1/mysession/', Session.as_view()),
+    url(r'^api/v1/mysession/(.*)', Session.as_view()),
     url(r'^api/v1/file/(.*)', File.as_view()),
     url(r'^api/v1/config/', Config.as_view()),
     url(r'^api/v1/', include('auth_new.urls')),
