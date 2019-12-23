@@ -43,14 +43,16 @@ def get_session(pre_job_name):
 
 
 class Session(baseview.BaseView):
-    '''
-    获取playbook的session参数
-    '''
+
     @error_capture 
     def get(self, request, args = None):
+
         pre_job_name = request.GET['filter']
-        if not args:
         
+        if not args:
+            '''
+            获取playbook的session参数
+            '''
             session_info = get_session(pre_job_name)  
 
             return Response({'status':1,'vars':session_info})
@@ -111,6 +113,9 @@ class Session(baseview.BaseView):
 
     @error_capture
     def post(self, request, args = None):
+        '''
+        提交session参数
+        '''
         filter = request.GET['filter']
         data = request.data
 
@@ -127,6 +132,9 @@ class Execution(baseview.BaseView):
     '''
     @error_capture
     def post(self, request, args = None):
+        '''
+        执行任务
+        '''
 
         filter = request.GET['filter']
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
@@ -134,8 +142,9 @@ class Execution(baseview.BaseView):
         #user=json.loads(base64.b64decode(jwt_str))['username']
         #print user 
         user=str(request.user)
-        job_id=uuid.uuid1().hex
         data = request.data
+
+        job_id=uuid.uuid1().hex
         session_tag = config.prefix_session
         if data:
             redis_config_client.hmset(session_tag+filter,data)
@@ -183,6 +192,9 @@ class Execution(baseview.BaseView):
             redis_config_client.expire(new_session_name,config.session_var_expire_sec)
 
         if args == 'rerun':
+            '''
+            重新执行单个执行
+            '''
             target_id = request.GET['target_id']
             begin_host = request.GET.get('begin_host','')
             begin_line = int(request.GET.get('begin_line',0))
@@ -223,6 +235,9 @@ class Execution(baseview.BaseView):
 
             
         elif args == 'rerun_info':
+            '''
+            单个执行的重新执行信息
+            '''
             target_id = request.GET.get('target_id','')  
 
             rerun_info={}

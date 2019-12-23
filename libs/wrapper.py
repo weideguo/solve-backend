@@ -39,6 +39,9 @@ class HashCURD():
     def get(redis_client,request, args = None):
 
         if args=='get':
+            '''
+            获取列表及详细值
+            '''
             filter = request.GET['filter']
             page = int(request.GET.get('page',1))
             pagesize = int(request.GET.get('pagesize',16))
@@ -65,6 +68,9 @@ class HashCURD():
 
 
         elif args=='del':
+            '''
+            删除
+            '''
             target =  request.GET['target']
             redis_client.delete(target)
             return Response({'status':1})
@@ -72,7 +78,7 @@ class HashCURD():
 
         elif args=='info':
             '''
-            简单的所有列表
+            简单的匹配列表
             '''
             filter = request.GET['filter']        
             filter=filter

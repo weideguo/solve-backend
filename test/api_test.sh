@@ -34,7 +34,7 @@ curl  "http://127.0.0.1:8000/api/v1/userinfo/${username}" -H "Authorization:JWT 
 
 
 #工单增改查
-curl "http://127.0.0.1:8000/api/v1/myorder?page=1&pagesize=16" -H "Authorization:JWT ${xx}" 
+curl "http://127.0.0.1:8000/api/v1/order?page=1&pagesize=16" -H "Authorization:JWT ${xx}" 
 
 
 curl "http://127.0.0.1:8000/api/v1/order/detail?workid=job_0ba06dba38b311e9add3000c29e7008f" -H "Authorization:JWT ${xx}"
@@ -79,13 +79,13 @@ curl "http://127.0.0.1:8000/api/v1/hostmanage/online" -H "Authorization:JWT ${xx
 
 
 #执行管理
-curl "http://127.0.0.1:8000/api/v1/mysession/?filter=xxxx" -H "Authorization:JWT ${xx}"
-curl "http://127.0.0.1:8000/api/v1/mysession/extend?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}"
+curl "http://127.0.0.1:8000/api/v1/session/?filter=xxxx" -H "Authorization:JWT ${xx}"
+curl "http://127.0.0.1:8000/api/v1/session/extend?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}"
 
-curl "http://127.0.0.1:8000/api/v1/myexecution/?filter=eweas123124" -H "Authorization:JWT ${xx}" -X POST -d "name=server_db12334987sd&a=daf&b=af"
+curl "http://127.0.0.1:8000/api/v1/execution/?filter=eweas123124" -H "Authorization:JWT ${xx}" -X POST -d "name=server_db12334987sd&a=daf&b=af"
 
 
-curl "http://127.0.0.1:8000/api/v1/mysession/?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}" -d "cmd=ls -altr /root"
+curl "http://127.0.0.1:8000/api/v1/session/?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}" -d "cmd=ls -altr /root"
 
 
 #文件管理
