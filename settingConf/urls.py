@@ -15,9 +15,9 @@ from core.api.home import Home,Test
 urlpatterns = [
     url(r'^api/v1/home/(.*)', Home.as_view()),
     url(r'^api/v1/order/(.*)', Order.as_view()),
-    url(r'^api/v1/targetinfo/(.*)', Target.as_view()),
+    url(r'^api/v1/target/(.*)', Target.as_view()),
     url(r'^api/v1/host/(.*)', Host.as_view()),
-    url(r'^api/v1/executioninfo/(.*)', ExecutionInfo.as_view()),
+    url(r'^api/v1/executionInfo/(.*)', ExecutionInfo.as_view()),
     url(r'^api/v1/execution/(.*)', Execution.as_view()),
     url(r'^api/v1/session/(.*)', Session.as_view()),
     url(r'^api/v1/file/(.*)', File.as_view()),
