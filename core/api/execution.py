@@ -108,7 +108,7 @@ class Session(baseview.BaseView):
                 for k2 in var.keys():
                     sesion_list.append({'key':k2,'value':var[k2]})
 
-            return Response({'status':1,'session':sesion_list})
+            return Response({'status':1,'session':sesion_list,'vars':var})
 
 
     @error_capture
@@ -121,6 +121,12 @@ class Session(baseview.BaseView):
 
         session_tag = config.prefix_session
         if data:
+            for k in data:
+                #将dict格式转成扁平的dict 即值只为str格式
+                if isinstance(data[k],list):
+                    # 对list值进行格式化转换
+                    data[k]=" ".join(data[k])
+
             redis_config_client.hmset(session_tag+filter,data)
 
         return Response({'status':1,'vars':data})

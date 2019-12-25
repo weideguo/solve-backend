@@ -4,3 +4,4 @@ django-filter==2.2.0
 djangorestframework==3.10.3
 djangorestframework-jwt==1.11.0
 redis==3.3.11
+PyYAML==5.2
