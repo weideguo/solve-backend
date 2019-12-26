@@ -26,6 +26,16 @@ def safe_decode(string):
         #python3是字符都是以unicode存储 不能再转换
         return string
 
+def plain_dict(data):
+    for k in data:
+        #将dict格式转成扁平的dict 即值只为str格式
+        if isinstance(data[k],list):
+            # 对list值进行格式化转换
+            data[k]=" ".join(data[k])
+
+    return data
+
+
 def getcp():
     cp = configparser.ConfigParser()
     cp.read('deploy.conf')

@@ -45,7 +45,9 @@ class HashCURD():
             filter = request.GET['filter']
             page = int(request.GET.get('page',1))
             pagesize = int(request.GET.get('pagesize',16))
-         
+            orderby = request.GET.get('orderby','')
+            reverse = bool(int(request.GET.get('reverse',1))) 
+            
             filter=filter
             
             new_target_list = []
@@ -59,6 +61,13 @@ class HashCURD():
                     new_target_list.append(b)
             
             page_number=len(new_target_list)
+
+            if orderby:
+                def sortitem(element):
+                    sort_keyname=orderby
+                    return element[sort_keyname] if sort_keyname in element else 0 
+                
+                new_target_list.sort(key=sortitem,reverse=reverse)   
 
             start = (page - 1) * pagesize
             end = page * pagesize
