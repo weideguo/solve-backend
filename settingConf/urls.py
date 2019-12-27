@@ -1,7 +1,7 @@
 #coding:utf8
 
-from django.urls import include
-from django.conf.urls import url
+#from django.urls import include
+from django.conf.urls import url,include
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from core.api.order import Order
@@ -23,6 +23,6 @@ urlpatterns = [
     url(r'^api/v1/file/(.*)', File.as_view()),
     url(r'^api/v1/config/', Config.as_view()),
     url(r'^api/v1/', include('auth_new.urls')),
-    url(r'^api/v1/test/(.*)', Test.as_view()),   #用于测试 正式部署请务必删除
+    #url(r'^api/v1/test/(.*)', Test.as_view()),   #用于测试 正式部署请务必删除
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
