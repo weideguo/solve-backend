@@ -25,8 +25,10 @@ class Order(baseview.BaseView):
             '''
             page = request.GET.get('page',1)
             pagesize = int(request.GET.get('pagesize',16))
+            sort_keyname = request.GET.get('sort','begin_time')
             reverse = bool(int(request.GET.get('reverse',1)))           
                      
+
             alldata = []
             i=0
             job_key_list=redis_job_client.keys(config.prefix_job+'*')
@@ -42,8 +44,7 @@ class Order(baseview.BaseView):
                 alldata.append(job_info)
             
             def sortitem(element):
-                sort_keyname='begin_time'
-                return element[sort_keyname] if sort_keyname in element else 0 
+                return float(element[sort_keyname]) if sort_keyname in element else 0 
             
             alldata.sort(key=sortitem,reverse=reverse)    
     
