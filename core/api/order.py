@@ -13,7 +13,7 @@ redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_ma
 
 class Order(baseview.BaseView):
     '''
-    :argument 执行工单详细信息的查询 删除 终止 
+    执行工单详细信息的查询 删除 终止 
 
     '''
     @error_capture
@@ -25,30 +25,34 @@ class Order(baseview.BaseView):
             '''
             page = request.GET.get('page',1)
             pagesize = int(request.GET.get('pagesize',16))
-            sort_keyname = request.GET.get('sort','begin_time')
+            sort_keyname = request.GET.get('orderby','begin_time')
             reverse = bool(int(request.GET.get('reverse',1)))           
-                     
-
-            alldata = []
-            i=0
-            job_key_list=redis_job_client.keys(config.prefix_job+'*')
-            page_number = len(job_key_list)
-            
-            start = (int(page) - 1) * pagesize
-            end = int(page) * pagesize
-    
-            for j in job_key_list:
-                job_info=redis_job_client.hgetall(j)
-                job_info['work_id']=j
-            
-                alldata.append(job_info)
-            
-            def sortitem(element):
-                return float(element[sort_keyname]) if sort_keyname in element else 0 
-            
-            alldata.sort(key=sortitem,reverse=reverse)    
-    
-            data=alldata[start:end]        
+                 
+            dura_flag=False    
+            if dura_flag:
+                data=[]
+                # 配置持久化数据库时执行工单列表全部通过数据库查询 如mongodb
+            else:
+                alldata = []
+                i=0
+                job_key_list=redis_job_client.keys(config.prefix_job+'*')
+                page_number = len(job_key_list)
+                
+                start = (int(page) - 1) * pagesize
+                end = int(page) * pagesize
+                
+                for j in job_key_list:
+                    job_info=redis_job_client.hgetall(j)
+                    job_info['work_id']=j
+                
+                    alldata.append(job_info)
+                
+                def sortitem(element):
+                    return float(element[sort_keyname]) if sort_keyname in element else 0 
+                
+                alldata.sort(key=sortitem,reverse=reverse)    
+                
+                data=alldata[start:end]        
     
             return Response({'status':1,'data': data,'page': page_number})
 

@@ -199,7 +199,7 @@ class Execution(baseview.BaseView):
             重新执行单个执行
             '''
             target_id = request.GET['target_id']
-            begin_host = request.GET.get('begin_host','')
+            #begin_host = request.GET.get('begin_host','')
             begin_line = int(request.GET.get('begin_line',0))
  
             new_target_id = uuid.uuid1().hex
@@ -217,8 +217,8 @@ class Execution(baseview.BaseView):
             job_info['begin_time'] = time.time() 
             job_info['job_type'] = config.job_rerun
             job_info['number'] = len(target.split(','))
-            if begin_host:
-                job_info['begin_host'] = begin_host
+            #if begin_host:
+            #    job_info['begin_host'] = begin_host
             if begin_line:
                 job_info['begin_line'] = begin_line
             
@@ -256,10 +256,10 @@ class Execution(baseview.BaseView):
             _len=int(redis_log_client.llen(config.prefix_log_target+target_id))
             changable['begin_line']=_len
             
-            begin_host=''
-            if target_id:
-                begin_host=redis_log_client.hget(redis_log_client.lrange(config.prefix_log_target+target_id,_len-1,_len)[0],'exe_host') 
-            changable['begin_host']=begin_host
+            #begin_host=''
+            #if target_id:
+            #    begin_host=redis_log_client.hget(redis_log_client.lrange(config.prefix_log_target+target_id,_len-1,_len)[0],'exe_host') 
+            #changable['begin_host']=begin_host
 
             rerun_info['changable']=changable
 
