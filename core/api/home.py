@@ -52,14 +52,14 @@ class Home(baseview.BaseView):
             time_gap=config.exe_stats_time_gap
             now_time = datetime.datetime.now()
             for i in reversed(range(time_gap)):
-                tmp_date = (now_time +datetime.timedelta(days=-i)).strftime("%m-%d")     
+                tmp_date = (now_time +datetime.timedelta(days=-i)).strftime("%y-%m-%d")     
                 stats[tmp_date] = {}
 
 
             for j in job_list:
                 j_timestamp=redis_job_client.hget(j,'begin_time')
                 #print j_timestamp
-                j_time=datetime.datetime.fromtimestamp(float(j_timestamp)).strftime("%m-%d")            
+                j_time=datetime.datetime.fromtimestamp(float(j_timestamp)).strftime("%y-%m-%d")            
                 if j_time in stats:
                     #stats[j_time]=stats[j_time]+1
                     job_type=redis_job_client.hget(j,'job_type')

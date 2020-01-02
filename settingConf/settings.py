@@ -197,7 +197,7 @@ LOGGING = {
 # 用于auth_new模块
 # 使用CAS
 # if don't use, set: CAS_URL=''
-CAS_URL='http://192.168.59.132:9095/cas'
+CAS_URL='http://192.168.253.128:9095/cas'
 #CAS_URL=''
 """
 CAS协议提供的接口：

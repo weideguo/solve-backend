@@ -7,6 +7,8 @@ from mongoengine import *
 connect(db='solve',host='127.0.0.1',port=27017,username='solve',password='solve123456')
 
 
+
+
 class Job(Document):  
     job_id=StringField(required=True,primary_key=True)
     comment=StringField() 
@@ -57,5 +59,21 @@ class Log(Document):
     stdout=StringField(required=False)
     stop_timestamp=StringField(required=False)
 
+
+class Vars():
+    job_id=StringField(required=True)
+    var_type=StringField(required=True)     #session global
+    value=DictField()
+
+
+
+class Sum():
+    target_id=StringField(required=True,primary_key=True)
+    end_timestamp=StringField() 
+    last_stdout=StringField() 
+    stop_str=StringField() 
+    last_uuid=StringField() 
+    target=StringField() 
+    begin_timestamp=StringField() 
 
 
