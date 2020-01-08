@@ -212,3 +212,18 @@ serviceValidate      #验证ticket 返回xml格式  (后端使用)
 ERROR_CAPTURE='libs.wrapper.error_capture'
 #ERROR_CAPTURE=''
 
+
+
+##################
+# 用于持久保存redis的数据
+# 如果不设置，则数据全部存在redis中，过期则清除
+#可以设置为{}或者全部清除
+#MONGODB_CONFIG = {}
+MONGODB_CONFIG = {
+    'host': '127.0.0.1',
+    'port': 27017,
+    'db': 'solve',
+    'user': 'solve',
+    'passwd': 'solve123456'
+
+}
