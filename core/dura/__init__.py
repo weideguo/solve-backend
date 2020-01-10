@@ -1,1 +1,1 @@
-from .dura import dura
+from .solve_dura import solve_dura

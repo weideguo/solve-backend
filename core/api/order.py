@@ -8,6 +8,8 @@ from libs import util, redis_pool
 from libs.wrapper import error_capture
 from conf import config
 
+#from core.dura import solve_dura
+
 redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
 
@@ -68,6 +70,8 @@ class Order(baseview.BaseView):
 
             def get_summary(work_id):
                 data=[]
+                #log_job_xxx 不存在则从mongodb加载到redis
+                #solve_dura.reload(config.prefix_log+work_id,0)
                 job_info=redis_log_client.hgetall(config.prefix_log+work_id)
                 
                 if (job_info):
