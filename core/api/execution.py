@@ -14,7 +14,7 @@ from libs import util, redis_pool
 from libs.wrapper import error_capture,HashCURD
 from conf import config
 
-redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
+redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
 
 def get_session(pre_job_name):
@@ -151,8 +151,8 @@ class Execution(baseview.BaseView):
         if data:
             data=util.plain_dict(data)
             redis_config_client.hmset(session_tag+filter,data)
-            redis_config_client.hmset(session_tag+filter+'_'+job_id,data)
-            redis_config_client.expire(session_tag+filter+'_'+job_id,24*60*60)
+            redis_tmp_client.hmset(session_tag+filter+'_'+job_id,data)
+            redis_tmp_client.expire(session_tag+filter+'_'+job_id,24*60*60)
 
         job_info = redis_manage_client.hgetall(filter)
         
@@ -189,10 +189,10 @@ class Execution(baseview.BaseView):
         new_session_name=old_session_name+'_'+job_id
         job_info[config.playbook_prefix_session]=new_session_name
 
-        session_data=redis_config_client.hgetall(old_session_name)
+        session_data=redis_tmp_client.hgetall(old_session_name)
         if session_data:
-            redis_config_client.hmset(new_session_name,session_data)
-            redis_config_client.expire(new_session_name,config.session_var_expire_sec)
+            redis_tmp_client.hmset(new_session_name,session_data)
+            redis_tmp_client.expire(new_session_name,config.session_var_expire_sec)
 
         if args == 'rerun':
             '''
@@ -204,12 +204,12 @@ class Execution(baseview.BaseView):
  
             new_target_id = uuid.uuid1().hex
             
-            redis_config_client.hmset(target+'_'+new_target_id,redis_config_client.hgetall(target+'_'+target_id))
-            global_data=redis_config_client.hgetall(config.prefix_global+target_id)
+            redis_tmp_client.hmset(target+'_'+new_target_id,redis_tmp_client.hgetall(target+'_'+target_id))
+            global_data=redis_tmp_client.hgetall(config.prefix_global+target_id)
             if global_data:
-                redis_config_client.hmset(config.prefix_global+new_target_id,global_data)
+                redis_tmp_client.hmset(config.prefix_global+new_target_id,global_data)
                 #在此提前设置过期时间 防止执行到一半失败时global_xxx一直存在 命令分发后端会在执行结束后再设置一次
-                redis_config_client.expire(config.prefix_global+new_target_id,config.global_var_expire_sec)
+                redis_tmp_client.expire(config.prefix_global+new_target_id,config.global_var_expire_sec)
 
             job_name = config.prefix_job+job_id
                         
@@ -244,7 +244,7 @@ class Execution(baseview.BaseView):
             target_id = request.GET.get('target_id','')  
 
             rerun_info={}
-            _rerun_info=redis_config_client.hgetall(job_info.get(config.playbook_prefix_session,''))  
+            _rerun_info=redis_tmp_client.hgetall(job_info.get(config.playbook_prefix_session,''))  
             rerun_info[config.playbook_prefix_session]=_rerun_info
             
             readonly={}

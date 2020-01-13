@@ -12,7 +12,7 @@ from libs.wrapper import error_capture
 from conf import config
 
 
-redis_send_client,redis_log_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
+redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
 class Home(baseview.BaseView):
     '''
