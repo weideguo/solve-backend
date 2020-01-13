@@ -93,7 +93,7 @@ class SolveDura():
             time.sleep(self.time_gap)
     
 
-    def expire(self, key, force=0, expire_time=config.session_var_expire_sec):
+    def expire(self, key, force=0, expire_time=config.tmp_config_expire_sec):
         '''
         单个log_job_XXX的过期设置
         force 是否不管已经完成与否，默认需要完成才设置过期
@@ -110,7 +110,7 @@ class SolveDura():
                 for ik in ck[1]:
                     #过期的时间跟session的过期时间一致
                     redis_client.expire(ik, expire_time)
-                    #print(str(redis_client), ik, str(config.session_var_expire_sec))
+                    #print(str(redis_client), ik, str(config.tmp_config_expire_sec))
             return client_key
         else:
             return None

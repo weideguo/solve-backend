@@ -192,7 +192,7 @@ class Execution(baseview.BaseView):
         session_data=redis_tmp_client.hgetall(old_session_name)
         if session_data:
             redis_tmp_client.hmset(new_session_name,session_data)
-            redis_tmp_client.expire(new_session_name,config.session_var_expire_sec)
+            redis_tmp_client.expire(new_session_name,config.tmp_config_expire_sec)
 
         if args == 'rerun':
             '''
@@ -209,7 +209,7 @@ class Execution(baseview.BaseView):
             if global_data:
                 redis_tmp_client.hmset(config.prefix_global+new_target_id,global_data)
                 #在此提前设置过期时间 防止执行到一半失败时global_xxx一直存在 命令分发后端会在执行结束后再设置一次
-                redis_tmp_client.expire(config.prefix_global+new_target_id,config.global_var_expire_sec)
+                redis_tmp_client.expire(config.prefix_global+new_target_id,config.tmp_config_expire_sec)
 
             job_name = config.prefix_job+job_id
                         
