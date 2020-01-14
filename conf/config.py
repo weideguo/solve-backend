@@ -16,7 +16,7 @@ prefix_exec_tmpl="tmpl"             #任务模板key的开头
 
 
 ###############################以下的参数需要与solve的配置相同############################################################################
-tmp_config_expire_sec=24*60*60     #复制的session过期的时间 每个job复制一次session
+tmp_config_expire_sec=24*60*60     #复制的对象 global session过期的时间 每个job复制一次
 #session_var_expire_sec=24*60*60     #复制的session过期的时间 每个job复制一次session
 #global_var_expire_sec=24*60*60      #global_ 全局变量的保存时间  
 host_check_success_time=15          #心跳时间超时间隔 超过15s即判断连接断开

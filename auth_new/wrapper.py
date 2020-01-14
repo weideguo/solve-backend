@@ -11,8 +11,16 @@ from django.db import transaction
 from . import util
 from .models import CASProxyPgt,CASProxyToken
 
-error_capture_name=settings.ERROR_CAPTURE
-cas_url=settings.CAS_URL
+
+try:
+    error_capture_name=settings.ERROR_CAPTURE
+except:
+    error_capture_name=''
+
+try:
+    cas_url=settings.CAS_URL
+except:
+    cas_url=''
 
 if error_capture_name:
     class_name = error_capture_name.split('.')[-1]

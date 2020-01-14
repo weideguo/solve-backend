@@ -10,12 +10,11 @@ from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth import authenticate
 from django.shortcuts import redirect
-from django.conf import settings
 
 from . import baseview,util
 from .models import Account,CASProxyPgt
 from .serializers import UserINFO
-from .wrapper import error_capture
+from .wrapper import error_capture,cas_url
 
 
 
@@ -126,8 +125,6 @@ class AuthCAS(baseview.AnyLogin):
     '''
     @error_capture
     def get(self, request, args = None):
-
-        cas_url=settings.CAS_URL
         if not cas_url:
             return Response({'status':-3,'msg':util.safe_decode('必须先在后端设置CAS的地址才能使用')})
 
@@ -210,7 +207,6 @@ class LogoutCAS(baseview.BaseView):
     
     @error_capture
     def get(self, request, args = None):
-        cas_url=settings.CAS_URL
         #service='http://192.168.59.132:8080/#/about'      #从请求获取前端的信息
         service=request.GET['service']
 
@@ -220,7 +216,10 @@ class LogoutCAS(baseview.BaseView):
         #return redirect('%s/logout?service=%s' %(cas_url,service))
         
         #window.location = <url>    #js获取返回值后，使用这种方式跳转，不能使用ajax发起请求
-        return Response({'status':1, 'user':username, 'cas_logout_url':'%s/logout?service=%s' % (cas_url,service)})
+        if cas_url:
+            return Response({'status':1, 'user':username, 'cas_logout_url':'%s/logout?service=%s' % (cas_url,service)})
+        else:
+            return Response({'status':1, 'user':username})
 
 
 
