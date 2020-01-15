@@ -1,14 +1,19 @@
 #coding:utf8
+import os
 import re
+import sys
+import yaml
 import time
 import redis
 from threading import Thread
+from multiprocessing import Process
+
+from django.conf import settings
 
 from libs import redis_pool
 from conf import config
-
-from .dura import dura
-
+from .dura import Dura
+from libs.util import MYLOGGER,MYLOGERROR
 
 
 class SolveDura():
@@ -18,11 +23,26 @@ class SolveDura():
     '''
     redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
-    def __init__(self, time_gap=60):
+    def __init__(self, mongodb_config, dura_config='dura.conf', time_gap=60):
+        BASE_DIR=os.path.dirname(os.path.abspath(__file__))
+        self.yaml_file=os.path.join(BASE_DIR,dura_config)
+        self.mongodb_config=mongodb_config
+        self.dura = self.getDura(self.mongodb_config, self.yaml_file)
 
         self.time_gap=time_gap
-        self.__backgroup()
+        self.__background()
         
+    
+    def getDura(self, mongodb_config, yaml_file):
+        
+        redis_client_set=redis_pool.redis_init()
+        with open(yaml_file,'rb') as f:
+            if sys.version_info>(3,0):
+                yaml_dict=yaml.load(f,Loader=yaml.FullLoader)
+            else:
+                yaml_dict=yaml.load(f)
+        
+        return Dura(yaml_dict, mongodb_config, redis_client_set)
 
 
     def get_keys(self, key):
@@ -75,10 +95,6 @@ class SolveDura():
             return False
 
 
-    def x__expire(self):
-        pass
-
-
     def __expire(self):
         '''
         监听执行日志log_job_XXXXXX，判定执行结束将对应关联key设置过期
@@ -90,6 +106,7 @@ class SolveDura():
                 if self.redis_log_client.ttl(k) <= 0:
                     self.expire(k)
                     #print('expire %s'  % k)
+            MYLOGGER.info('set keys expire done')
             time.sleep(self.time_gap)
     
 
@@ -120,15 +137,16 @@ class SolveDura():
         '''
         从mongodb获取key的信息
         '''
+        key_info={}
         if key:
-            connection_name=dura.get_collection_name(key, redis_client)
-            key_info = dura.db[connection_name].find({dura.primary_key: key})
+            connection_name=self.dura.get_collection_name(key, redis_client)
+            if connection_name:
+                key_info = self.dura.db[connection_name].find({self.dura.primary_key: key})
         elif pattern:
-            connection_name=dura.get_collection_name(pattern, redis_client)
-            key_info=dura.db[connection_name].find({dura.primary_key: {'$regex': pattern}})
-        else:
-            key_info={}
-
+            connection_name=self.dura.get_collection_name(pattern, redis_client)
+            if connection_name:
+                key_info=self.dura.db[connection_name].find({self.dura.primary_key: {'$regex': pattern}})
+                
         try:
             key_info=key_info[0]
         except:
@@ -158,8 +176,8 @@ class SolveDura():
         session_pattern=config.prefix_session+'.*_'+job_id
         session_list_info=self.get_key_info_from_mongo(self.redis_tmp_client, pattern=session_pattern)
 
-        if dura.primary_key in session_list_info:
-            session_list.append(session_list_info[dura.primary_key])
+        if self.dura.primary_key in session_list_info:
+            session_list.append(session_list_info[self.dura.primary_key])
 
         log_job_info=self.get_key_info_from_mongo( self.redis_log_client, key)
 
@@ -174,28 +192,28 @@ class SolveDura():
                 target_pattern=target_type+'.*_'+target_id
                 target_list_info=self.get_key_info_from_mongo(self.redis_tmp_client, pattern=target_pattern)
         
-                if dura.primary_key in target_list_info:
-                    target_list.append(target_list_info[dura.primary_key])
+                if self.dura.primary_key in target_list_info:
+                    target_list.append(target_list_info[self.dura.primary_key])
 
                 sum_list.append(config.prefix_sum+target_id,)
 
                 log_list_info = self.get_key_info_from_mongo( self.redis_log_client, target_log)
-                if dura.list_name in log_list_info and isinstance(log_list_info[dura.list_name],list):
-                    log_list += log_list_info[dura.list_name]
+                if self.dura.list_name in log_list_info and isinstance(log_list_info[self.dura.list_name],list):
+                    log_list += log_list_info[self.dura.list_name]
 
         return target_log_list, sum_list, log_list, session_list, global_list, target_list
 
 
     def reload(self, key, is_update=1):
         '''
-        由log_job_XXXXXX 从mongodb加载相关key到redis
-        
+        key 由log_job_XXXXXX 从mongodb加载相关key到redis
+        is_update 0 redis中存在时跳过 1 强制从mongodb加载到redis
         '''
         summary=[]
         key_exist=self.redis_log_client.exists(key)
         if (not key_exist) or is_update:
             #redis中不存在，或者强制为更新，则都mongodb加载
-            #dura.load(key, self.redis_log_client)
+            #self.dura.load(key, self.redis_log_client)
             target_log_list, sum_list, log_list, session_list, global_list, target_list = self.get_keys_from_mongo(key)
     
             client_key = [(self.redis_log_client, [key]+target_log_list+log_list+sum_list),\
@@ -204,7 +222,7 @@ class SolveDura():
             for ck in client_key:
                 redis_client=ck[0]
                 for ik in ck[1]:
-                    x=dura.load(ik, redis_client)
+                    x=self.dura.reload(ik, redis_client)
                     summary.append(x)
 
             return key,summary
@@ -212,19 +230,60 @@ class SolveDura():
             return None,None
 
 
-    def __backgroup(self):
-        t1=Thread(target=self.__expire,args=())  
+    def __save(self):
+        '''
+        从redis保存数据到mongodb
+        无限循环运行
+        '''
+        dura = self.getDura(self.mongodb_config, self.yaml_file)
+        while True:
+            dura.save()
+            time.sleep(self.time_gap)
+
+
+    def __load(self):
+        '''
+        mongodb数据自动加载到redis
+        只在初始化时运行一次
+        '''
+        #mongodb client不能在多进程之间fork 因而在此重新实例化一个对象
+        dura = self.getDura(self.mongodb_config, self.yaml_file)
+        dura.load()
+
+
+    def __background_t(self):
+        '''
+        线程模型 
+        GIL Global Interpreter Lock
+        存在全局锁导致只能使用一个CPU核心？
+        '''
+        t1=Thread(target=self.__expire,args=())
+        t2=Thread(target=self.__save,args=())   
+        t3=Thread(target=self.__load,args=())     
         t1.start()
+        t2.start()
+        t3.start()
+
+
+    def __background(self):
+        p1=Process(target=self.__expire,args=())
+        p2=Process(target=self.__save,args=())   
+        t1=Thread(target=self.__load,args=())     
+        p1.start()
+        p2.start()
+        t1.start()
+        #启动时加载使用线程模式，防止存在僵死进程
 
 
 
-def getSolveDura():
-    if dura:
-        return SolveDura
-    else:
-        return None
+try:
+    MONGODB_CONFIG = settings.MONGODB_CONFIG
+except:
+    MONGODB_CONFIG=None
 
-#单例模式
-#solve_dura=getSolveDura()
-solve_dura=SolveDura()
-
+if MONGODB_CONFIG:
+    #单例模式
+    solve_dura=SolveDura(MONGODB_CONFIG)
+else:
+    MYLOGGER.info('no durability for MONGODB_CONFIG [ %s ] in settings ' % str(MONGODB_CONFIG))
+    solve_dura=None

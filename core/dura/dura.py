@@ -4,15 +4,12 @@ import re
 import sys
 import time
 import redis
-import yaml
 from threading import Thread
 from traceback import format_exc
 
-from django.conf import settings
 from pymongo import MongoClient 
 
 from libs import redis_pool
-
 from libs.util import MYLOGGER,MYLOGERROR
 
 
@@ -21,13 +18,13 @@ class Dura():
     持久化操作
     '''
 
-    def __init__(self, key_map_config, mongodb_config, redis_client_set, time_gap=60, \
+    def __init__(self, key_map_config, mongodb_config, redis_client_set, \
                 type_name='__type', primary_key='__pid', 
                 list_name='list_value',set_name='set_value',str_name='str_value',zset_name='zset_value'):
         '''
-        key_map_config   redis key与mongodb映射关系
-        mongodb_config   mongodb的配置
-        time_gap         redis同步到mongodb的时间间隔
+        key_map_config    redis key与mongodb映射关系 由yaml文件获取的字典
+        mongodb_config    mongodb的配置 必须存在字段 host port db 可选字段 user passwd
+        redis_client_set  redis_client的集合
         '''
         
         self.key_map_config = key_map_config
@@ -41,48 +38,56 @@ class Dura():
         self.str_name = str_name             #string类型的值存储在mongodb的字段
         self.zset_name = zset_name           #zset类型的值存储在mongodb的字段
 
+        
         #pymongo内置连接池，可以自动处理网络波动问题，阻塞等待
         conn=MongoClient(host=mongodb_config['host'], port=mongodb_config['port'])
         self.db=conn[mongodb_config['db']]
         if ('user' in mongodb_config) and mongodb_config['user']:
             self.db.authenticate(mongodb_config['user'], mongodb_config['passwd']) 
-
+        
+        #self.db=mongodb_db
         self.redis_client_set=redis_client_set
-        self.time_gap = time_gap
-        self.__backgroup()
+        #self.__backgroup()
 
 
-    def __save(self):
+    def save(self):
         '''
         从redis保存数据到mongodb
         '''
-        while True:
-            for db_config in self.key_map_config['save']:
-                pos=list(db_config.keys())[0]
-                
-                redis_client=self.redis_client_set[pos]
+        for db_config in self.key_map_config['save']:
+            pos=list(db_config.keys())[0]
+            
+            redis_client=self.redis_client_set[pos]
 
-                #可能太大 使用scan代替
-                for k in redis_client.keys():        
-                    for key_config in db_config[pos]:
-                        if re.match(key_config['key_pattern'], k):
-                            collection_name = key_config['collection']
-                            is_update = key_config.get('update',1)
-                            try:
-                                self.save(k, redis_client, collection_name, is_update)
-                            except:
-                                MYLOGERROR.error(format_exc())
-                                MYLOGERROR.error('save key failed-------%s %s %s %s' % (k, str(redis_client), collection_name, is_update))
+            all_keys = []
+            cursor,v =redis_client.scan()
+            all_keys += v
+            while cursor:
+                cursor,v =redis_client.scan(cursor)
+                all_keys += v
 
-                            #print('save key ------- %s %s' % (k,str(redis_client)))
-            #print('save key from redis to mongodb')
-            MYLOGGER.info('save key from redis to mongodb done')
-            time.sleep(self.time_gap)
+            #可能太大 使用scan代替
+            #for k in redis_client.keys():
+            for k in all_keys:      
+                for key_config in db_config[pos]:
+                    if re.match(key_config['key_pattern'], k):
+                        collection_name = key_config['collection']
+                        is_update = key_config.get('update',1)
+                        try:
+                            self.real_save(k, redis_client, collection_name, is_update)
+                        except:
+                            MYLOGERROR.error(format_exc())
+                            MYLOGERROR.error('save key failed-------%s %s %s %s' % (k, str(redis_client), collection_name, is_update))
 
+                        #print('save key ------- %s %s' % (k,str(redis_client)))
 
-    def save(self, key, redis_client, collection_name, is_update=1):
+        MYLOGGER.info('save key from redis to mongodb done')
+            
+
+    def real_save(self, key, redis_client, collection_name, is_update=1):
         '''
         redis中单个key的存储
+        is_update hash set zset string 0在mongodb存在则不更新，默认1存在则替换更新； list -1更新只插入不存在的key，0不更新，默认1全量替换
         '''
         value = {}
         #根据pid判定在mongodb中是否存在
@@ -160,15 +165,10 @@ class Dura():
                 #存在且key类型为不更新则跳过
                 return key, None
 
-                                
-    def x__load(self):
-        pass
 
-
-    def __load(self):
+    def load(self):
         '''
-        mongodb数据自动加载到redis
-        只在初始化时进行一次
+        根据配置从mongodb数据自动加载到redis
         '''
         for db_config in self.key_map_config['load']:
             pos=list(db_config.keys())[0]
@@ -187,26 +187,32 @@ class Dura():
         '''
         由key名在save模块获取对应的mongodb collention信息
         '''
-        pos=0
-        for r in self.redis_client_set: 
-            if str(r)==str(redis_client):
-                break
-            pos=pos+1       
-
         collection_name=None
-        for db_config in self.key_map_config['save']:
-            if list(db_config.keys())[0] == pos:
-                for key_config in db_config[pos]:
-                    if re.match(key_config['key_pattern'],key):
-                        collection_name=key_config['collection']
+        try:
+            pos=0
+            for r in self.redis_client_set: 
+                if str(r)==str(redis_client):
+                    break
+                pos=pos+1       
+    
+            for db_config in self.key_map_config['save']:
+                if list(db_config.keys())[0] == pos:
+                    for key_config in db_config[pos]:
+                        if re.match(key_config['key_pattern'],key):
+                            collection_name=key_config['collection']
+
+        except:
+            MYLOGERROR.error(format_exc())
+            MYLOGERROR.error('get collection name error for [ %s ] by [ %s ]' % (key, str(self.key_map_config['save'])))
 
         return collection_name
 
 
-    def load(self, key, redis_client, is_update=1):
+
+    def reload(self, key, redis_client, is_update=1):
         '''
-        单个key加载，对外提供接口
-        使用save模块的配置
+        单个key从mongodb加载到redis，使用save模块的配置
+        is_update 0 redis中存在时不从mongodb加载 1 都从mongodb加载
         '''
         collection_name=self.get_collection_name(key, redis_client)
         summary={}
@@ -219,6 +225,8 @@ class Dura():
     def real_load(self, redis_client, collection_name, find=None, is_update=1):
         '''
         实际从mongodb加载数据到redis
+        find mongodb的查询条件 如 {'__pid': 'xxxxx'}
+        is_update 0 redis中存在时不从mongodb加载 1 都从mongodb加载
         '''
         summary={'update':0, 'skip': 0 ,'error': 0}
         for key_info in self.db[collection_name].find(find):
@@ -278,7 +286,7 @@ class Dura():
                 else:
                     #key存在且为不更新 则跳过
                     summary['skip'] += 1
-                
+            
             else:
                 MYLOGERROR.error('key info error, \'%s\' not in %s at collection [ %s ]' % (self.primary_key, str(key_info), collection_name))
                 summary['error'] += 1
@@ -286,38 +294,4 @@ class Dura():
         return  summary
 
 
-    def __backgroup(self):
-        '''
-        后台运行
-        无限循环同步
-        首次启动加载
-        '''
-        t1=Thread(target=self.__save,args=())   
-        t2=Thread(target=self.__load,args=())   
-        t1.start()
-        t2.start()
 
-
-def getDura(dura_config='core/dura/dura.conf'):
-    try:
-        MONGODB_CONFIG = settings.MONGODB_CONFIG
-    except:
-        MONGODB_CONFIG=None
-    
-    if MONGODB_CONFIG:
-        redis_client_set=redis_pool.redis_init()
-
-        yaml_file=os.path.join(settings.BASE_DIR,dura_config)
-        with open(yaml_file,'rb') as f:
-            if sys.version_info>(3,0):
-                yaml_dict=yaml.load(f,Loader=yaml.FullLoader)
-            else:
-                yaml_dict=yaml.load(f)
-        
-        return Dura(yaml_dict, settings.MONGODB_CONFIG, redis_client_set)
-    else:
-        MYLOGGER.info('not durability for MONGODB_CONFIG [ %s ] in settings ' % str(MONGODB_CONFIG))
-        return None
-
-#使用单例模式
-dura=getDura()

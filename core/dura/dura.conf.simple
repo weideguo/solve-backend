@@ -52,25 +52,7 @@ save:
             -
                 key_pattern: ^(cluster|server|host).*(_[^_]{32})$
                 collection: target_tmp
-    -
-        3:
-            -
-                key_pattern: ^[^session_].*
-                collection: target
-            -
-                key_pattern: ^session_.*
-                collection: session
-    -
-        5:
-            -
-                key_pattern: (^config.*)|solve_config
-                collection: solve_config
-            -
-                key_pattern: ^tmpl:.*
-                collection: tmpl
-            -
-                key_pattern: ^exec:.*
-                collection: exec
+                
 load:
     -
         4:
