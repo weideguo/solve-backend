@@ -51,3 +51,8 @@ if __name__ == '__main__':
     solve_dura.reload('log_job_5da525ec374011ea8abd000c295dd589')
     solve_dura.reload('log_job_5da525ec374011ea8abd000c295dd589',0)
 
+    ######################################################################################
+    solve_dura.delete('log_job_5da525ec374011ea8abd000c295dd589')
+    solve_dura.real_delete('job_5da525ec374011ea8abd000c295dd589', redis_job_client)
+    
+

@@ -9,6 +9,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from libs import util
 from libs.util import MYLOGGER,MYLOGERROR,safe_decode
 
+from core.dura import solve_dura
 
 def error_capture(func):
     def my_wrapper(*args, **kwargs):
@@ -82,6 +83,9 @@ class HashCURD():
             '''
             target =  request.GET['target']
             redis_client.delete(target)
+            if solve_dura:
+                solve_dura.real_delete(target,redis_client)
+
             return Response({'status':1})
 
 

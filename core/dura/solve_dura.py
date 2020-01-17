@@ -27,22 +27,22 @@ class SolveDura():
         BASE_DIR=os.path.dirname(os.path.abspath(__file__))
         self.yaml_file=os.path.join(BASE_DIR,dura_config)
         self.mongodb_config=mongodb_config
-        self.dura = self.getDura(self.mongodb_config, self.yaml_file)
+        self.dura = self.getDura()
 
         self.time_gap=time_gap
-        self.__background()
+        db=self.__background()
         
     
-    def getDura(self, mongodb_config, yaml_file):
+    def getDura(self):
         
         redis_client_set=redis_pool.redis_init()
-        with open(yaml_file,'rb') as f:
+        with open(self.yaml_file,'rb') as f:
             if sys.version_info>(3,0):
                 yaml_dict=yaml.load(f,Loader=yaml.FullLoader)
             else:
                 yaml_dict=yaml.load(f)
         
-        return Dura(yaml_dict, mongodb_config, redis_client_set)
+        return Dura(yaml_dict, self.mongodb_config, redis_client_set)
 
 
     def get_keys(self, key):
@@ -122,11 +122,10 @@ class SolveDura():
                       (self.redis_tmp_client, session_list+global_list+target_list)]
 
         if self.is_job_finish(target_log_list, sum_list) or force:
-            for ck in client_key:
-                redis_client=ck[0]
-                for ik in ck[1]:
+            for redis_client,k_list in client_key:
+                for k in k_list:
                     #过期的时间跟session的过期时间一致
-                    redis_client.expire(ik, expire_time)
+                    redis_client.expire(k, expire_time)
                     #print(str(redis_client), ik, str(config.tmp_config_expire_sec))
             return client_key
         else:
@@ -219,15 +218,48 @@ class SolveDura():
             client_key = [(self.redis_log_client, [key]+target_log_list+log_list+sum_list),\
                           (self.redis_tmp_client, session_list+global_list+target_list)]
             
-            for ck in client_key:
-                redis_client=ck[0]
-                for ik in ck[1]:
-                    x=self.dura.reload(ik, redis_client)
-                    summary.append(x)
+            for redis_client,k_list in client_key:
+                for k in k_list:
+                    r=self.dura.reload(k, redis_client)
+                    summary.append(r)
 
             return key,summary
         else:
             return None,None
+
+
+    def delete(self, key):
+        '''
+        在mongodb删除对应key的信息，log_job_xxx获取关联key并删除
+        '''
+        target_log_list, sum_list, log_list, session_list, global_list, target_list = self.get_keys(key)
+
+        client_key = [(self.redis_log_client, [key]+target_log_list+log_list+sum_list),\
+                      (self.redis_tmp_client, session_list+global_list+target_list)]
+
+
+        for redis_client,k_list in client_key:
+            for k in k_list:
+                #print("delete in mongodb for %s %s" % (str(redis_client),str(k)))
+                self.real_delete(k, redis_client)
+
+        return client_key
+
+
+    def real_delete(self, key, redis_client):
+        '''
+        在mongodb删除对应key的信息 任意key的删除
+        '''
+        redis_client.delete(key)
+        connection_name=self.dura.get_collection_name(key, redis_client)
+        r=self.dura.db[connection_name].remove({self.dura.primary_key: key})
+        #print(connection_name,{self.dura.primary_key: key})
+        #{'ok': 1.0, 'n': 0}
+        #{'ok': 1.0, 'n': 1}
+        if 'n' in r and r['n']:
+            return key
+        else:
+            return None
 
 
     def __save(self):
@@ -235,7 +267,7 @@ class SolveDura():
         从redis保存数据到mongodb
         无限循环运行
         '''
-        dura = self.getDura(self.mongodb_config, self.yaml_file)
+        dura = self.getDura()
         while True:
             dura.save()
             time.sleep(self.time_gap)
@@ -247,7 +279,7 @@ class SolveDura():
         只在初始化时运行一次
         '''
         #mongodb client不能在多进程之间fork 因而在此重新实例化一个对象
-        dura = self.getDura(self.mongodb_config, self.yaml_file)
+        dura = self.getDura()
         dura.load()
 
 
