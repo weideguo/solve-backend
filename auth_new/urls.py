@@ -1,7 +1,6 @@
 #coding:utf8
 
 from django.conf.urls import url
-#from rest_framework.urlpatterns import format_suffix_patterns
 
 from auth_new.views import UserInfo,LoginAuth,AuthCAS,LogoutCAS
 
@@ -12,4 +11,3 @@ urlpatterns = [
     url(r'^cas/(.*)', AuthCAS.as_view()),               #casd登陆认证以及cas proxy的使用
     url(r'^logout/', LogoutCAS.as_view()),              #登出cas 
 ]
-#urlpatterns = format_suffix_patterns(urlpatterns)

@@ -41,16 +41,19 @@ my_backend ='https://192.168.59.132:9000/api/v1/cas/serviceValidate' #后端处�
 my_callback='https://192.168.59.132:9000/api/v1/cas/callback'        #接收cas回调的后端接口，由此会获取新的pgtId，需要为https
 
 #由前端获取ticket，如直接在浏览器中访问
+#http://192.168.59.132:9095为cas的根路径
 #http://192.168.59.132:9095/cas/login?service=http://192.168.59.132:8080/#/login
 ticket='ST-1575617640-ByqBYrzELgcnA256x8ERt9MURmSEhNjE'    
 
+#如果没有pgtUrl参数，则当作普通的cas登陆，登陆信息不能用于连接其他的app
+#带pgtUrl参数，即登陆该app之后，要访问其他app的接口，双方使用同一个cas且设置代理，则可以使用当前登陆的账号信息（不是通过保存账号密码）直接连接其他app，而不需要再次登陆
 #后端调用cas，验证ticket，获取pgtId
 requests.get('%s?ticket=%s&service=%s&pgtUrl=%s' % (my_backend,ticket,my_frontend,my_callback), verify=0).text
 
 ####################################################
 #获取其他app的token
 from auth_new.wrapper import get_service_token
-service_proxyValidate='http://192.168.59.132:8000/api/v1/cas/proxyValidate'          #要连接的app处理proxyValidate的接口
+service_proxyValidate='http://192.168.59.132:7000/api/v1/cas/proxyValidate'          #要连接的app处理proxyValidate的接口
 get_service_token(service_proxyValidate,verify=0)
 
 targetService='http://192.168.59.132:7000'                 

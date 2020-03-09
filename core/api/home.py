@@ -108,12 +108,9 @@ class Home(baseview.BaseView):
 #class Test(baseview.AnyLogin):
 class Test(baseview.BaseView):
     '''
-    首页的信息
+    测试
     '''
     @error_capture 
     def get(self, request, args = None):
-        from auth_new.wrapper import get_service_token
-        #service_proxyValidate='http://192.168.59.132:8000/api/v1/cas/proxyValidate'
-        service_proxyValidate='https://192.168.59.132:9000/api/v1/cas/proxyValidate'
-        token,msg=get_service_token(service_proxyValidate,verify=False)
-        return Response(str({'token':token,'msg':msg}))
+        r={'a':'aaa'}
+        return Response(r)

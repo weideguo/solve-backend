@@ -188,6 +188,8 @@ class AuthCAS(baseview.AnyLogin):
         if args == 'callback':
             '''
             在作为代理时(即该服务要访问其他app的接口)，用于接收cas的回调
+            serviceValidate接口被请求时pgtUrl参数传入该接口作为回调
+            获取参数存入数据库，需要为https
             '''
             #print(request.GET)
             pgtId=request.GET.get('pgtId')
@@ -223,3 +225,19 @@ class LogoutCAS(baseview.BaseView):
 
 
 
+class TestProxy(baseview.BaseView):
+    '''
+    测试作为代理获取其他app的token
+    即登陆该app之后，要访问其他app的接口，双方使用同一个cas且设置代理，则可以使用当前登陆的账号信息（不是通过保存账号密码）直接连接其他app，而不需要再次登陆
+    要求登陆该app时serviceValidate接口附加参数pgtUrl
+    '''
+    @error_capture 
+    def get(self, request, args = None):
+        from auth_new.wrapper import get_service_token
+        #https://192.168.59.132:9000/api/v1/cas/proxyValidate  需要访问的其他app的proxyValidate接口，不是该app的接口
+        service_proxyValidate='https://192.168.59.132:9000/api/v1/cas/proxyValidate'
+        token,msg=get_service_token(service_proxyValidate,verify=False)
+        # verify是否验证https的证书
+        # targetService 默认为 service_proxyValidate 的根路径
+        #token,msg=get_service_token(service_proxyValidate,targetService=targetService,verify=0)
+        return Response(str({'token':token,'msg':msg}))
