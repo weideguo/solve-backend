@@ -6,3 +6,6 @@ djangorestframework-jwt
 redis
 PyYAML
 pymongo
+configparser
+requests
+requests-oauthlib
