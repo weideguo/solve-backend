@@ -55,23 +55,42 @@ class File(baseview.BaseView):
 
     @error_capture
     def get(self, request, args = None):
+        if args == 'content':
+            filename = request.GET['file']
+            #是否是相对路径
+            if int(request.GET.get('relative', 0)) > 0:
+                filename = os.path.join(file_root,'./'+filename)
+            
+            content=''
+            try:
+                with open(filename) as f:
+                    content=f.read()
+
+                return Response({'status':1,'file':filename,'content':content})
+            except:
+                return Response({'status':-1,'file':filename,'msg':util.safe_decode('读取文件失败')})
+
+        
         if args == 'download':
-            filename = request.GET.get('file')
+            filename = request.GET['file']
             name=os.path.basename(filename)
             filename = os.path.join(file_root,'./'+filename)
-            
+
+            #attachment下载文件, inline 和 attachment inline 在浏览器中显示
+            showtype = ['attachment','inline', 'attachment inline'][0]
+
             if os.path.isfile(filename):
                 file = open(filename,mode='rb')
                 response=FileResponse(file)
                 response['Content-Type']='application/octet-stream'
-                response['Content-Disposition']='attachment;filename="%s' % name.encode('utf8')   #inline 和 attachment inline 在浏览器中显示
+                response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
                 return response
             else:
                 return Response({'status':-1,'file':filename,'msg':util.safe_decode('路径不为文件')})
        
 
         if args == 'list':
-            root_path = request.GET.get('path')
+            root_path = request.GET['path']
             root_path = os.path.join(file_root,'./'+root_path)
             files=[]
             dirs=[]
@@ -91,7 +110,7 @@ class File(baseview.BaseView):
 
 
         if args == 'create':
-            create_path = request.GET.get('path')
+            create_path = request.GET['path']
             create_path = os.path.join(file_root,'./'+create_path)
             try:
                 os.makedirs(create_path)
