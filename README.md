@@ -21,7 +21,6 @@ vim deploy.conf                     #设置redis以及相关参数
 python manage.py makemigrations     #创建数据库迁移文件
 python manage.py migrate            #使用迁移文件初始化数据库
 python manage.py createsuperuser    #创建账号
-python preset.py                    #初始化redis 可以根据实际情况更新相关参数再执行
 export LC_ALL=en_US.UTF-8           #中文支持
 ```
 

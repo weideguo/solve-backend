@@ -109,8 +109,10 @@ class HashCURD():
             info = request.data.dict()
         except:
             info = request.data            
-        target = info.pop('name')
-        
+        target = info.pop('name','')
+        if not target:
+            return  Response({'status':-4,'msg':safe_decode('name 字段必须存在')})
+
         target_o = info.pop('name_o','')
         if target_o:
             #修改
@@ -120,6 +122,9 @@ class HashCURD():
                 return  Response({'status':-2,'msg':safe_decode('对象名已经存在，不能修改为此!')})
             else:
                 redis_client.delete(target_o)
+                if solve_dura:
+                    solve_dura.real_delete(target_o,redis_client)
+
                 redis_client.hmset(target,info)
                 return  Response({'status':2,'msg':safe_decode('修改成功')})
         else:

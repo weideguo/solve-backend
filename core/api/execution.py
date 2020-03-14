@@ -65,11 +65,18 @@ class Session(baseview.BaseView):
             playbook = redis_manage_client.hget(tmpl_key,'playbook')
             playbook_str =  open(playbook).read()
 
+            #在playbook头部以注释引入session说明时格式如下
+            """
+            #CONTENT-BEGIN
+            #yaml_str
+            #CONTENT-END
+            """
             yaml_str_raw=re.findall('#CONTENT-BEGIN([\\w|\\W]*?)#CONTENT-END',playbook_str)
             if yaml_str_raw:
                 yaml_str=yaml_str_raw[0].replace('\n#','\n')
             else:
                 try:
+                    #或者通过单独的yaml文件说明session格式
                     yaml_str =  open(playbook+'.conf').read()
                 except:
                     yaml_str =  ""

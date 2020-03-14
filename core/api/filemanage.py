@@ -13,9 +13,7 @@ from conf import config
 #file_root=config.file_root
 cp=util.getcp()
 file_root=cp.get('common','file_root')
-try:
-    os.listdir(file_root)
-except:
+if not os.path.isdir(file_root):
     os.makedirs(file_root)
 
 class File(baseview.BaseView):
