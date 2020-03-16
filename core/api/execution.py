@@ -31,7 +31,6 @@ def get_session(pre_job_name):
             l=f.readline()     
     
     session_vars = list(set(session_vars))
-    #print session_vars
     
     session_tag = config.prefix_session
     session_info = {}
