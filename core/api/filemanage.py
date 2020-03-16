@@ -64,7 +64,7 @@ class File(baseview.BaseView):
                 with open(filename) as f:
                     content=f.read()
 
-                return Response({'status':1,'file':filename,'content':content})
+                return Response({'status':1,'file':filename,'content':util.safe_decode(content)})
             except:
                 return Response({'status':-1,'file':filename,'msg':util.safe_decode('读取文件失败')})
 
