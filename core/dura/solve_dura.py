@@ -241,7 +241,10 @@ class SolveDura():
         for redis_client,k_list in client_key:
             for k in k_list:
                 #print("delete in mongodb for %s %s" % (str(redis_client),str(k)))
-                self.real_delete(k, redis_client)
+                try:
+                    self.real_delete(k, redis_client)
+                except:
+                    pass
 
         return client_key
 

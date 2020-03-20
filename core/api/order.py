@@ -79,8 +79,8 @@ class Order(baseview.BaseView):
                 if (job_info):
                     for c in eval(job_info.get('log')):
                         x={}
-                        x['target']=c[0].split('_'+c[0].split('_')[-1])[0]
-                        x['target_id']=c[0].split('_')[-1]
+                        x['target']=c[0].split(config.spliter+c[0].split(config.spliter)[-1])[0]
+                        x['target_id']=c[0].split(config.spliter)[-1]
                         x['playbook_rownum']=job_info.get('playbook_rownum')    
                         x['exe_rownum']=redis_log_client.llen(c[1])
                         
@@ -220,8 +220,8 @@ class Order(baseview.BaseView):
             tmp_summary={}
             for c in log_target_list:
                 x = {}
-                x['target'] = c[0].split('_'+c[0].split('_')[-1])[0]
-                x['target_id']  = c[0].split('_')[-1]
+                x['target'] = c[0].split(config.spliter+c[0].split(config.spliter)[-1])[0]
+                x['target_id']  = c[0].split(config.spliter)[-1]
                 x['last_stdout'] = redis_log_client.hget(config.prefix_sum+x['target_id'],'last_stdout')          
                 if not x['last_stdout']:
                     x['last_stdout'] = ''

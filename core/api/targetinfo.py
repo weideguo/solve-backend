@@ -87,7 +87,7 @@ class Host(baseview.BaseView):
         elif args=='conn': 
             ip = request.GET['ip']
             conn_uuid=uuid.uuid1().hex
-            redis_send_client.rpush(config.key_conn_control,ip+config.cmd_spliter+conn_uuid)
+            redis_send_client.rpush(config.key_conn_control,ip+config.spliter+conn_uuid)
             
             conn_counter=0        
             while not redis_send_client.get(config.prefix_heart_beat+ip) and conn_counter<100 and (not redis_log_client.hget(conn_uuid,'exit_code')):

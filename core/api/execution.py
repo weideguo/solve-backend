@@ -27,14 +27,15 @@ def get_session(pre_job_name):
         #但不应排除#只后的字符串 如   echo '#' {{session.YYYY}}
         while l:
             if not re.match('^#',l):
-                session_vars=session_vars+re.findall('(?<={{'+config.playbook_prefix_session+'\.).*?(?=}})',l)
+                session_vars=session_vars+re.findall('(?<={{'+config.prefix_session+'\.).*?(?=}})',l)
             l=f.readline()     
     
     session_vars = list(set(session_vars))
     
     session_tag = config.prefix_session
     session_info = {}
-    old_session_info = redis_config_client.hgetall(session_tag+pre_job_name)
+    old_session_info = redis_config_client.hgetall(session_tag+config.spliter+pre_job_name)
+
     for v in session_vars:
         session_info[v] = old_session_info.get(v,'')
 
@@ -129,7 +130,7 @@ class Session(baseview.BaseView):
         if data:
             data=util.plain_dict(data)
 
-            redis_config_client.hmset(session_tag+filter,data)
+            redis_config_client.hmset(session_tag+config.spliter+filter,data)
 
         return Response({'status':1,'vars':data})
 
@@ -144,7 +145,7 @@ class Execution(baseview.BaseView):
         执行任务
         '''
 
-        filter = request.GET['filter']
+        exec_name = request.GET['filter']
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
         #jwt_str =jwt_str_raw.split('.')[1]+'=='     
         #user=json.loads(base64.b64decode(jwt_str))['username']
@@ -153,16 +154,17 @@ class Execution(baseview.BaseView):
         data = request.data
 
         job_id=uuid.uuid1().hex
+        #session_tag = config.prefix_session
         session_tag = config.prefix_session
         if data:
             data=util.plain_dict(data)
-            redis_config_client.hmset(session_tag+filter,data)
-            redis_tmp_client.hmset(session_tag+filter+'_'+job_id,data)
-            redis_tmp_client.expire(session_tag+filter+'_'+job_id,24*60*60)
+            redis_config_client.hmset(session_tag+config.spliter+exec_name,data)
+            redis_tmp_client.hmset(session_tag+config.spliter+job_id,data)
+            redis_tmp_client.expire(session_tag+config.spliter+job_id,24*60*60)
 
-        job_info = redis_manage_client.hgetall(filter)
+        job_info = redis_manage_client.hgetall(exec_name)
         
-        tmpl_key = redis_manage_client.hget(filter,config.prefix_exec_tmpl)
+        tmpl_key = redis_manage_client.hget(exec_name,config.prefix_exec_tmpl)
         
         if tmpl_key:
             tmpl_info=redis_manage_client.hgetall(tmpl_key)
@@ -171,7 +173,7 @@ class Execution(baseview.BaseView):
                     job_info[k]=tmpl_info[k]
 
         job_name = config.prefix_job+job_id
-        job_info['session'] = session_tag+filter+'_'+job_id
+        job_info['session'] = session_tag+config.spliter+job_id
         job_info['begin_time'] = time.time()        
         job_info['user'] = user   
 
@@ -191,40 +193,42 @@ class Execution(baseview.BaseView):
         job_info = redis_job_client.hgetall(old_job_id)
         job_id = uuid.uuid1().hex
 
-        old_session_name=job_info[config.playbook_prefix_session]
-        new_session_name=old_session_name+'_'+job_id
-        job_info[config.playbook_prefix_session]=new_session_name
+        #有些任务可能不存在session
+        try:
+            old_session_name=job_info[config.prefix_session]
+            new_session_name=old_session_name.split(config.spliter+old_session_name.split(config.spliter)[-1])[0]+config.spliter+job_id
+            session_data=redis_tmp_client.hgetall(old_session_name)
+        except:
+            session_data={}
 
-        session_data=redis_tmp_client.hgetall(old_session_name)
         if session_data:
             redis_tmp_client.hmset(new_session_name,session_data)
             redis_tmp_client.expire(new_session_name,config.tmp_config_expire_sec)
+            job_info[config.prefix_session]=new_session_name
 
         if args == 'rerun':
             '''
             重新执行单个执行
             '''
             target_id = request.GET['target_id']
-            #begin_host = request.GET.get('begin_host','')
             begin_line = int(request.GET.get('begin_line',0))
  
             new_target_id = uuid.uuid1().hex
             
-            redis_tmp_client.hmset(target+'_'+new_target_id,redis_tmp_client.hgetall(target+'_'+target_id))
-            global_data=redis_tmp_client.hgetall(config.prefix_global+target_id)
+            redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_tmp_client.hgetall(target+config.spliter+target_id))
+            global_data=redis_tmp_client.hgetall(config.prefix_global+config.spliter+target_id)
             if global_data:
-                redis_tmp_client.hmset(config.prefix_global+new_target_id,global_data)
+                redis_tmp_client.hmset(config.prefix_global+config.spliter+new_target_id,global_data)
                 #在此提前设置过期时间 防止执行到一半失败时global_xxx一直存在 命令分发后端会在执行结束后再设置一次
-                redis_tmp_client.expire(config.prefix_global+new_target_id,config.tmp_config_expire_sec)
+                redis_tmp_client.expire(config.prefix_global+config.spliter+new_target_id,config.tmp_config_expire_sec)
 
             job_name = config.prefix_job+job_id
                         
-            job_info['target'] = target+config.cmd_spliter+new_target_id
+            job_info['target'] = target+config.spliter+new_target_id
             job_info['begin_time'] = time.time() 
             job_info['job_type'] = config.job_rerun
             job_info['number'] = len(target.split(','))
-            #if begin_host:
-            #    job_info['begin_host'] = begin_host
+            
             if begin_line:
                 job_info['begin_line'] = begin_line
             
@@ -250,8 +254,8 @@ class Execution(baseview.BaseView):
             target_id = request.GET.get('target_id','')  
 
             rerun_info={}
-            _rerun_info=redis_tmp_client.hgetall(job_info.get(config.playbook_prefix_session,''))  
-            rerun_info[config.playbook_prefix_session]=_rerun_info
+            _rerun_info=redis_tmp_client.hgetall(job_info.get(config.prefix_session,''))  
+            rerun_info[config.prefix_session]=_rerun_info
             
             readonly={}
             readonly['playbook']=job_info['playbook']
@@ -262,11 +266,6 @@ class Execution(baseview.BaseView):
             _len=int(redis_log_client.llen(config.prefix_log_target+target_id))
             changable['begin_line']=_len
             
-            #begin_host=''
-            #if target_id:
-            #    begin_host=redis_log_client.hget(redis_log_client.lrange(config.prefix_log_target+target_id,_len-1,_len)[0],'exe_host') 
-            #changable['begin_host']=begin_host
-
             rerun_info['changable']=changable
 
             return Response({'status':1,'data':rerun_info}) 
