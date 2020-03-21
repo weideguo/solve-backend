@@ -9,3 +9,4 @@ pymongo
 configparser
 requests
 requests-oauthlib
+Jinja2
