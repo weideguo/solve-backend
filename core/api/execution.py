@@ -7,6 +7,7 @@ import yaml
 import redis
 import json
 import base64
+from jinja2 import Template
 from rest_framework.response import Response
 
 from auth_new import baseview
@@ -144,12 +145,11 @@ class Execution(baseview.BaseView):
         '''
         执行任务
         '''
-
         exec_name = request.GET['filter']
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
         #jwt_str =jwt_str_raw.split('.')[1]+'=='     
         #user=json.loads(base64.b64decode(jwt_str))['username']
-        #print user 
+        #print(user) 
         user=str(request.user)
         data = request.data
 
@@ -283,4 +283,106 @@ class ExecutionInfo(baseview.BaseView):
     def post(self, request, args = None):
         return HashCURD.post(redis_manage_client,request, args)
 
+
+class FastExecution(baseview.BaseView): 
+    '''
+    快速任务
+    快速任务直接由提交的信息执行，不再依赖存储的对象信息以及存储的 playbook
+    '''
+    @error_capture
+    def post(self, request, args = None):
+        user=str(request.user)
+        data = request.data
+        try:
+            spliter = data['spliter']
+            parallel = data['parallel']
+            exeinfo = data['exeinfo']
+            playbook = data['playbook']
+        except:
+            return Response({'status':-1,'msg': util.safe_decode('提交的数据必须包含以下属性： spliter、parallel、exeinfo、playbook'),'data':data}) 
+        
+        target_info=[]
+        for l in exeinfo.split('\n'):
+            if (re.match("^#",l.strip())) or (not l.strip()):
+                #跳过 注释开头的行以及空行
+                continue
+
+            i = 1
+            t = {}
+            for x in l.split(spliter):
+                t['_'+str(i)] = x.strip()
+                i =i+1
+
+            target_info.append(t)
+
+        playbook_file = '/tmp/tmp_'+uuid.uuid1().hex
+
+        def get_target_name():
+            t='temp_%s%s%s' % (uuid.uuid1().hex, config.spliter, uuid.uuid1().hex)
+            return t
+
+        job_info = {}
+
+        if (isinstance(parallel,str) and parallel == "true") or \
+            (isinstance(parallel,int) and parallel > 0) or (isinstance(parallel,int) and parallel):
+            #并行执行
+
+            target_list=[]
+            for t in target_info:
+                target_name=get_target_name()
+                redis_tmp_client.hmset(target_name,t)
+                redis_tmp_client.expire(target_name,config.tmp_config_expire_sec)
+                target_list.append(target_name)
+
+            with open(playbook_file,'w') as f:
+                f.write(playbook)
+
+            job_info['target'] = ','.join(target_list)
+            job_info['number'] = len(target_list)
+            job_info['comment'] = '快速任务-并行'  
+            
+        else:
+            #串行执行
+            #任意设置一个临时对象 里面的信息不会被使用
+            target_name=get_target_name()
+            redis_tmp_client.hmset(target_name,{'t':time.time()})
+            redis_tmp_client.expire(target_name,config.tmp_config_expire_sec)
+
+            #使用配置信息构造playbook
+            playbook_all=''
+            try:
+                i = 1
+                for t in target_info:
+                    for c in re.findall('(?<={{).+?(?=}})',playbook):
+                        if not t[c]:
+                            raise Exception('render error')
+
+                    playbook_all = playbook_all + Template(playbook).render(t) + '\n'
+                    i = i+1
+            except:
+                return Response({'status':-2,'msg': util.safe_decode('渲染失败，在第 %d 行' %i)}) 
+
+            with open(playbook_file,'w') as f:
+                f.write(playbook_all)
+
+            job_info['target'] = target_name
+            job_info['number'] = 1
+            job_info['comment'] = '快速任务-串行'  
+
+
+        job_info['playbook'] = playbook_file
+        job_info['user'] = user
+        job_info['begin_time'] = time.time()
+        job_info['target_type'] ='temp'
+        job_info['job_type'] ='temp'
+
+
+        job_id = uuid.uuid1().hex
+        job_name = config.prefix_job+job_id
+
+        redis_job_client.hmset(job_name,job_info)        
+
+        redis_send_client.rpush(config.key_job_list,job_name)  
+
+        return Response({'status':1,'data':job_name,'d':job_info}) 
 
