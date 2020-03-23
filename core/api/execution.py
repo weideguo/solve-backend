@@ -369,9 +369,12 @@ class FastExecution(baseview.BaseView):
             with open(playbook_file,'w') as f:
                 if playbook[-1] != '\n':
                     playbook = playbook + '\n'
-                #python2需要由unicode转码之后才能输出
-                #python3可以直接由unicode输出，但转码之后也不影响
-                f.write(playbook.encode('utf8'))
+                
+                try:
+                    f.write(playbook)
+                except:
+                    #python2需要由unicode转码之后才能输出
+                    f.write(playbook.encode('utf8'))
 
             job_info['target'] = ','.join(target_list)
             job_info['number'] = len(target_list)
@@ -385,7 +388,10 @@ class FastExecution(baseview.BaseView):
             redis_tmp_client.expire(target_name,config.tmp_config_expire_sec)
 
             with open(playbook_file,'w') as f:
-                f.write(playbook_all.encode('utf8'))
+                try:
+                    f.write(playbook_all)
+                except:
+                    f.write(playbook_all.encode('utf8'))
 
             job_info['target'] = target_name
             job_info['number'] = 1
