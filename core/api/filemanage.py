@@ -12,7 +12,11 @@ from conf import config
 
 #file_root=config.file_root
 cp=util.getcp()
-file_root=cp.get('common','file_root')
+try:
+    file_root=cp.get('common','file_root')
+except:
+    file_root='/tmp/solve'
+
 if not os.path.isdir(file_root):
     os.makedirs(file_root)
 

@@ -3,7 +3,9 @@
 exe_stats_time_gap=30               #首页的统计时常 天
 
 prefix_log="log_"                   #日志的开头
-                                    #重新运行/继续运行需要在上一次提交时间的以下两个时间内执行 分别对session/global参数限制
+
+prefix_temp="temp_"                 #临时对象 临时playbook的前缀
+
 #redis manage
 key_solve_config="solve_config"     #存储配置信息的key    
 prefix_config="config_"             #单项配置key的开头
@@ -17,8 +19,6 @@ prefix_exec_tmpl="tmpl"             #任务模板key的开头
 
 ###############################以下的参数需要与solve的配置相同############################################################################
 tmp_config_expire_sec=24*60*60     #复制的对象 global session过期的时间 每个job复制一次
-#session_var_expire_sec=24*60*60     #复制的session过期的时间 每个job复制一次session
-#global_var_expire_sec=24*60*60      #global_ 全局变量的保存时间  
 host_check_success_time=15          #心跳时间超时间隔 超过15s即判断连接断开
 spliter="@@@@@"                     #与uuid的分隔符
 

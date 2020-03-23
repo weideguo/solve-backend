@@ -1,4 +1,5 @@
 #coding:utf8
+import os
 import re
 import sys
 import uuid
@@ -10,6 +11,7 @@ import base64
 from jinja2 import Template
 from rest_framework.response import Response
 
+from django.conf import settings
 from auth_new import baseview
 from libs import util, redis_pool
 from libs.wrapper import error_capture,HashCURD
@@ -302,23 +304,53 @@ class FastExecution(baseview.BaseView):
             return Response({'status':-1,'msg': util.safe_decode('提交的数据必须包含以下属性： spliter、parallel、exeinfo、playbook'),'data':data}) 
         
         target_info=[]
-        for l in exeinfo.split('\n'):
-            if (re.match("^#",l.strip())) or (not l.strip()):
-                #跳过 注释开头的行以及空行
-                continue
+        #使用配置信息构造playbook
+        playbook_all=''
+        try:
+            i = 0
+            #for t in target_info:
+            for l in exeinfo.split('\n'):
+                i = i+1
+                if (re.match("^#",l.strip())) or (not l.strip()):
+                    #跳过 注释开头的行以及空行
+                    continue
 
-            i = 1
-            t = {}
-            for x in l.split(spliter):
-                t['_'+str(i)] = x.strip()
-                i =i+1
+                j=1
+                t = {}
+                # _1 _2 _3 ... 对应一行分割后的字符 __ 对应一行
+                for x in l.split(spliter):
+                    t['_'+str(j)] = x.strip()
+                    j = j+1
 
-            target_info.append(t)
+                t['__'] = l    
+                target_info.append(t)
 
-        playbook_file = '/tmp/tmp_'+uuid.uuid1().hex
+                for c in re.findall('(?<={{).+?(?=}})',playbook):
+                    if not t[c]:
+                        raise Exception('render error')
+
+                playbook_all = playbook_all + Template(playbook).render(t) + '\n'
+                
+        except:
+            return Response({'status':-2,'msg': util.safe_decode('第 %d 行配置信息错误！ \n%s' %(i, str(t)))}) 
+
+        cp=util.getcp()
+        try:
+            base_dir=cp.get('common','playbook_temp')
+        except:
+            try:
+                base_dir=cp.get('common','file_root')
+            except:
+                base_dir='/temp/'
+
+        temp_dir=os.path.join(base_dir,'playbook/temp/')
+        if not os.path.isdir(temp_dir):
+            os.makedirs(temp_dir)
+
+        playbook_file = temp_dir + config.prefix_temp + uuid.uuid1().hex
 
         def get_target_name():
-            t='temp_%s%s%s' % (uuid.uuid1().hex, config.spliter, uuid.uuid1().hex)
+            t = config.prefix_temp + uuid.uuid1().hex + config.spliter + uuid.uuid1().hex
             return t
 
         job_info = {}
@@ -335,7 +367,11 @@ class FastExecution(baseview.BaseView):
                 target_list.append(target_name)
 
             with open(playbook_file,'w') as f:
-                f.write(playbook)
+                if playbook[-1] != '\n':
+                    playbook = playbook + '\n'
+                #python2需要由unicode转码之后才能输出
+                #python3可以直接由unicode输出，但转码之后也不影响
+                f.write(playbook.encode('utf8'))
 
             job_info['target'] = ','.join(target_list)
             job_info['number'] = len(target_list)
@@ -343,27 +379,13 @@ class FastExecution(baseview.BaseView):
             
         else:
             #串行执行
-            #任意设置一个临时对象 里面的信息不会被使用
+            #设置一个临时对象 里面的信息不会被使用
             target_name=get_target_name()
             redis_tmp_client.hmset(target_name,{'t':time.time()})
             redis_tmp_client.expire(target_name,config.tmp_config_expire_sec)
 
-            #使用配置信息构造playbook
-            playbook_all=''
-            try:
-                i = 1
-                for t in target_info:
-                    for c in re.findall('(?<={{).+?(?=}})',playbook):
-                        if not t[c]:
-                            raise Exception('render error')
-
-                    playbook_all = playbook_all + Template(playbook).render(t) + '\n'
-                    i = i+1
-            except:
-                return Response({'status':-2,'msg': util.safe_decode('渲染失败，在第 %d 行' %i)}) 
-
             with open(playbook_file,'w') as f:
-                f.write(playbook_all)
+                f.write(playbook_all.encode('utf8'))
 
             job_info['target'] = target_name
             job_info['number'] = 1
@@ -381,8 +403,7 @@ class FastExecution(baseview.BaseView):
         job_name = config.prefix_job+job_id
 
         redis_job_client.hmset(job_name,job_info)        
-
         redis_send_client.rpush(config.key_job_list,job_name)  
 
-        return Response({'status':1,'data':job_name,'d':job_info}) 
+        return Response({'status':1,'data':job_name}) 
 
