@@ -313,6 +313,7 @@ class FastExecution(baseview.BaseView):
                 i = i+1
                 if (re.match("^#",l.strip())) or (not l.strip()):
                     #跳过 注释开头的行以及空行
+                    target_info.append({})
                     continue
 
                 j=1
@@ -325,13 +326,23 @@ class FastExecution(baseview.BaseView):
                 t['__'] = l    
                 target_info.append(t)
 
+                playbook_new=playbook
                 for c in re.findall('(?<={{).+?(?=}})',playbook):
-                    if not t[c]:
-                        raise Exception('render error')
+                    # 只对 _1 _2 _3 ... __ 判断值是否存在
+                    if re.match('(^(_\\d+)$)|(^__$)', c.strip()): 
+                        if c.strip() in t:
+                            playbook_new=re.sub('{{'+c+'}}',t[c.strip()],playbook_new)
+                            print(playbook_new)
+                        else:
+                            raise Exception('render error')
 
-                playbook_all = playbook_all + Template(playbook).render(t) + '\n'
+                playbook_all = playbook_all + playbook_new + '\n'
+                #存在错误，使用global参数时由于没有值，出现渲染失败
+                #playbook_all = playbook_all + Template(playbook).render(t) + '\n'
                 
         except:
+            from traceback import format_exc
+            print(format_exc())
             return Response({'status':-2,'msg': util.safe_decode('第 %d 行配置信息错误！ \n%s' %(i, str(t)))}) 
 
         cp=util.getcp()
@@ -349,22 +360,26 @@ class FastExecution(baseview.BaseView):
 
         playbook_file = temp_dir + config.prefix_temp + uuid.uuid1().hex
 
-        def get_target_name():
-            t = config.prefix_temp + uuid.uuid1().hex + config.spliter + uuid.uuid1().hex
+        def get_target_name(n=0):
+            #t = config.prefix_temp + uuid.uuid1().hex + config.spliter + uuid.uuid1().hex
+            t = config.prefix_temp + str(n) + config.spliter + uuid.uuid1().hex
             return t
 
         job_info = {}
 
-        if (isinstance(parallel,str) and parallel == "true") or \
+        if (isinstance(parallel,str) and parallel == 'true') or \
             (isinstance(parallel,int) and parallel > 0) or (isinstance(parallel,int) and parallel):
             #并行执行
 
             target_list=[]
+            i=0
             for t in target_info:
-                target_name=get_target_name()
-                redis_tmp_client.hmset(target_name,t)
-                redis_tmp_client.expire(target_name,config.tmp_config_expire_sec)
-                target_list.append(target_name)
+                i=i+1
+                if t:
+                    target_name=get_target_name(i)
+                    redis_tmp_client.hmset(target_name,t)
+                    redis_tmp_client.expire(target_name,config.tmp_config_expire_sec)
+                    target_list.append(target_name)
 
             with open(playbook_file,'w') as f:
                 if playbook[-1] != '\n':
