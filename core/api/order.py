@@ -88,7 +88,7 @@ class Order(baseview.BaseView):
                         x['begin_date']=log_target_sum.get('begin_timestamp')
                         x['end_date']=log_target_sum.get('end_timestamp')
                         if x['begin_date'] and x['end_date']:
-                            x['endure']=float(x['end_date'])-float(x['begin_date'])
+                            x['endure']=round(float(x['end_date'])-float(x['begin_date']),4)
 
                         if log_target_sum.get('stop_str'):
                             x['exe_status']=log_target_sum.get('stop_str')
