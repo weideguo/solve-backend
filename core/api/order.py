@@ -4,13 +4,12 @@ import redis
 from rest_framework.response import Response
 
 from auth_new import baseview
-from libs import util, redis_pool
-from libs.wrapper import error_capture
+from libs import util
 from conf import config
-
 from core.dura import solve_dura
 
-redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
+from libs.wrapper import error_capture
+from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
 
 
 class Order(baseview.BaseView):

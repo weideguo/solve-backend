@@ -8,19 +8,18 @@ import yaml
 import redis
 import json
 import base64
+
 from jinja2 import Template
 from rest_framework.response import Response
-
 from django.conf import settings
+
 from auth_new import baseview
-from libs import util, redis_pool
-from libs.wrapper import error_capture,HashCURD
+from libs import util
 from conf import config
 
-redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
+from libs.wrapper import error_capture,HashCURD,playbook_root,playbook_temp
+from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
 
-cp=util.getcp()
-playbook_root=cp.get('common','playbook_root')
 
 def get_session(pre_job_name):
     tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
@@ -349,20 +348,8 @@ class FastExecution(baseview.BaseView):
             print(format_exc())
             return Response({'status':-2,'msg': util.safe_decode('第 %d 行配置信息错误！ \n%s' %(i, str(t)))}) 
 
-        cp=util.getcp()
-        try:
-            base_dir=cp.get('common','playbook_temp')
-        except:
-            try:
-                base_dir=cp.get('common','file_root')
-            except:
-                base_dir='/temp/'
 
-        temp_dir=os.path.join(base_dir,'playbook/temp/')
-        if not os.path.isdir(temp_dir):
-            os.makedirs(temp_dir)
-
-        playbook_file = temp_dir + config.prefix_temp + uuid.uuid1().hex
+        playbook_file = os.path.join(playbook_temp, config.prefix_temp + uuid.uuid1().hex)
 
         def get_target_name(n=0):
             #t = config.prefix_temp + uuid.uuid1().hex + config.spliter + uuid.uuid1().hex

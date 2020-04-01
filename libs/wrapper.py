@@ -1,4 +1,5 @@
 #coding:utf8
+import os
 import re
 from traceback import format_exc
 
@@ -6,10 +7,47 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 
-from libs import util
+from libs import util, redis_pool
 from libs.util import MYLOGGER,MYLOGERROR,safe_decode
 
 from core.dura import solve_dura
+
+redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
+
+
+cp=util.getcp()
+
+def get_file_root():
+    try:
+        file_root=cp.get('common','file_root')
+    except:
+        file_root='/tmp/solve'
+    
+    if not os.path.isdir(file_root):
+        os.makedirs(file_root)
+    return file_root
+
+def get_playbook_temp():
+    try:
+        base_dir=cp.get('common','playbook_temp')
+    except:
+        try:
+            base_dir=cp.get('common','file_root')
+        except:
+            base_dir='/temp/'
+
+    temp_dir=os.path.join(base_dir,'playbook/temp/')
+    if not os.path.isdir(temp_dir):
+        os.makedirs(temp_dir)
+
+    return temp_dir
+
+def get_playbook_root():
+    return cp.get('common','playbook_root')
+
+file_root=get_file_root()
+playbook_temp=get_playbook_temp()
+playbook_root=get_playbook_root()
 
 def error_capture(func):
     def my_wrapper(*args, **kwargs):

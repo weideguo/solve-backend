@@ -15,14 +15,14 @@ from conf import config
 from .dura import Dura
 from libs.util import MYLOGGER,MYLOGERROR
 
+from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
+
 
 class SolveDura():
     '''
     根据实际情况对对应的key进行过期设置
     以及从mongodb同步到redis
     '''
-    redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
-
     def __init__(self, mongodb_config, dura_config='dura.conf', time_gap=60):
         BASE_DIR=os.path.dirname(os.path.abspath(__file__))
         self.yaml_file=os.path.join(BASE_DIR,dura_config)
@@ -51,8 +51,8 @@ class SolveDura():
         '''
         job_id=key.split('_')[-1]
         #session
-        #session_list=self.redis_tmp_client.keys('session_'+'*'+job_id)
-        session_list=self.redis_tmp_client.keys(config.prefix_session+'*'+job_id)
+        #session_list=redis_tmp_client.keys('session_'+'*'+job_id)
+        session_list=redis_tmp_client.keys(config.prefix_session+'*'+job_id)
 
         target_log_list=[]
         global_list=[]
@@ -62,17 +62,17 @@ class SolveDura():
 
         #global_target_list=[]
 
-        log_job_info=self.redis_log_client.hgetall(key)
+        log_job_info=redis_log_client.hgetall(key)
         if 'log' in log_job_info:
             for tl in eval(log_job_info.get('log','[]')):
                 target_list.append(tl[0])
                 target_log=tl[1]
                 target_id=target_log.split('_')[-1]
                 target_log_list.append(target_log)
-                global_list += self.redis_tmp_client.keys(config.prefix_global+target_id)
-                #global_target_list += self.redis_tmp_client.keys('*'+target_id)
-                sum_list    += self.redis_log_client.keys(config.prefix_sum+target_id)
-                log_list    += self.redis_log_client.lrange(target_log, 0, self.redis_log_client.llen(target_log))
+                global_list += redis_tmp_client.keys(config.prefix_global+target_id)
+                #global_target_list += redis_tmp_client.keys('*'+target_id)
+                sum_list    += redis_log_client.keys(config.prefix_sum+target_id)
+                log_list    += redis_log_client.lrange(target_log, 0, redis_log_client.llen(target_log))
 
 
         return target_log_list, sum_list, log_list, session_list, global_list, target_list
@@ -84,7 +84,7 @@ class SolveDura():
         '''
         if len(target_log_list) == len(sum_list):
             for l in sum_list:
-                if not ('stop_str' in self.redis_log_client.hgetall(l)):
+                if not ('stop_str' in redis_log_client.hgetall(l)):
                     #print(l)
                     return False
 
@@ -101,9 +101,9 @@ class SolveDura():
         '''
         log_prefix=config.prefix_log+config.prefix_job
         while True:
-            for k in self.redis_log_client.keys(log_prefix+'*'):
+            for k in redis_log_client.keys(log_prefix+'*'):
                 
-                if self.redis_log_client.ttl(k) <= 0:
+                if redis_log_client.ttl(k) <= 0:
                     self.expire(k)
                     #print('expire %s'  % k)
             MYLOGGER.info('set keys expire done')
@@ -118,8 +118,8 @@ class SolveDura():
         '''
         target_log_list, sum_list, log_list, session_list, global_list, target_list = self.get_keys(key)
 
-        client_key = [(self.redis_log_client, [key]+target_log_list+log_list+sum_list),\
-                      (self.redis_tmp_client, session_list+global_list+target_list)]
+        client_key = [(redis_log_client, [key]+target_log_list+log_list+sum_list),\
+                      (redis_tmp_client, session_list+global_list+target_list)]
 
         if self.is_job_finish(target_log_list, sum_list) or force:
             for redis_client,k_list in client_key:
@@ -166,19 +166,19 @@ class SolveDura():
 
         job_id=key.split('_')[-1]
 
-        job_info=self.get_key_info_from_mongo(self.redis_job_client,config.prefix_job+job_id)
+        job_info=self.get_key_info_from_mongo(redis_job_client,config.prefix_job+job_id)
         if 'target_type' in job_info:
         	target_type=job_info['target_type']
         else:
         	target_type=''
 
         session_pattern=config.prefix_session+'.*_'+job_id
-        session_list_info=self.get_key_info_from_mongo(self.redis_tmp_client, pattern=session_pattern)
+        session_list_info=self.get_key_info_from_mongo(redis_tmp_client, pattern=session_pattern)
 
         if self.dura.primary_key in session_list_info:
             session_list.append(session_list_info[self.dura.primary_key])
 
-        log_job_info=self.get_key_info_from_mongo( self.redis_log_client, key)
+        log_job_info=self.get_key_info_from_mongo( redis_log_client, key)
 
         if 'log' in log_job_info:
             for tl in eval(log_job_info.get('log','[]')):
@@ -189,14 +189,14 @@ class SolveDura():
                 global_list.append(config.prefix_global+target_id)
 
                 target_pattern=target_type+'.*_'+target_id
-                target_list_info=self.get_key_info_from_mongo(self.redis_tmp_client, pattern=target_pattern)
+                target_list_info=self.get_key_info_from_mongo(redis_tmp_client, pattern=target_pattern)
         
                 if self.dura.primary_key in target_list_info:
                     target_list.append(target_list_info[self.dura.primary_key])
 
                 sum_list.append(config.prefix_sum+target_id,)
 
-                log_list_info = self.get_key_info_from_mongo( self.redis_log_client, target_log)
+                log_list_info = self.get_key_info_from_mongo( redis_log_client, target_log)
                 if self.dura.list_name in log_list_info and isinstance(log_list_info[self.dura.list_name],list):
                     log_list += log_list_info[self.dura.list_name]
 
@@ -209,14 +209,14 @@ class SolveDura():
         is_update 0 redis中存在时跳过 1 强制从mongodb加载到redis
         '''
         summary=[]
-        key_exist=self.redis_log_client.exists(key)
+        key_exist=redis_log_client.exists(key)
         if (not key_exist) or is_update:
             #redis中不存在，或者强制为更新，则都mongodb加载
-            #self.dura.load(key, self.redis_log_client)
+            #self.dura.load(key, redis_log_client)
             target_log_list, sum_list, log_list, session_list, global_list, target_list = self.get_keys_from_mongo(key)
     
-            client_key = [(self.redis_log_client, [key]+target_log_list+log_list+sum_list),\
-                          (self.redis_tmp_client, session_list+global_list+target_list)]
+            client_key = [(redis_log_client, [key]+target_log_list+log_list+sum_list),\
+                          (redis_tmp_client, session_list+global_list+target_list)]
             
             for redis_client,k_list in client_key:
                 for k in k_list:
@@ -234,8 +234,8 @@ class SolveDura():
         '''
         target_log_list, sum_list, log_list, session_list, global_list, target_list = self.get_keys(key)
 
-        client_key = [(self.redis_log_client, [key]+target_log_list+log_list+sum_list),\
-                      (self.redis_tmp_client, session_list+global_list+target_list)]
+        client_key = [(redis_log_client, [key]+target_log_list+log_list+sum_list),\
+                      (redis_tmp_client, session_list+global_list+target_list)]
 
 
         for redis_client,k_list in client_key:

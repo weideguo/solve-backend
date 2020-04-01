@@ -7,21 +7,10 @@ from rest_framework.response import Response
 from django.http import FileResponse
 
 from auth_new import baseview
-from libs import util, redis_pool
-from libs.wrapper import error_capture
+from libs import util
 from conf import config
 
-#file_root=config.file_root
-cp=util.getcp()
-try:
-    file_root=cp.get('common','file_root')
-except:
-    file_root='/tmp/solve'
-
-playbook_root=cp.get('common','playbook_root')
-
-if not os.path.isdir(file_root):
-    os.makedirs(file_root)
+from libs.wrapper import error_capture,file_root,playbook_root
 
 class File(baseview.BaseView):
     '''

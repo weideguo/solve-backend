@@ -6,11 +6,11 @@ import json
 from rest_framework.response import Response
 
 from auth_new import baseview
-from libs import util, redis_pool
-from libs.wrapper import error_capture
+from libs import util
 from conf import config
 
-redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
+from libs.wrapper import error_capture
+from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
 
 #当不存在对应key时，以默认值初始化
 if not redis_manage_client.keys(config.key_solve_config):

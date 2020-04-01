@@ -9,7 +9,6 @@ from traceback import format_exc
 
 from pymongo import MongoClient 
 
-from libs import redis_pool
 from libs.util import MYLOGGER,MYLOGERROR
 
 
