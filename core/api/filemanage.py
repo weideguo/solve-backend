@@ -1,5 +1,6 @@
 #coding:utf8
 import os
+import re
 import sys
 import time
 from rest_framework.response import Response
@@ -16,6 +17,8 @@ try:
     file_root=cp.get('common','file_root')
 except:
     file_root='/tmp/solve'
+
+playbook_root=cp.get('common','playbook_root')
 
 if not os.path.isdir(file_root):
     os.makedirs(file_root)
@@ -59,9 +62,8 @@ class File(baseview.BaseView):
     def get(self, request, args = None):
         if args == 'content':
             filename = request.GET['file']
-            #是否是相对路径
-            if int(request.GET.get('relative', 0)) > 0:
-                filename = os.path.join(file_root,'./'+filename)
+
+            filename = os.path.join(playbook_root,filename)
             
             content=''
             try:
@@ -113,6 +115,9 @@ class File(baseview.BaseView):
 
         if args == 'create':
             create_path = request.GET['path']
+            if re.match('.*\.\..*',create_path):
+                return Response({'status':-1,'path':create_path,'msg':util.safe_decode('路径不能存在..')})
+
             create_path = os.path.join(file_root,'./'+create_path)
             try:
                 os.makedirs(create_path)

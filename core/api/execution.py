@@ -19,11 +19,14 @@ from conf import config
 
 redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
+cp=util.getcp()
+playbook_root=cp.get('common','playbook_root')
 
 def get_session(pre_job_name):
     tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
     playbook = redis_manage_client.hget(tmpl_key,'playbook')
     session_vars=[]
+    playbook = os.path.join(playbook_root,playbook)
     with open(playbook,'r') as f:   
         l=f.readline()
         #存在bug 注释被获取,如            echo xxx # {{session.YYYY}}
@@ -66,6 +69,7 @@ class Session(baseview.BaseView):
             '''
             tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
             playbook = redis_manage_client.hget(tmpl_key,'playbook')
+            playbook = os.path.join(playbook_root,playbook)
             playbook_str =  open(playbook).read()
 
             #在playbook头部以注释引入session说明时格式如下
