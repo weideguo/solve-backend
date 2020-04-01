@@ -43,7 +43,16 @@ def get_playbook_temp():
     return temp_dir
 
 def get_playbook_root():
-    return cp.get('common','playbook_root')
+    #优先从配置文件deploy.conf获取，获取失败则从redis获取(solve后端在启动时设置对应参数)
+    try:
+        playbook_root=cp.get('common','playbook_root')
+    except:
+        playbook_root=""
+
+    if not playbook_root:
+        playbook_root=os.path.join(redis_send_client.hget("__solve__","base_dir"),"playbook")
+
+    return playbook_root
 
 file_root=get_file_root()
 playbook_temp=get_playbook_temp()
