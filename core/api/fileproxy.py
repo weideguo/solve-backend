@@ -30,9 +30,9 @@ def result_parse(res,msg1,msg2):
         r_text=res.text
         r=json.loads(r_text)
         if "status" in r and r["status"]>0:
-            MYLOGERROR.error(r_text)
             r['msg']=util.safe_decode(msg1)
         else:
+            MYLOGERROR.error(r_text)
             r=None
     except:
         MYLOGERROR.error(format_exc())
@@ -70,7 +70,6 @@ class Test(baseview.AnyLogin):
         if args == 'content':
             filename = request.GET['file']
             #是否是相对路径
-            
             filename = os.path.join(playbook_root,filename)
             
             url=self.base_url+"?file="+filename
@@ -88,11 +87,11 @@ class Test(baseview.AnyLogin):
 
             url=self.base_url+"?file="+filename
             r = requests.get(url)
-
             try:
                 response=FileResponse(r.content)
                 response['Content-Type']='application/octet-stream'
                 response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
+                #print("xxxxx")
                 return response
             except:
                 print(r.text)
