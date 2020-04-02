@@ -88,7 +88,7 @@ class File(baseview.BaseView):
                 response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
                 return response
             else:
-                return Response({'status':-1,'file':filename,'msg':util.safe_decode('路径不为文件')})
+                return Response({'status':-1,'file':filename,'msg':util.safe_decode('路径不为文件')},status=404)
        
 
         if args == 'list':

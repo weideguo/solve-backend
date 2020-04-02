@@ -5,6 +5,7 @@ import sys
 import time
 import json
 import requests
+import tempfile
 from traceback import format_exc
 
 from rest_framework.response import Response
@@ -37,7 +38,7 @@ def result_parse(res,msg1,msg2):
     return r
 
 
-class Test(baseview.AnyLogin):
+class FileProxy(baseview.AnyLogin):
     '''
     #实现对核心后端文件处理接口的转发
     中文路径 文件名支持 export LC_ALL=en_US.UTF-8
@@ -66,7 +67,7 @@ class Test(baseview.AnyLogin):
 
         for path in [request.GET.get('file',''),request.GET.get('path','')]:
             if re.match('.*\.\..*',path):
-                return Response({'status':-1,'file':path,'msg':util.safe_decode('路径不能存在..')})
+                return Response({'status':-1,'path':path,'msg':util.safe_decode('路径不能存在..')})
 
         self.base_url=self.base_url+args
         if args == 'content':
@@ -91,14 +92,25 @@ class Test(baseview.AnyLogin):
 
             url=self.base_url+"?file="+filename
             r = requests.get(url)
-            try:
-                response=FileResponse(r.content)  #不会处理失败
-                response['Content-Type']='application/octet-stream'
-                response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
-                return response
-            except:
+            
+            if r.status_code == 200:
+                try:
+                    # 使用临时文件流将字符串转成流
+                    f=tempfile.NamedTemporaryFile()
+                    f.write(r.content)
+                    f.flush()
+                    f.seek(0)
+                    #f=open("/path_to_file/xxx")
+                    response=FileResponse(f)     #不会处理失败
+                    response['Content-Type']='application/octet-stream'
+                    response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
+                    return response
+                except:
+                    r=result_parse(r,'下载成功','解析返回失败，请查看日志')
+                    return Response(r)
+            else:
                 r=result_parse(r,'下载成功','下载失败，请查看日志')
-                return Response(r)
+                return Response(r,status=404)
        
 
         if args == 'list':
