@@ -74,7 +74,7 @@ def error_capture(func):
             return HttpResponse(status=400)
         except Exception as e:
             MYLOGERROR.error(format_exc())
-            return HttpResponse(status=500)
+            return HttpResponse(status=501)
         
     return my_wrapper
 
