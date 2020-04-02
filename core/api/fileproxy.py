@@ -19,10 +19,6 @@ from libs.wrapper import error_capture,file_root,playbook_root
 solve_host="192.168.253.128"
 solve_port=9000
 
-#curl  "http://127.0.0.1:8000/api/v1/file/?path=./" -F "file=@/root/xxx.sh"
-#real_url='http://127.0.0.1:9000/api/v1/file/?path=/tmp/a/b/c'
-#file = {'file': open("/home/weideguo/get-pip.py", 'rb')}
-#response = requests.post(real_url,headers=headers, files=files).text
 
 def result_parse(res,msg1,msg2):
     r=None
@@ -52,9 +48,11 @@ class Test(baseview.AnyLogin):
     def post(self, request, args = None):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path']   
+        if re.match('.*\.\..*',path):
+            return Response({'status':-1,'file':path,'msg':util.safe_decode('路径不能存在..')})
+
         path=os.path.join(file_root,'./'+path)
         
-        #help(fr)
         file = {'file': fr}
         url=self.base_url+"?path="+path
         r = requests.post(url, files=file)
@@ -66,9 +64,14 @@ class Test(baseview.AnyLogin):
     @error_capture
     def get(self, request, args = None):
 
+        for path in [request.GET.get('file',''),request.GET.get('path','')]:
+            if re.match('.*\.\..*',path):
+                return Response({'status':-1,'file':path,'msg':util.safe_decode('路径不能存在..')})
+
         self.base_url=self.base_url+args
         if args == 'content':
             filename = request.GET['file']
+
             #是否是相对路径
             filename = os.path.join(playbook_root,filename)
             
@@ -79,6 +82,7 @@ class Test(baseview.AnyLogin):
                 
         if args == 'download':
             filename = request.GET['file']
+
             name=os.path.basename(filename)
             filename = os.path.join(file_root,'./'+filename)
 
@@ -88,19 +92,18 @@ class Test(baseview.AnyLogin):
             url=self.base_url+"?file="+filename
             r = requests.get(url)
             try:
-                response=FileResponse(r.content)
+                response=FileResponse(r.content)  #不会处理失败
                 response['Content-Type']='application/octet-stream'
                 response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
-                #print("xxxxx")
                 return response
             except:
-                print(r.text)
                 r=result_parse(r,'下载成功','下载失败，请查看日志')
                 return Response(r)
        
 
         if args == 'list':
             root_path = request.GET['path']
+
             root_path = os.path.join(file_root,'./'+root_path)
             
             url=self.base_url+"?path="+root_path
@@ -110,12 +113,10 @@ class Test(baseview.AnyLogin):
 
         if args == 'create':
             create_path = request.GET['path']
+
             create_path = os.path.join(file_root,'./'+create_path)
             
             url=self.base_url+"?path="+create_path
             r = requests.get(url)
             r=result_parse(r,'创建成功','创建失败，请查看日志')
             return Response(r)
-
-
-

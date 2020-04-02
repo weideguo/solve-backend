@@ -20,7 +20,10 @@ class File(baseview.BaseView):
     @error_capture
     def post(self, request, args = None):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
-        path=request.GET['path']    
+        path=request.GET['path'] 
+        if re.match('.*\.\..*',path):
+            return Response({'status':-1,'file':path,'msg':util.safe_decode('路径不能存在..')})
+
         filename=fr.name
         #print filename 
         save_path=os.path.join(file_root,'./'+path)
@@ -49,6 +52,11 @@ class File(baseview.BaseView):
 
     @error_capture
     def get(self, request, args = None):
+        
+        for path in [request.GET.get('file',''),request.GET.get('path','')]:
+            if re.match('.*\.\..*',path):
+                return Response({'status':-1,'file':path,'msg':util.safe_decode('路径不能存在..')})
+        
         if args == 'content':
             filename = request.GET['file']
 
@@ -66,6 +74,7 @@ class File(baseview.BaseView):
         
         if args == 'download':
             filename = request.GET['file']
+
             name=os.path.basename(filename)
             filename = os.path.join(file_root,'./'+filename)
 
@@ -85,6 +94,7 @@ class File(baseview.BaseView):
         if args == 'list':
             root_path = request.GET['path']
             root_path = os.path.join(file_root,'./'+root_path)
+
             files=[]
             dirs=[]
             
@@ -104,8 +114,6 @@ class File(baseview.BaseView):
 
         if args == 'create':
             create_path = request.GET['path']
-            if re.match('.*\.\..*',create_path):
-                return Response({'status':-1,'path':create_path,'msg':util.safe_decode('路径不能存在..')})
 
             create_path = os.path.join(file_root,'./'+create_path)
             try:
