@@ -22,7 +22,7 @@ class File(baseview.BaseView):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path'] 
         if re.match('.*\.\..*',path):
-            return Response({'status':-1,'file':path,'msg':util.safe_decode('路径不能存在..')})
+            return Response({'status':-1,'path':path,'msg':util.safe_decode('路径不能存在..')})
 
         filename=fr.name
         #print filename 
@@ -55,7 +55,7 @@ class File(baseview.BaseView):
         
         for path in [request.GET.get('file',''),request.GET.get('path','')]:
             if re.match('.*\.\..*',path):
-                return Response({'status':-1,'file':path,'msg':util.safe_decode('路径不能存在..')})
+                return Response({'status':-1,'path':path,'msg':util.safe_decode('路径不能存在..')})
         
         if args == 'content':
             filename = request.GET['file']
