@@ -36,7 +36,7 @@ def result_parse(res,msg1,msg2):
     return r
 
 
-class FileProxy(baseview.AnyLogin):
+class FileProxy(baseview.BaseView):
     '''
     #实现对核心后端文件处理接口的转发
     中文路径 文件名支持 export LC_ALL=en_US.UTF-8
