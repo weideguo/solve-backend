@@ -7,11 +7,11 @@ from rest_framework.urlpatterns import format_suffix_patterns
 from core.api.order import Order
 from core.api.execution import Session,Execution,ExecutionInfo,FastExecution
 from core.api.targetinfo import Target,Host
-from core.api.filemanage import File
 from core.api.config import Config
 from core.api.home import Home
 
-from core.api.fileproxy import FileProxy
+from core.api.filemanage import File
+#from core.api.fileproxy import FileProxy as File
 
 # 使用"/"结尾可以避免后续扩展时要改前端的请求
 urlpatterns = [
@@ -23,10 +23,10 @@ urlpatterns = [
     url(r'^api/v1/execution/(.*)', Execution.as_view()),
     url(r'^api/v1/session/(.*)', Session.as_view()),
     url(r'^api/v1/fast/(.*)', FastExecution.as_view()),
-    #url(r'^api/v1/file/(.*)', File.as_view()),
+    url(r'^api/v1/file/(.*)', File.as_view()),
     url(r'^api/v1/config/', Config.as_view()),
     url(r'^api/v1/', include('auth_new.urls')),
-    url(r'^api/v1/file/(.*)', FileProxy.as_view()),   #用于测试 正式部署请务必删除
+    #url(r'^api/v1/test/(.*)', FileProxy.as_view()),   #用于测试 正式部署请务必删除
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
 

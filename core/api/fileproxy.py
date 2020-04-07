@@ -15,10 +15,8 @@ from auth_new import baseview
 from libs import util
 from conf import config
 from libs.util import MYLOGGER,MYLOGERROR
-from libs.wrapper import error_capture,file_root,playbook_root
+from libs.wrapper import error_capture,file_root,playbook_root,fileserver_bind,fileserver_port
 
-solve_host="192.168.253.128"
-solve_port=9000
 
 
 def result_parse(res,msg1,msg2):
@@ -43,7 +41,7 @@ class FileProxy(baseview.AnyLogin):
     #实现对核心后端文件处理接口的转发
     中文路径 文件名支持 export LC_ALL=en_US.UTF-8
     '''
-    base_url='http://%s:%s/file/' % (solve_host,solve_port)
+    base_url='http://%s:%s/file/' % (fileserver_bind,fileserver_port)
 
     @error_capture
     def post(self, request, args = None):

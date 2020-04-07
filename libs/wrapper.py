@@ -54,9 +54,33 @@ def get_playbook_root():
 
     return playbook_root
 
+def get_params(name,section='common',redis_key='__solve__'):
+    #优先从配置文件deploy.conf获取，获取失败则从redis获取
+    try:
+        value=cp.get(section, name)
+    except:
+        value=""
+
+    if not value:
+        value=redis_send_client.hget(redis_key, name)
+
+    if not value:
+        value=""
+
+    try:
+        value=int(value)
+    except:
+        pass
+
+    return value
+
+
 file_root=get_file_root()
 playbook_temp=get_playbook_temp()
 playbook_root=get_playbook_root()
+
+fileserver_bind=get_params('fileserver_bind')
+fileserver_port=get_params('fileserver_port')
 
 def error_capture(func):
     def my_wrapper(*args, **kwargs):
