@@ -10,4 +10,3 @@ configparser
 requests
 requests-oauthlib
 Jinja2
-Flask
