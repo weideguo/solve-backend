@@ -130,6 +130,10 @@ REST_FRAMEWORK = {
         'rest_framework.renderers.JSONRenderer',
         'rest_framework.renderers.BrowsableAPIRenderer',
     ),
+    #访问频率设置  ('s', 'sec', 'm', 'min', 'h', 'hour', 'd', 'day')
+    'DEFAULT_THROTTLE_RATES': {
+        'anylogin': '3/m'
+    },
 }
 
 JWT_AUTH = {

@@ -45,31 +45,14 @@ class SuperUserpermissions(APIView):
     def delete(self, request, args = None):
         pass
 
-
+from rest_framework.throttling import ScopedRateThrottle
 class AnyLogin(APIView):
     permission_classes = ()
     authentication_classes = ()
 
-    def get(self, request, args = None):
-        pass
-
-    def post(self, request, args = None):
-        pass
-
-    def put(self, request, args = None):
-        pass
-
-    def delete(self, request, args = None):
-        pass
-
-
-class SessionView(APIView):
-    '''
-    用于设置与校验session/cookie 从而实现登陆状态的验证
-    前后端分离不适用
-    '''
-    permission_classes = ()
-    authentication_classes = ()
+    #settings.py REST_FRAMEWORK.DEFAULT_THROTTLE_RATES设置访问频率
+    throttle_scope='anylogin'
+    throttle_classes = [ScopedRateThrottle]
 
     def get(self, request, args = None):
         pass
@@ -82,3 +65,4 @@ class SessionView(APIView):
 
     def delete(self, request, args = None):
         pass
+
