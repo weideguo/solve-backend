@@ -8,6 +8,7 @@ import redis
 from threading import Thread
 from multiprocessing import Process
 
+from redis.exceptions import ConnectionError
 from django.conf import settings
 
 from libs import redis_pool
@@ -16,6 +17,27 @@ from .dura import Dura
 from libs.util import MYLOGGER,MYLOGERROR
 
 #from libs.wrapper import self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client
+def connection_error_rerun(retry_gap=1):
+    """
+    当发生连接错误时函数的重新运行
+    """
+    def __wrapper(func):                  
+        def __wrapper2(*args, **kwargs):
+            while True:
+                try:
+                    func(*args, **kwargs)
+                    break
+                except ConnectionError:
+                    time.sleep(retry_gap)
+                    if args:
+                        func_name="%s.%s" % (args[0].__class__.__name__, func.__name__)
+                    else:
+                        func_name=func.__name__
+                    
+                    MYLOGERROR.error("function:%s  retry" % func_name)
+                          
+        return __wrapper2
+    return __wrapper
 
 
 class SolveDura():
@@ -97,6 +119,7 @@ class SolveDura():
             return False
 
 
+    @connection_error_rerun()
     def __expire(self):
         '''
         监听执行日志log_job_XXXXXX，判定执行结束将对应关联key设置过期
@@ -267,6 +290,7 @@ class SolveDura():
             return None
 
 
+    @connection_error_rerun()
     def __save(self):
         '''
         从redis保存数据到mongodb
