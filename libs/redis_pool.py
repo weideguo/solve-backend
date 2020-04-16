@@ -14,13 +14,13 @@ def get_redis_config(section):
     将每个section的配置信息转成dict
     """
     db=int(cp.get(section,'db'))
-    password=cp.get(section,'passwd')
+    password=cp.get(section,'password')
     sentinels=[]
     service_name=''
     host=''
     port=0
     try:
-        sentinels=cp.get(section,'sentinels')
+        sentinels=eval(cp.get(section,'sentinels'))
         service_name=cp.get(section,'service_name')
     except:    
         host=cp.get(section,'host')
@@ -57,3 +57,22 @@ def refresh(redis_send_client,redis_log_client,redis_tmp_client,redis_config_cli
     redis_manage_client = rc.refresh(redis_manage_client,get_redis_config('redis_manage'))
 
     return redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
+
+
+class RedisSingle(object):
+    
+    redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_init()
+
+    def refresh(self):
+        """
+        重新刷新，用于确保获取到可用的客户端  
+        """
+        self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client = \
+            refresh(self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client)
+
+    def get_client(self):
+        self.refresh()
+        return self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client
+
+#单例模式
+redis_single=RedisSingle()
