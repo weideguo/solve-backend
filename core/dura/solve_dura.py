@@ -17,8 +17,8 @@ from conf import config
 from .dura import Dura
 from libs.util import MYLOGGER,MYLOGERROR
 
-#from libs.wrapper import self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client
-def connection_error_rerun(retry_gap=1):
+
+def connection_error_rerun(retry_gap=5):
     """
     当发生连接错误时函数的重新运行
     """
