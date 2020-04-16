@@ -1,4 +1,5 @@
 #coding:utf8
+import os
 import re
 import uuid
 import logging
@@ -9,6 +10,7 @@ import configparser
 #使用setting.py中的log配置
 MYLOGGER = logging.getLogger('solve.core.views')
 MYLOGERROR = logging.getLogger('django.request')
+BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 
 def my_md5(string):
     h = hashlib.md5()
@@ -36,9 +38,11 @@ def plain_dict(data):
     return data
 
 
-def getcp():
+def getcp(config_file=None):
     cp = configparser.ConfigParser()
-    cp.read('deploy.conf')
+    if not config_file:
+        config_file=os.path.join(BASE_DIR,'deploy.conf')
+    cp.read(config_file)
     return cp
 
 

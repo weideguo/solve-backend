@@ -8,6 +8,7 @@ import redis
 from threading import Thread
 from multiprocessing import Process
 
+from pymongo.errors import PyMongoError,ServerSelectionTimeoutError
 from redis.exceptions import ConnectionError
 from django.conf import settings
 
@@ -27,7 +28,7 @@ def connection_error_rerun(retry_gap=1):
                 try:
                     func(*args, **kwargs)
                     break
-                except ConnectionError:
+                except (ConnectionError,PyMongoError,ServerSelectionTimeoutError):
                     time.sleep(retry_gap)
                     if args:
                         func_name="%s.%s" % (args[0].__class__.__name__, func.__name__)
@@ -55,8 +56,13 @@ class SolveDura():
 
         self.time_gap=time_gap
         db=self.__background()
-        
     
+
+    def redis_refresh(self):
+        self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client = \
+                redis_pool.refresh(self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client)
+
+
     def getDura(self):
         
         redis_client_set=redis_pool.redis_init()
@@ -124,6 +130,7 @@ class SolveDura():
         '''
         监听执行日志log_job_XXXXXX，判定执行结束将对应关联key设置过期
         '''
+        self.redis_refresh()
         log_prefix=config.prefix_log+config.prefix_job
         while True:
             for k in self.redis_log_client.keys(log_prefix+'*'):
@@ -296,6 +303,7 @@ class SolveDura():
         从redis保存数据到mongodb
         无限循环运行
         '''
+        self.redis_refresh()
         dura = self.getDura()
         while True:
             dura.save()
