@@ -3,6 +3,7 @@ import os
 import re
 import sys
 import time
+import uuid
 import redis
 from threading import Thread
 from traceback import format_exc
@@ -189,11 +190,16 @@ class Dura():
         collection_name=None
         try:
             pos=0
+            random_key=uuid.uuid1().hex
+            redis_client.set(random_key,'')
             for r in self.redis_client_set: 
-                if str(r)==str(redis_client):
+                #sentinel时存在错误
+                #if str(r)==str(redis_client):
+                #    break
+                #pos=pos+1 
+                if r.delete(random_key):
                     break
-                pos=pos+1       
-    
+                pos=pos+1
             for db_config in self.key_map_config['save']:
                 if list(db_config.keys())[0] == pos:
                     for key_config in db_config[pos]:
