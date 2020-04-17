@@ -13,6 +13,7 @@ from conf import config
 from libs.wrapper import error_capture
 from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
 
+
 class Home(baseview.BaseView):
     '''
     首页的信息

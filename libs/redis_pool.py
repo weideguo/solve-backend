@@ -61,18 +61,26 @@ def refresh(redis_send_client,redis_log_client,redis_tmp_client,redis_config_cli
 
 class RedisSingle(object):
     
-    redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_init()
+    redis_send,redis_log,redis_tmp,redis_config,redis_job,redis_manage = redis_init()
 
-    def refresh(self):
-        """
-        重新刷新，用于确保获取到可用的客户端  
-        """
-        self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client = \
-            refresh(self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client)
 
-    def get_client(self):
-        self.refresh()
-        return self.redis_send_client,self.redis_log_client,self.redis_tmp_client,self.redis_config_client,self.redis_job_client,self.redis_manage_client
+    def __getitem__(self,item):
+        '''
+        可以当成字典使用
+        redis_single=RedisSingle()
+        redis_single['redis_send_client']
+        
+        每次获取前都判断是否可用，如果不可用，重新生成
+        因为在sentinel模式重新连接可能出现不可以
+        每次获取客户端都判断一次 还是出现连接不可用？
+        '''
+        #client=getattr(self, item)
+        #client1=rc.refresh(client,get_redis_config(item))
+
+        #tcp连接依旧保持，底层实现连接保持？
+        client1=rc.redis_init(get_redis_config(item))
+        return client1
+
 
 #单例模式
 redis_single=RedisSingle()

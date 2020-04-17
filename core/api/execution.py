@@ -18,7 +18,9 @@ from libs import util
 from conf import config
 
 from libs.wrapper import error_capture,HashCURD,playbook_root,playbook_temp
+
 from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
+
 
 
 def get_session(pre_job_name):

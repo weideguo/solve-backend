@@ -6,7 +6,8 @@ class RedisConn(object):
     
     decode_responses=True      #将结果自动编码为unicode格式，否则对于python3结果格式为 b"xxx"
     encoding_errors="ignore"   #decode的选项，编码出错时的处理方式，可选 strict ignore replace 默认为strict 
-    
+    socket_timeout=0.1
+
     def redis_init_single(self, host, port, db, password):
         """
         单个服务模式
@@ -24,11 +25,11 @@ class RedisConn(object):
         """
         sentinel = Sentinel(sentinels)
         if is_master:
-            client = sentinel.master_for(service_name, password=password, db=db,\
-                                        decode_responses=self.decode_responses, encoding_errors=self.encoding_errors)
+            client = sentinel.master_for(service_name, password=password, db=db,decode_responses=self.decode_responses, encoding_errors=self.encoding_errors,\
+                                         )
         else:
-            client = sentinel.slave_for(service_name, password=password, db=db, \
-                                        decode_responses=self.decode_responses, encoding_errors=self.encoding_errors)
+            client = sentinel.slave_for(service_name, password=password, db=db, decode_responses=self.decode_responses, \
+                                        encoding_errors=self.encoding_errors)
         
         return client
         

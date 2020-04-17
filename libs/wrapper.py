@@ -3,6 +3,8 @@ import os
 import re
 from traceback import format_exc
 
+from redis.exceptions import ConnectionError
+
 from rest_framework.response import Response
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
@@ -12,8 +14,12 @@ from libs.util import MYLOGGER,MYLOGERROR,safe_decode
 
 from core.dura import solve_dura
 
+#需要每次import都调用 如何实现？？？？？
+#使用sentiel存在bug，重连时有些客户端已经被销毁，导致有一部分概率出现错误
 redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
+
+#函数不会多次运行，多次调用只运行一次
 
 cp=util.getcp()
 
@@ -92,13 +98,16 @@ def error_capture(func):
                 from_host=str(request.META['REMOTE_ADDR'])
 
             MYLOGGER.info("%s %s %s" % (str(request.user),from_host,str(request.META['PATH_INFO']) ))
+
             return func(*args, **kwargs)
+        except ConnectionError:
+            return HttpResponse('redis connection failed',status=500)
         except MultiValueDictKeyError as e:
             MYLOGERROR.error(format_exc())
-            return HttpResponse(status=400)
+            return HttpResponse('paramster error',status=400)
         except Exception as e:
             MYLOGERROR.error(format_exc())
-            return HttpResponse(status=501)
+            return HttpResponse('unknow error, please check server log',status=500)
         
     return my_wrapper
 
