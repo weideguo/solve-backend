@@ -114,3 +114,10 @@ curl  "http://127.0.0.1:8000/api/v1/config?key=job_werwerq" -H "Authorization:JW
 #dura
 curl  "http://127.0.0.1:8000/api/v1/dura/?id=job_3d10ade82b8711ea82d8000c295dd589" -H "Authorization:JWT ${xx}"
 
+
+
+
+#test
+curl  "http://127.0.0.1:8000/api/v1/test/" -H "Authorization:JWT ${xx}"
+
+
