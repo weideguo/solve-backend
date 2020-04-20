@@ -106,12 +106,3 @@ class Home(baseview.BaseView):
             return Response(r)
 
 
-#class Test(baseview.AnyLogin):
-class Test(baseview.BaseView):
-    '''
-    测试
-    '''
-    @error_capture 
-    def get(self, request, args = None):
-        r={'a':'aaa'}
-        return Response(r)
