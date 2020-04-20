@@ -11,8 +11,7 @@ from libs import util
 from conf import config
 
 from libs.wrapper import error_capture,HashCURD
-
-from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
+from libs.redis_pool import redis_single
 
 
 class Target(baseview.BaseView):
@@ -21,19 +20,24 @@ class Target(baseview.BaseView):
     '''    
     @error_capture
     def get(self, request, args = None):
+        redis_config_client = redis_single['redis_config']
         return HashCURD.get(redis_config_client,request, args)
 
     @error_capture
     def post(self, request, args = None):
+        redis_config_client = redis_single['redis_config']
         return HashCURD.post(redis_config_client,request, args)
+
 
 class Host(baseview.BaseView):
     '''
     主机
     '''
-
     @error_capture
     def get(self, request, args = None):
+        redis_send_client = redis_single['redis_send']
+        redis_log_client = redis_single['redis_log']
+        redis_config_client = redis_single['redis_config']
 
         def get_online():
             online_host = redis_send_client.keys(config.prefix_heart_beat+'*')    

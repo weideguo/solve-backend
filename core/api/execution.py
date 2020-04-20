@@ -18,12 +18,10 @@ from libs import util
 from conf import config
 
 from libs.wrapper import error_capture,HashCURD,playbook_root,playbook_temp
-
-from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
-
+from libs.redis_pool import redis_single
 
 
-def get_session(pre_job_name):
+def get_session(pre_job_name,redis_manage_client,redis_config_client):
     tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
     playbook = redis_manage_client.hget(tmpl_key,'playbook')
     session_vars=[]
@@ -53,6 +51,8 @@ class Session(baseview.BaseView):
 
     @error_capture 
     def get(self, request, args = None):
+        redis_config_client = redis_single['redis_config']
+        redis_manage_client = redis_single['redis_manage']
 
         pre_job_name = request.GET['filter']
         
@@ -60,7 +60,7 @@ class Session(baseview.BaseView):
             '''
             获取playbook的session参数
             '''
-            session_info = get_session(pre_job_name)  
+            session_info = get_session(pre_job_name,redis_manage_client,redis_config_client) 
 
             return Response({'status':1,'vars':session_info})
 
@@ -101,7 +101,7 @@ class Session(baseview.BaseView):
             if not yaml_dict:
                 yaml_dict = {}
 
-            var=get_session(pre_job_name)
+            var=get_session(pre_job_name,redis_manage_client,redis_config_client)
 
             sesion_list=[]
             if 'session' in yaml_dict:
@@ -131,6 +131,8 @@ class Session(baseview.BaseView):
         '''
         提交session参数
         '''
+        redis_config_client = redis_single['redis_config']
+
         filter = request.GET['filter']
         data = request.data
 
@@ -152,6 +154,12 @@ class Execution(baseview.BaseView):
         '''
         执行任务
         '''
+        redis_send_client = redis_single['redis_send']
+        redis_tmp_client = redis_single['redis_tmp']
+        redis_config_client = redis_single['redis_config']
+        redis_job_client = redis_single['redis_job']
+        redis_manage_client = redis_single['redis_manage']
+
         exec_name = request.GET['filter']
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
         #jwt_str =jwt_str_raw.split('.')[1]+'=='     
@@ -193,6 +201,10 @@ class Execution(baseview.BaseView):
         
     @error_capture
     def get(self, request, args = None):
+        redis_send_client = redis_single['redis_send']
+        redis_log_client = redis_single['redis_log']
+        redis_tmp_client = redis_single['redis_tmp']
+        redis_job_client = redis_single['redis_job']
 
         old_job_id = request.GET['work_id']
         target = request.GET['target']  
@@ -284,10 +296,12 @@ class ExecutionInfo(baseview.BaseView):
     '''    
     @error_capture
     def get(self, request, args = None):
+        redis_manage_client = redis_single['redis_manage']
         return HashCURD.get(redis_manage_client,request, args)
 
     @error_capture
     def post(self, request, args = None):
+        redis_manage_client = redis_single['redis_manage']
         return HashCURD.post(redis_manage_client,request, args)
 
 
@@ -298,6 +312,10 @@ class FastExecution(baseview.BaseView):
     '''
     @error_capture
     def post(self, request, args = None):
+        redis_send_client = redis_single['redis_send']
+        redis_tmp_client = redis_single['redis_tmp']
+        redis_job_client = redis_single['redis_job']
+
         user=str(request.user)
         data = request.data
         try:

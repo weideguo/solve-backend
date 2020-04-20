@@ -11,7 +11,7 @@ from libs import util
 from conf import config
 
 from libs.wrapper import error_capture
-from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
+from libs.redis_pool import redis_single
 
 
 class Home(baseview.BaseView):
@@ -20,6 +20,7 @@ class Home(baseview.BaseView):
     '''
     @error_capture 
     def get(self, request, args = None):
+        redis_config_client,redis_job_client,redis_manage_client=redis_single['redis_config'],redis_single['redis_job'],redis_single['redis_manage']
         if args == 'info': 
             info = {}
             info['user'] = Account.objects.count()

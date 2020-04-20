@@ -10,9 +10,10 @@ from libs import util
 from conf import config
 
 from libs.wrapper import error_capture
-#from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
 from libs.redis_pool import redis_single
 
+
+#只会运行一次
 redis_manage_client=redis_single['redis_manage']
 #当不存在对应key时，以默认值初始化
 if not redis_manage_client.keys(config.key_solve_config):
@@ -58,10 +59,10 @@ class Config(baseview.BaseView):
     """
     @error_capture
     def get(self, request, args = None):
+        redis_manage_client=redis_single['redis_manage']
+
         key=request.GET['key']
 
-        #为什么在此容易出现客户端使用失败？需要每次都重新获取
-        redis_manage_client=redis_single['redis_manage']
         key_name=redis_manage_client.hget(config.key_solve_config,key)
         if key_name:
             key_type=redis_manage_client.type(key_name)
@@ -90,6 +91,8 @@ class Config(baseview.BaseView):
         提交的数据可以为 string list set hash格式，如果为string list set则需要明确指定格式
         提交时设置header Content-Type: application/json 
         """
+        redis_manage_client=redis_single['redis_manage']
+
         key=request.GET['key']
         key_type=request.GET.get('type','hash')
         try:

@@ -9,8 +9,7 @@ from conf import config
 from core.dura import solve_dura
 
 from libs.wrapper import error_capture
-
-from libs.wrapper import redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client
+from libs.redis_pool import redis_single
 
 
 class Order(baseview.BaseView):
@@ -20,6 +19,9 @@ class Order(baseview.BaseView):
     '''
     @error_capture
     def get(self, request, args = None):
+        redis_send_client = redis_single['redis_send']
+        redis_log_client = redis_single['redis_log']
+        redis_job_client = redis_single['redis_job']
 
         if not args:
             '''

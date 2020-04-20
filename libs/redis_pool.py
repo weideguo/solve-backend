@@ -66,20 +66,18 @@ class RedisSingle(object):
 
     def __getitem__(self,item):
         '''
-        可以当成字典使用
-        redis_single=RedisSingle()
-        redis_single['redis_send_client']
-        
+        可以当成字典使用        
         每次获取前都判断是否可用，如果不可用，重新生成
         因为在sentinel模式重新连接可能出现不可以
         每次获取客户端都判断一次 还是出现连接不可用？
+        
+        client=getattr(self, item)
+        client=rc.refresh(client,get_redis_config(item))
         '''
-        #client=getattr(self, item)
-        #client1=rc.refresh(client,get_redis_config(item))
 
         #tcp连接依旧保持，底层实现连接保持？
-        client1=rc.redis_init(get_redis_config(item))
-        return client1
+        client=rc.redis_init(get_redis_config(item))
+        return client
 
 
 #单例模式
