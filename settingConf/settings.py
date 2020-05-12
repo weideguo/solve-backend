@@ -61,8 +61,6 @@ CORS_ALLOW_METHODS = (
     'PUT',
 )
 
-CORS_ORIGIN_WHITELIST = ['192.168.58.1','192.168.58.132']
-
 ROOT_URLCONF = 'settingConf.urls'
 
 WSGI_APPLICATION = 'settingConf.wsgi.application'
@@ -132,9 +130,26 @@ REST_FRAMEWORK = {
     ),
     #访问频率设置  ('s', 'sec', 'm', 'min', 'h', 'hour', 'd', 'day')
     'DEFAULT_THROTTLE_RATES': {
-        'anylogin': '3/m'
+        'anylogin': '10/m'
     },
 }
+
+TEMPLATES = [
+    {
+        'BACKEND': 'django.template.backends.django.DjangoTemplates',
+        #用于浏览器展示
+        'DIRS': 'rest_framework/Templates',    
+        'APP_DIRS': True,
+        #'OPTIONS': {
+        #    'context_processors': [
+        #        'django.template.context_processors.debug',
+        #        'django.template.context_processors.request',
+        #        'django.contrib.auth.context_processors.auth',
+        #        'django.contrib.messages.context_processors.messages',
+        #    ],
+        #},
+    },
+]
 
 JWT_AUTH = {
     'JWT_RESPONSE_PAYLOAD_HANDLER':

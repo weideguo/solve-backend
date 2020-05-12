@@ -368,8 +368,10 @@ class FastExecution(baseview.BaseView):
             print(format_exc())
             return Response({'status':-2,'msg': util.safe_decode('第 %d 行配置信息错误！ \n%s' %(i, str(t)))}) 
 
-
         playbook_file = os.path.join(playbook_temp, config.prefix_temp + uuid.uuid1().hex)
+        _path=os.path.dirname(playbook_file)
+        if not os.path.exists(_path):
+            os.makedirs(_path)
 
         def get_target_name(n=0):
             #t = config.prefix_temp + uuid.uuid1().hex + config.spliter + uuid.uuid1().hex

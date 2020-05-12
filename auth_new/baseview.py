@@ -66,3 +66,21 @@ class AnyLogin(APIView):
     def delete(self, request, args = None):
         pass
 
+class TestView(APIView):
+    '''
+    没有任何限制，用于测试
+    '''
+    permission_classes = ()
+    authentication_classes = ()
+
+    def get(self, request, args = None):
+        pass
+
+    def post(self, request, args = None):
+        pass
+
+    def put(self, request, args = None):
+        pass
+
+    def delete(self, request, args = None):
+        pass
