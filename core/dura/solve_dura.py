@@ -12,11 +12,10 @@ from pymongo.errors import PyMongoError,ServerSelectionTimeoutError
 from redis.exceptions import ConnectionError
 from django.conf import settings
 
-from libs import redis_pool
+from libs import redis_pool,util
 from conf import config
-from .dura import Dura
 from libs.util import MYLOGGER,MYLOGERROR
-
+from .dura import Dura
 
 def connection_error_rerun(retry_gap=5):
     """
@@ -344,14 +343,22 @@ class SolveDura():
         #启动时加载使用线程模式，防止存在僵死进程
 
 
-
-try:
-    MONGODB_CONFIG = settings.MONGODB_CONFIG
-except:
-    MONGODB_CONFIG=None
+MONGODB_CONFIG={}
+cp=util.getcp()
+if cp.has_section("mongodb") and cp.has_option("mongodb","host"):
+    MONGODB_CONFIG['host']=cp.get('mongodb','host')
+    MONGODB_CONFIG['port']=int(cp.get('mongodb','port'))
+    MONGODB_CONFIG['db']=cp.get('mongodb','db')
+    try:
+        #允许不设置账号密码，不推荐
+        MONGODB_CONFIG['user']=cp.get('mongodb','user')
+        MONGODB_CONFIG['passwd']=cp.get('mongodb','passwd')
+    except:
+        pass
 
 if MONGODB_CONFIG:
     #单例模式
+    #solve_dura=None
     solve_dura=SolveDura(MONGODB_CONFIG)
 else:
     MYLOGGER.info('no durability for MONGODB_CONFIG [ %s ] in settings ' % str(MONGODB_CONFIG))

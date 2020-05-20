@@ -1,5 +1,19 @@
 #coding:utf8
 import re
+import importlib
+
+
+def get_obj(full_obj_name):
+    """
+    由对象的路径获取对象
+    如 "libs.util.AAA"
+    """
+    class_name = full_obj_name.split('.')[-1]
+    module_name = '.'.join(full_obj_name.split('.')[:-1])
+    mod = importlib.import_module(module_name)
+    obj = getattr(mod, class_name)
+    return obj
+
 
 def safe_decode(string):
     '''

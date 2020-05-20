@@ -3,7 +3,7 @@ import json
 import base64
 import time
 import requests
-import importlib
+#import importlib
 
 from django.conf import settings
 from django.db import transaction
@@ -13,20 +13,22 @@ from .models import CASProxyPgt,CASProxyToken
 
 
 try:
+    cas_url_name=settings.CAS_URL
+except:
+    cas_url_name=''
+
+if cas_url_name:
+    cas_url=util.get_obj(cas_url_name)
+else:
+    cas_url=''
+
+try:
     error_capture_name=settings.ERROR_CAPTURE
 except:
     error_capture_name=''
 
-try:
-    cas_url=settings.CAS_URL
-except:
-    cas_url=''
-
 if error_capture_name:
-    class_name = error_capture_name.split('.')[-1]
-    module_name = '.'.join(error_capture_name.split('.')[:-1])
-    mod = importlib.import_module(module_name)
-    error_capture = getattr(mod, class_name)
+    error_capture=util.get_obj(error_capture_name)
 else:
     def error_capture(func):
         def my_wrapper(*args, **kwargs):

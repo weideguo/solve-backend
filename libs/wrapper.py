@@ -14,14 +14,21 @@ from libs.util import MYLOGGER,MYLOGERROR,safe_decode
 
 from core.dura import solve_dura
 
-#需要每次import都调用 如何实现？？？？？
-#使用sentiel存在bug，重连时有些客户端已经被销毁，导致有一部分概率出现错误
+
 redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
 
 #函数不会多次运行，多次调用只运行一次
 
 cp=util.getcp()
+
+def get_cas_url():
+    cas_url=""
+    if cp.has_section("cas") and cp.has_option("cas","url"):
+        cas_url=cp.get("cas","url")
+    return cas_url
+
+cas_url=get_cas_url()
 
 def get_file_root():
     try:

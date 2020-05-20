@@ -214,10 +214,6 @@ LOGGING = {
 ##############
 
 # 用于auth_new模块
-# 使用CAS
-# if don't use, set: CAS_URL=''
-CAS_URL='http://192.168.253.128:9095/cas'
-#CAS_URL=''
 """
 CAS协议提供的接口：
 login                #登陆(前端使用)
@@ -225,24 +221,8 @@ logout               #登出(前端使用)
 validate             #验证ticket 返回text格式 (后端使用)
 serviceValidate      #验证ticket 返回xml格式  (后端使用)
 """
-
-# 用于auth_new模块
+CAS_URL='libs.wrapper.cas_url'
 # 用于接口函数错误捕获的装饰器  
 ERROR_CAPTURE='libs.wrapper.error_capture'
 #ERROR_CAPTURE=''
 
-
-
-##################
-# 用于持久保存redis的数据
-# 如果不设置，则数据全部存在redis中，过期则清除
-#可以设置为{}或者全部清除
-#MONGODB_CONFIG = {}
-MONGODB_CONFIG = {
-    'host': '127.0.0.1',
-    'port': 27017,
-    'db': 'solve',
-    'user': 'solve',
-    'passwd': 'solve123456'
-
-}
