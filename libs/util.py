@@ -2,6 +2,7 @@
 import os
 import re
 import uuid
+import json
 import logging
 import hashlib
 import configparser
@@ -32,8 +33,12 @@ def plain_dict(data):
     for k in data:
         #将dict格式转成扁平的dict 即值只为str格式
         if isinstance(data[k],list):
-            # 对list值进行格式化转换
-            data[k]=" ".join(data[k])
+            """
+            # 对list值进行格式化转换 简单的以空格分隔存储 存在空格则出错
+            data[k]='  '.join(data[k])
+            """
+            #转成字符串存储 允许存在空格
+            data[k]=json.dumps(data[k],ensure_ascii=False).replace('[','').replace(']','').replace('\", \"','\" \"') 
 
     return data
 
