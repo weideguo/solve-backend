@@ -15,9 +15,9 @@ ret=$?
 SECRET_KEY=`echo ${SECRET_KEY} | sed "s|&|\\\\\\&|g"`
 #echo "SECRET_KEY = '"${SECRET_KEY}"'"
 if [ $ret -eq 0 ];then
-    #cat settingConf/settings.py | grep SECRET_KEY
-    #sed "s|^SECRET_KEY.*|SECRET_KEY = '${SECRET_KEY}'|g" $config_file
     sed -i "s|^SECRET_KEY.*|SECRET_KEY = '${SECRET_KEY}'|g" $config_file
+    echo -e "replace ${config_file} SECRET_KEY \e[1;32m done \e[0m"
 else
+    echo -e "replace ${config_file} SECRET_KEY \e[1;31m failed \e[0m"
     exit 1
 fi
