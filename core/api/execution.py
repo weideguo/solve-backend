@@ -246,7 +246,11 @@ class Execution(baseview.BaseView):
                 #如果传入带有new_job_id，说明已经设置好session，不需要再设置
                 job_info[config.prefix_session]=new_session_name
             else:
-                session_data=redis_tmp_client.hgetall(redis_tmp_client.hget(target+config.spliter+target_id,config.prefix_session))
+                try:
+                    session_data=redis_tmp_client.hgetall(redis_tmp_client.hget(target+config.spliter+target_id,config.prefix_session))
+                except:
+                    session_data={}
+
                 #有些任务可能不存在session
                 if session_data:
                     redis_tmp_client.hmset(new_session_name,session_data)
@@ -292,7 +296,11 @@ class Execution(baseview.BaseView):
             #target_id = request.GET.get('target_id','')  
 
             rerun_info={}
-            session_data=redis_tmp_client.hgetall(redis_tmp_client.hget(target+config.spliter+target_id,config.prefix_session))
+            try:
+                session_data=redis_tmp_client.hgetall(redis_tmp_client.hget(target+config.spliter+target_id,config.prefix_session))
+            except:
+                session_data={}
+
             rerun_info[config.prefix_session]=session_data
             
             readonly={}
