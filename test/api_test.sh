@@ -85,6 +85,8 @@ curl "http://127.0.0.1:8000/api/v1/execution/?filter=eweas123124" -H "Authorizat
 
 curl "http://127.0.0.1:8000/api/v1/session/?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}" -d "cmd=ls -altr /root"
 
+curl "http://127.0.0.1:8000/api/v1/session/temp" -H "Authorization:JWT ${xx}" -d "cmd=ls -altr /root"
+
 curl "http://127.0.0.1:8000/api/v1/fast/" -H "Authorization:JWT ${xx}" -X POST -d  "spliter=|&parallel=true&exeinfo=192.168.253.128      |  whoami    | pwd\n192.168.253.128      |  whoami    | pwd&playbook=[{{_1}}]     \necho {{_2}}  \necho {{_3}}  "
 
 #文件管理

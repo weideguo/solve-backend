@@ -131,20 +131,35 @@ class Session(baseview.BaseView):
         '''
         提交session参数
         '''
-        redis_config_client = redis_single['redis_config']
+        if not args:
+            redis_config_client = redis_single['redis_config']
+    
+            filter = request.GET['filter']
+            data = request.data
+    
+            session_tag = config.prefix_session
+            if data:
+                data=util.plain_dict(data)
+    
+                redis_config_client.hmset(session_tag+config.spliter+filter,data)
+    
+            return Response({'status':1,'vars':data})
 
-        filter = request.GET['filter']
-        data = request.data
+        elif args == 'temp':
+            #提交临时session
+            data = request.data
 
-        session_tag = config.prefix_session
-        if data:
-            data=util.plain_dict(data)
+            redis_tmp_client = redis_single['redis_tmp']
+            
+            job_id=uuid.uuid1().hex
+            session_name=config.prefix_session+config.spliter+job_id
+            redis_tmp_client.hmset(session_name,data)
 
-            redis_config_client.hmset(session_tag+config.spliter+filter,data)
+            return Response({'status':1,'job_id':job_id,'session':session_name})
 
-        return Response({'status':1,'vars':data})
+        #return Response({'status':-1,'msg':"error args","args":args})
 
-   
+
 class Execution(baseview.BaseView): 
     '''
     执行任务
@@ -208,30 +223,36 @@ class Execution(baseview.BaseView):
 
         old_job_id = request.GET['work_id']
         target = request.GET['target']  
+        target_id = request.GET['target_id']
 
         job_info = redis_job_client.hgetall(old_job_id)
-        job_id = uuid.uuid1().hex
-
-        #有些任务可能不存在session
-        try:
-            old_session_name=job_info[config.prefix_session]
-            new_session_name=old_session_name.split(config.spliter+old_session_name.split(config.spliter)[-1])[0]+config.spliter+job_id
-            session_data=redis_tmp_client.hgetall(old_session_name)
-        except:
-            session_data={}
-
-        if session_data:
-            redis_tmp_client.hmset(new_session_name,session_data)
-            redis_tmp_client.expire(new_session_name,config.tmp_config_expire_sec)
-            job_info[config.prefix_session]=new_session_name
 
         if args == 'rerun':
             '''
             重新执行单个执行
-            '''
-            target_id = request.GET['target_id']
-            begin_line = int(request.GET.get('begin_line',0))
- 
+            ''' 
+            
+            begin_line = int(request.GET.get('begin_line',0))            
+
+            _job_id = request.GET.get('new_job_id','')
+            if _job_id:
+                job_id = _job_id
+            else:
+                job_id = uuid.uuid1().hex
+            job_name = config.prefix_job+job_id
+
+            new_session_name=config.prefix_session+config.spliter+job_id
+            if _job_id:
+                #如果传入带有new_job_id，说明已经设置好session，不需要再设置
+                job_info[config.prefix_session]=new_session_name
+            else:
+                session_data=redis_tmp_client.hgetall(redis_tmp_client.hget(target+config.spliter+target_id,config.prefix_session))
+                #有些任务可能不存在session
+                if session_data:
+                    redis_tmp_client.hmset(new_session_name,session_data)
+                    redis_tmp_client.expire(new_session_name,config.tmp_config_expire_sec)
+                    job_info[config.prefix_session]=new_session_name
+
             new_target_id = uuid.uuid1().hex
             
             redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_tmp_client.hgetall(target+config.spliter+target_id))
@@ -241,8 +262,6 @@ class Execution(baseview.BaseView):
                 #在此提前设置过期时间 防止执行到一半失败时global_xxx一直存在 命令分发后端会在执行结束后再设置一次
                 redis_tmp_client.expire(config.prefix_global+config.spliter+new_target_id,config.tmp_config_expire_sec)
 
-            job_name = config.prefix_job+job_id
-                        
             job_info['target'] = target+config.spliter+new_target_id
             job_info['begin_time'] = time.time() 
             job_info['job_type'] = config.job_rerun
@@ -270,11 +289,11 @@ class Execution(baseview.BaseView):
             '''
             单个执行的重新执行信息
             '''
-            target_id = request.GET.get('target_id','')  
+            #target_id = request.GET.get('target_id','')  
 
             rerun_info={}
-            _rerun_info=redis_tmp_client.hgetall(job_info.get(config.prefix_session,''))  
-            rerun_info[config.prefix_session]=_rerun_info
+            session_data=redis_tmp_client.hgetall(redis_tmp_client.hget(target+config.spliter+target_id,config.prefix_session))
+            rerun_info[config.prefix_session]=session_data
             
             readonly={}
             readonly['playbook']=job_info['playbook']
