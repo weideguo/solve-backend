@@ -148,6 +148,8 @@ class Session(baseview.BaseView):
         elif args == 'temp':
             #提交临时session
             data = request.data
+            if not data:
+                return Response({'status':-1,'msg':util.safe_decode('空数据不必提交')})
 
             redis_tmp_client = redis_single['redis_tmp']
             
