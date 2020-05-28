@@ -12,7 +12,7 @@ from django.utils.datastructures import MultiValueDictKeyError
 from libs import util, redis_pool
 from libs.util import MYLOGGER,MYLOGERROR,safe_decode
 
-from core.dura import solve_dura
+from dura import solve_dura
 
 
 redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()

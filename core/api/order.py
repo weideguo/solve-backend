@@ -6,7 +6,7 @@ from rest_framework.response import Response
 from auth_new import baseview
 from libs import util
 from conf import config
-from core.dura import solve_dura
+from dura import solve_dura
 
 from libs.wrapper import error_capture
 from libs.redis_pool import redis_single

@@ -33,7 +33,6 @@ urlpatterns = [
 urlpatterns = format_suffix_patterns(urlpatterns)
 
 #异常页面 没有明确设置则回复django的对应的默认页面
-#handler404 = "core.api.fileproxy.page_not_found"
-from core.exception import page_not_found,inner_error
+from libs.exception import page_not_found,inner_error
 handler404 = page_not_found
 handler500 = inner_error
