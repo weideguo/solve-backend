@@ -36,6 +36,11 @@ gunicorn settingConf.wsgi:application -c gunicorn.conf -p solve_backend.pid -n s
 
 ### test ###
 ```shell
-cd test             #使用test目录下的测试样例
+#使用test目录下的测试样例
+cd test             
 curl http://...
+#使用测试框架
+python manage.py test auth_new
+python manage.py test core
+python manage.py test
 ```
