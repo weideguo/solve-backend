@@ -61,9 +61,9 @@ CORS_ALLOW_METHODS = (
     'PUT',
 )
 
-ROOT_URLCONF = 'settingConf.urls'
+ROOT_URLCONF = 'setting.urls'
 
-WSGI_APPLICATION = 'settingConf.wsgi.application'
+WSGI_APPLICATION = 'setting.wsgi.application'
 
 # Database
 # https://docs.djangoproject.com/en/1.10/ref/settings/#databases
