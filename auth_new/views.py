@@ -14,7 +14,7 @@ from django.shortcuts import redirect
 from . import baseview,util
 from .models import Account,CASProxyPgt
 from .serializers import UserINFO
-from .wrapper import error_capture,cas_url
+from .wrapper import cas_url
 
 
 
@@ -26,7 +26,6 @@ class UserInfo(baseview.BaseView):
     '''
     用户信息的增删改查
     '''
-    @error_capture
     def get(self, request, args=None):
         page = request.GET.get('page',1)
         pagesize = int(request.GET.get('pagesize',16))
@@ -41,7 +40,6 @@ class UserInfo(baseview.BaseView):
         return Response({'status':1,'page': page_number, 'data': info})
 
 
-    @error_capture
     def put(self, request, args=None):
         username = request.data['username']
         new_password = request.data['new']
@@ -53,7 +51,6 @@ class UserInfo(baseview.BaseView):
         return Response({'status':1,'data':util.safe_decode('%s 密码修改成功') % username})
 
 
-    @error_capture
     def post(self, request, args=None):
         username = request.data['username']
         password = request.data['password']
@@ -67,7 +64,6 @@ class UserInfo(baseview.BaseView):
             user.save()
             return Response({'status':1,'msg':util.safe_decode('%s 用户注册成功!') % username})
 
-    @error_capture
     def delete(self, request, args=None):
         username=args
         Account.objects.filter(username=username).delete()
@@ -75,7 +71,7 @@ class UserInfo(baseview.BaseView):
 
 
 class LoginAuth(baseview.AnyLogin):
-    @error_capture
+
     def post(self, request, args = None):
         '''
         登录验证
@@ -123,7 +119,6 @@ class AuthCAS(baseview.AnyLogin):
     '''
     使用cas系统的登陆
     '''
-    @error_capture
     def get(self, request, args = None):
         if not cas_url:
             return Response({'status':-3,'msg':util.safe_decode('必须先在后端设置CAS的地址才能使用')})
@@ -207,7 +202,6 @@ class LogoutCAS(baseview.BaseView):
     登出 将对应的session清除 需要验证是否已经登陆
     '''
     
-    @error_capture
     def get(self, request, args = None):
         #service='http://192.168.59.132:8080/#/about'      #从请求获取前端的信息
         service=request.GET['service']
@@ -231,7 +225,6 @@ class TestProxy(baseview.BaseView):
     即登陆该app之后，要访问其他app的接口，双方使用同一个cas且设置代理，则可以使用当前登陆的账号信息（不是通过保存账号密码）直接连接其他app，而不需要再次登陆
     要求登陆该app时serviceValidate接口附加参数pgtUrl
     '''
-    @error_capture 
     def get(self, request, args = None):
         from auth_new.wrapper import get_service_token
         #https://192.168.59.132:9000/api/v1/cas/proxyValidate  需要访问的其他app的proxyValidate接口，不是该app的接口

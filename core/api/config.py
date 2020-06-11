@@ -9,7 +9,6 @@ from auth_new import baseview
 from libs import util
 from conf import config
 
-from libs.wrapper import error_capture
 from libs.redis_pool import redis_single
 
 
@@ -57,7 +56,6 @@ class Config(baseview.BaseView):
     """
     可以动态设置的配置信息
     """
-    @error_capture
     def get(self, request, args = None):
         redis_manage_client=redis_single['redis_manage']
 
@@ -85,7 +83,6 @@ class Config(baseview.BaseView):
 
         return Response({'status':1,'data':data})
 
-    @error_capture
     def post(self, request, args = None):
         """
         提交的数据可以为 string list set hash格式，如果为string list set则需要明确指定格式

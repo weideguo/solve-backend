@@ -47,6 +47,7 @@ MIDDLEWARE = [
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
     'django.middleware.common.CommonMiddleware',
     'corsheaders.middleware.CorsMiddleware',
+    'libs.middleware.MyMiddleware',
 ]
 CORS_ORIGIN_ALLOW_ALL = True
 CSRF_ORIGIN_ALLOW_ALL = True
@@ -220,7 +221,4 @@ validate             #验证ticket 返回text格式 (后端使用)
 serviceValidate      #验证ticket 返回xml格式  (后端使用)
 """
 CAS_URL='libs.wrapper.cas_url'
-# 用于接口函数错误捕获的装饰器  
-ERROR_CAPTURE='libs.wrapper.error_capture'
-#ERROR_CAPTURE=''
 

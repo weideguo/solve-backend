@@ -1,13 +1,8 @@
 #coding:utf8
 import os
 import re
-from traceback import format_exc
-
-from redis.exceptions import ConnectionError
 
 from rest_framework.response import Response
-from django.http import HttpResponse
-from django.utils.datastructures import MultiValueDictKeyError
 
 from libs import util, redis_pool
 from libs.util import MYLOGGER,MYLOGERROR,safe_decode
@@ -94,29 +89,6 @@ playbook_root=get_playbook_root()
 
 fileserver_bind=get_params('fileserver_bind')
 fileserver_port=get_params('fileserver_port')
-
-def error_capture(func):
-    def my_wrapper(*args, **kwargs):
-        try:
-            request=args[1]
-            if 'HTTP_X_FORWARDED_FOR' in request.META:
-                from_host=str(request.META['HTTP_X_FORWARDED_FOR'])
-            else:
-                from_host=str(request.META['REMOTE_ADDR'])
-
-            MYLOGGER.info("%s %s %s" % (str(request.user),from_host,str(request.META['PATH_INFO']) ))
-
-            return func(*args, **kwargs)
-        except ConnectionError:
-            return HttpResponse('redis connection failed',status=500)
-        except MultiValueDictKeyError as e:
-            MYLOGERROR.error(format_exc())
-            return HttpResponse('paramster error',status=400)
-        except Exception as e:
-            MYLOGERROR.error(format_exc())
-            return HttpResponse('unknow error, please check server log',status=500)
-        
-    return my_wrapper
 
 
 class HashCURD():

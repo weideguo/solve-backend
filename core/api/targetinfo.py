@@ -10,7 +10,7 @@ from auth_new import baseview
 from libs import util
 from conf import config
 
-from libs.wrapper import error_capture,HashCURD
+from libs.wrapper import HashCURD
 from libs.redis_pool import redis_single
 
 
@@ -18,12 +18,10 @@ class Target(baseview.BaseView):
     '''
     执行对象的增删改查 
     '''    
-    @error_capture
     def get(self, request, args = None):
         redis_config_client = redis_single['redis_config']
         return HashCURD.get(redis_config_client,request, args)
 
-    @error_capture
     def post(self, request, args = None):
         redis_config_client = redis_single['redis_config']
         return HashCURD.post(redis_config_client,request, args)
@@ -33,7 +31,6 @@ class Host(baseview.BaseView):
     '''
     主机
     '''
-    @error_capture
     def get(self, request, args = None):
         redis_send_client = redis_single['redis_send']
         redis_log_client = redis_single['redis_log']

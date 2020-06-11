@@ -8,7 +8,6 @@ from libs import util
 from conf import config
 from dura import solve_dura
 
-from libs.wrapper import error_capture
 from libs.redis_pool import redis_single
 
 
@@ -17,7 +16,6 @@ class Order(baseview.BaseView):
     执行工单详细信息的查询 删除 终止 
 
     '''
-    @error_capture
     def get(self, request, args = None):
         redis_send_client = redis_single['redis_send']
         redis_log_client = redis_single['redis_log']

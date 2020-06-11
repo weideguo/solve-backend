@@ -17,7 +17,7 @@ from auth_new import baseview
 from libs import util
 from conf import config
 
-from libs.wrapper import error_capture,HashCURD,playbook_root,playbook_temp
+from libs.wrapper import HashCURD,playbook_root,playbook_temp
 from libs.redis_pool import redis_single
 
 
@@ -49,7 +49,6 @@ def get_session(pre_job_name,redis_manage_client,redis_config_client):
 
 class Session(baseview.BaseView):
 
-    @error_capture 
     def get(self, request, args = None):
         redis_config_client = redis_single['redis_config']
         redis_manage_client = redis_single['redis_manage']
@@ -126,7 +125,6 @@ class Session(baseview.BaseView):
             return Response({'status':1,'session':sesion_list})
 
 
-    @error_capture
     def post(self, request, args = None):
         '''
         提交session参数
@@ -166,7 +164,6 @@ class Execution(baseview.BaseView):
     '''
     执行任务
     '''
-    @error_capture
     def post(self, request, args = None):
         '''
         执行任务
@@ -216,7 +213,6 @@ class Execution(baseview.BaseView):
         return Response({'status':1,'data':job_name}) 
 
         
-    @error_capture
     def get(self, request, args = None):
         redis_send_client = redis_single['redis_send']
         redis_log_client = redis_single['redis_log']
@@ -323,12 +319,10 @@ class ExecutionInfo(baseview.BaseView):
     '''
     任务、任务模板的增删改查 
     '''    
-    @error_capture
     def get(self, request, args = None):
         redis_manage_client = redis_single['redis_manage']
         return HashCURD.get(redis_manage_client,request, args)
 
-    @error_capture
     def post(self, request, args = None):
         redis_manage_client = redis_single['redis_manage']
         return HashCURD.post(redis_manage_client,request, args)
@@ -339,7 +333,6 @@ class FastExecution(baseview.BaseView):
     快速任务
     快速任务直接由提交的信息执行，不再依赖存储的对象信息以及存储的 playbook
     '''
-    @error_capture
     def post(self, request, args = None):
         redis_send_client = redis_single['redis_send']
         redis_tmp_client = redis_single['redis_tmp']

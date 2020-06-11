@@ -21,19 +21,6 @@ if cas_url_name:
     cas_url=util.get_obj(cas_url_name)
 else:
     cas_url=''
-
-try:
-    error_capture_name=settings.ERROR_CAPTURE
-except:
-    error_capture_name=''
-
-if error_capture_name:
-    error_capture=util.get_obj(error_capture_name)
-else:
-    def error_capture(func):
-        def my_wrapper(*args, **kwargs):
-            return func(*args, **kwargs)
-        return my_wrapper
         
 
 #使用cas proxy连接其他app时增加的函数

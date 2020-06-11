@@ -1,6 +1,5 @@
 #coding:utf8
 from auth_new import baseview
-from libs.wrapper import error_capture
 
 from rest_framework.response import Response
 from django.http import HttpResponse
@@ -10,7 +9,6 @@ class Test(baseview.BaseView):
     '''
     测试
     '''
-    #@error_capture 
     def get(self, request, args = None):
         r={'a':'aaa'}
         """

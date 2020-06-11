@@ -10,14 +10,13 @@ from auth_new import baseview
 from libs import util
 from conf import config
 
-from libs.wrapper import error_capture,file_root,playbook_root
+from libs.wrapper import file_root,playbook_root
 
 class File(baseview.BaseView):
     '''
     关于文件的操作
     中文路径 文件名支持 export LC_ALL=en_US.UTF-8
     '''
-    @error_capture
     def post(self, request, args = None):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path'] 
@@ -50,7 +49,6 @@ class File(baseview.BaseView):
         return Response({'status':status,'file':full_path,'msg':msg})
 
 
-    @error_capture
     def get(self, request, args = None):
         
         for path in [request.GET.get('file',''),request.GET.get('path','')]:

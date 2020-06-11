@@ -15,7 +15,7 @@ from auth_new import baseview
 from libs import util
 from conf import config
 from libs.util import MYLOGGER,MYLOGERROR
-from libs.wrapper import error_capture,file_root,playbook_root,fileserver_bind,fileserver_port
+from libs.wrapper import file_root,playbook_root,fileserver_bind,fileserver_port
 
 
 
@@ -43,7 +43,6 @@ class FileProxy(baseview.BaseView):
     '''
     base_url='http://%s:%s/file/' % (fileserver_bind,fileserver_port)
 
-    @error_capture
     def post(self, request, args = None):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path']   
@@ -60,7 +59,6 @@ class FileProxy(baseview.BaseView):
 
         return Response(r)
 
-    @error_capture
     def get(self, request, args = None):
 
         for path in [request.GET.get('file',''),request.GET.get('path','')]:
