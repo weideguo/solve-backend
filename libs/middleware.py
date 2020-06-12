@@ -29,7 +29,12 @@ class MyMiddleware(MiddlewareMixin):
         else:
             from_host=str(request.META['REMOTE_ADDR'])
 
+        #路径找不到时user不存在
+        if not hasattr(request,'user'):
+            request.user='NullUser'
+            
         MYLOGGER.info("%s %s %s" % (str(request.user),from_host,str(request.META['PATH_INFO']) ))
+        
         return response
 
 

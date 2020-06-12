@@ -6,9 +6,28 @@ from rest_framework.permissions import (
 )
 
 from rest_framework.views import APIView
+from rest_framework.throttling import ScopedRateThrottle
+
+from django.http import HttpResponse
+
+class DefaultView(object):
+    '''
+    没有覆盖这些函数时 默认对请求的响应
+    '''
+    def get(self, request, args = None):
+        return HttpResponse('not implement this operation yet',status=400)
+
+    def post(self, request, args = None):
+        return HttpResponse('not implement this operation yet',status=400)
+
+    def put(self, request, args = None):
+        return HttpResponse('not implement this operation yet',status=400)
+
+    def delete(self, request, args = None):
+        return HttpResponse('not implement this operation yet',status=400)
 
 
-class BaseView(APIView):
+class BaseView(DefaultView, APIView):
     '''
     settings.py REST_FRAMEWORK 模块设置的验证方法
     '''
@@ -16,37 +35,13 @@ class BaseView(APIView):
     #permission_classes = ()
     #authentication_classes = ()
 
-    def get(self, request, args = None):
-        pass
 
-    def post(self, request, args = None):
-        pass
-
-    def put(self, request, args = None):
-        pass
-
-    def delete(self, request, args = None):
-        pass
-
-
-class SuperUserpermissions(APIView):
+class SuperUserpermissions(DefaultView, APIView):
     permission_classes = (IsAdminUser,)
     authentication_classes = ()
 
-    def get(self, request, args = None):
-        pass
 
-    def post(self, request, args = None):
-        pass
-
-    def put(self, request, args = None):
-        pass
-
-    def delete(self, request, args = None):
-        pass
-
-from rest_framework.throttling import ScopedRateThrottle
-class AnyLogin(APIView):
+class AnyLogin(DefaultView, APIView):
     permission_classes = ()
     authentication_classes = ()
 
@@ -54,33 +49,12 @@ class AnyLogin(APIView):
     throttle_scope='anylogin'
     throttle_classes = [ScopedRateThrottle]
 
-    def get(self, request, args = None):
-        pass
 
-    def post(self, request, args = None):
-        pass
-
-    def put(self, request, args = None):
-        pass
-
-    def delete(self, request, args = None):
-        pass
-
-class TestView(APIView):
+class TestView(DefaultView, APIView):
     '''
     没有任何限制，用于测试
     '''
     permission_classes = ()
     authentication_classes = ()
 
-    def get(self, request, args = None):
-        pass
 
-    def post(self, request, args = None):
-        pass
-
-    def put(self, request, args = None):
-        pass
-
-    def delete(self, request, args = None):
-        pass
