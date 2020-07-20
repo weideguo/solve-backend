@@ -6,7 +6,7 @@ shellpath=$(cd "$(dirname "$0")";pwd)
 cd ${shellpath}
 
 PYTHON=python
-config_file=settingConf/settings.py
+config_file=setting/settings.py
 
 SECRET_KEY=`$PYTHON -c "from django.core.management.utils import get_random_secret_key;print(get_random_secret_key())"`
 ret=$?
