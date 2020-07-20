@@ -23,6 +23,7 @@ python manage.py makemigrations     #创建数据库迁移文件 deploy.conf的m
 python manage.py migrate            #使用迁移文件初始化数据库
 python manage.py createsuperuser    #创建账号
 vim deploy.conf                     #设置redis、mongodb、cas 以及其他相关参数
+python set_config.py                #初始化执行对象、执行模板等的一些默认配置，这些配置也可以在web界面重新修改
 ```
 
 ### start ###
