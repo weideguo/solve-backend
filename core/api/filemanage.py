@@ -11,6 +11,7 @@ from libs import util
 from conf import config
 
 from libs.wrapper import file_root,playbook_root
+from libs.util import translate
 
 class File(baseview.BaseView):
     '''
@@ -21,13 +22,13 @@ class File(baseview.BaseView):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path'] 
         if re.match('.*\.\..*',path):
-            return Response({'status':-1,'path':path,'msg':util.safe_decode('路径不能存在..')})
+            return Response({'status':-1,'path':path,'msg':util.safe_decode(translate('should_not_change_in_path',request))})
 
         filename=fr.name
         #print filename 
         save_path=os.path.join(file_root,'./'+path)
         if os.path.isfile(save_path):
-            msg=util.safe_decode('路径为文件')
+            msg=util.safe_decode(translate('path_is_dir',request))
             status=-1
             return Response({'file':save_path,'msg':msg,'status':status})
         elif not os.path.exists(save_path):
@@ -44,7 +45,7 @@ class File(baseview.BaseView):
                f.write(chunk) 
 
             status=1
-            msg=util.safe_decode('上传成功')
+            msg=util.safe_decode(translate('upload_success',request))
 
         return Response({'status':status,'file':full_path,'msg':msg})
 
@@ -53,7 +54,7 @@ class File(baseview.BaseView):
         
         for path in [request.GET.get('file',''),request.GET.get('path','')]:
             if re.match('.*\.\..*',path):
-                return Response({'status':-1,'path':path,'msg':util.safe_decode('路径不能存在..')})
+                return Response({'status':-1,'path':path,'msg':util.safe_decode(translate('should_not_change_in_path',request))})
         
         if args == 'content':
             filename = request.GET['file']
@@ -67,7 +68,7 @@ class File(baseview.BaseView):
 
                 return Response({'status':1,'file':filename,'content':util.safe_decode(content)})
             except:
-                return Response({'status':-1,'file':filename,'msg':util.safe_decode('读取文件失败')})
+                return Response({'status':-1,'file':filename,'msg':util.safe_decode(translate('read_file_failed',request))})
 
         
         if args == 'download':
@@ -86,7 +87,7 @@ class File(baseview.BaseView):
                 response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
                 return response
             else:
-                return Response({'status':-1,'file':filename,'msg':util.safe_decode('路径不为文件')},status=404)
+                return Response({'status':-1,'file':filename,'msg':util.safe_decode(translate('path_is_not_file',request))},status=404)
        
 
         if args == 'list':
@@ -107,7 +108,7 @@ class File(baseview.BaseView):
                 dirs.sort()
                 return Response({'status':1,'path':root_path,'files':files,'dirs':dirs})
             else:
-                return Response({'status':-1,'path':root_path,'msg':util.safe_decode('路径不为目录')}) 
+                return Response({'status':-1,'path':root_path,'msg':util.safe_decode(translate('path_is_not_dir',request))}) 
 
 
         if args == 'create':
@@ -117,10 +118,10 @@ class File(baseview.BaseView):
             try:
                 os.makedirs(create_path)
                 status=1
-                msg=util.safe_decode('创建成功')
+                msg=util.safe_decode(translate('create_success',request))
             except OSError:
                 status=-1
-                msg=util.safe_decode('创建失败')
+                msg=util.safe_decode(translate('create_failed',request))
 
             return Response({'status':status,'path':create_path,'msg':msg})
 

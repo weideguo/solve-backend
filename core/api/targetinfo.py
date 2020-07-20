@@ -12,6 +12,7 @@ from conf import config
 
 from libs.wrapper import HashCURD
 from libs.redis_pool import redis_single
+from libs.util import translate
 
 
 class Target(baseview.BaseView):
@@ -81,9 +82,9 @@ class Host(baseview.BaseView):
                 deletelist = redis_send_client.keys('*'+ip+'*')
                 for d in deletelist:
                     redis_send_client.delete(d)
-                return  Response({'status':1, 'msg':util.safe_decode('断开成功'), 'delete_list':deletelist}) 
+                return  Response({'status':1, 'msg':util.safe_decode(translate('close_success',request)), 'delete_list':deletelist}) 
             else:
-                return  Response({'status':-1, 'msg':util.safe_decode('断开失败')})
+                return  Response({'status':-1, 'msg':util.safe_decode(translate('close_failed',request))})
 
         
         elif args=='conn': 
@@ -98,11 +99,11 @@ class Host(baseview.BaseView):
 
             exit_code=redis_log_client.hget(conn_uuid,'exit_code')
             if exit_code=='0':
-                return  Response({'status':1, 'msg':util.safe_decode('连接成功')})
+                return  Response({'status':1, 'msg':util.safe_decode(translate('connect_success',request))})
             elif exit_code:
                 return  Response({'status':-1, 'msg': util.safe_decode(exit_code)})
             elif conn_counter<100:
-                return  Response({'status':1, 'msg':util.safe_decode('连接成功')})
+                return  Response({'status':1, 'msg':util.safe_decode(translate('connect_success',request))})
             else:
-                return  Response({'status':-2, 'msg':util.safe_decode('连接超时')})
+                return  Response({'status':-2, 'msg':util.safe_decode(translate('connect_timeout',request))})
 

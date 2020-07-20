@@ -105,6 +105,9 @@ curl  "http://127.0.0.1:8000/api/v1/file/content?file=./11111/django_view&relati
 
 #config
 curl  "http://127.0.0.1:8000/api/v1/config/?key=job_types" -H "Authorization:JWT ${xx}"
+#多语言
+curl  "http://127.0.0.1:8000/api/v1/config/?key=job_types" -H "Authorization:JWT ${xx}" -H "Accept-Language:en-US"
+curl  "http://127.0.0.1:8000/api/v1/config/?key=job_types" -H "Authorization:JWT ${xx}" -H "Accept-Language:zh-CN"
 
 #直接提提交非string类型需要指明header
 #如何传list？

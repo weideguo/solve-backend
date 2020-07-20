@@ -14,7 +14,7 @@ from django.shortcuts import redirect
 from . import baseview,util
 from .models import Account,CASProxyPgt
 from .serializers import UserINFO
-from .wrapper import cas_url
+from .wrapper import cas_url,translate
 
 
 
@@ -48,7 +48,7 @@ class UserInfo(baseview.BaseView):
         user.set_password(new_password)
         user.save()
 
-        return Response({'status':1,'data':util.safe_decode('%s 密码修改成功') % username})
+        return Response({'status':1,'data':util.safe_decode(username+' '+translate('change_password_success',request)) })
 
 
     def post(self, request, args=None):
@@ -56,18 +56,18 @@ class UserInfo(baseview.BaseView):
         password = request.data['password']
 
         if Account.objects.filter(username=username):
-            return Response({'status':-1,'msg':util.safe_decode('%s 用户名已经存在!') % username})
+            return Response({'status':-1,'msg':util.safe_decode(username+' '+translate('user_exist_already',request))})
         else:
             user = Account.objects.create_user(
                 username=username,
                 password=password)
             user.save()
-            return Response({'status':1,'msg':util.safe_decode('%s 用户注册成功!') % username})
+            return Response({'status':1,'msg':util.safe_decode(username+' '+translate('user_register_success',request))})
 
     def delete(self, request, args=None):
         username=args
         Account.objects.filter(username=username).delete()
-        return Response({'status':1,'data':util.safe_decode('%s 用户删除成功!') % username})
+        return Response({'status':1,'data':util.safe_decode(username+' '+translate('user_delete_success',request))})
 
 
 class LoginAuth(baseview.AnyLogin):
@@ -90,9 +90,9 @@ class LoginAuth(baseview.AnyLogin):
             #token = jwt_encode_handler(x)
             return Response({'status':1,'token': token})
         elif Account.objects.filter(username=user):
-            return Response({'status':-1,'token': '','msg':util.safe_decode('密码错误')})
+            return Response({'status':-1,'token': '','msg':util.safe_decode(translate('password_error',request))})
         else:
-            return Response({'status':-2,'token': '','msg':util.safe_decode('账号不存在')})
+            return Response({'status':-2,'token': '','msg':util.safe_decode(translate('user_not_exist',request))})
 
 
 
@@ -121,7 +121,7 @@ class AuthCAS(baseview.AnyLogin):
     '''
     def get(self, request, args = None):
         if not cas_url:
-            return Response({'status':-3,'msg':util.safe_decode('必须先在后端设置CAS的地址才能使用')})
+            return Response({'status':-3,'msg':util.safe_decode(translate('set_cas_before_used',request))})
 
         if args == 'login':
             '''

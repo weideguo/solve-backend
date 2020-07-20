@@ -35,6 +35,12 @@ gunicorn setting.wsgi:application -b 0.0.0.0:8000
 gunicorn setting.wsgi:application -c gunicorn.conf -p solve_backend.pid -n solve_backend
 ```
 
+### multi language ###
+语言文件存放于目录 conf/lang  
+文件名使用小写+下划线分隔  
+语言选择由前端请求的http头 Accept-Languague （django request.META['HTTP_ACCEPT_LANGUAGUE'）控制  
+默认使用中文 zh_cn/zh-CN  
+
 ### test ###
 ```shell
 #使用test目录下的测试样例

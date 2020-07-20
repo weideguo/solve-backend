@@ -9,7 +9,7 @@ from conf import config
 from dura import solve_dura
 
 from libs.redis_pool import redis_single
-
+from libs.util import translate
 
 class Order(baseview.BaseView):
     '''
@@ -101,7 +101,7 @@ class Order(baseview.BaseView):
             try:
                 data=get_summary(work_id)
             except:
-                return Response({'status':-1, 'msg':util.safe_decode('获取日志信息失败')})
+                return Response({'status':-1, 'msg':util.safe_decode(translate('get_log_info_failed',request))})
             
             rerun_str=redis_log_client.hget(config.prefix_log+work_id,'rerun')
             if not rerun_str:
@@ -167,7 +167,7 @@ class Order(baseview.BaseView):
 
                 return Response({'status':1,'abort_time':0})
             else:
-                return Response({'status':-1,'abort_time':abort_time,'msg':util.safe_decode('已经存在终止操作')})
+                return Response({'status':-1,'abort_time':abort_time,'msg':util.safe_decode(translate('abort_alread_exist',request))})
             
             
         elif args=='exelist':

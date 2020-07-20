@@ -6,6 +6,7 @@ import json
 import logging
 import hashlib
 import configparser
+import importlib
 
 
 #使用setting.py中的log配置
@@ -17,6 +18,30 @@ def my_md5(string):
     h = hashlib.md5()
     h.update(string.encode('utf8'))
     return h.hexdigest()
+
+
+def translate(string,request=None):
+    '''
+    翻译
+    由前端请求的http头Accept-Language指定后端返回的语言
+    默认使用zh_cn/zh-CN
+    '''
+    if request:
+        lang= request.META['HTTP_ACCEPT_LANGUAGE']
+        if not lang:
+            lang='zh_cn'
+        #前端可能传入类型如 zh-CN
+        lang=lang.split(',')[0].replace('-','_').lower()  
+        try:
+            lang=importlib.import_module('conf.lang.'+lang)
+        except:
+            lang=importlib.import_module('conf.lang.zh_cn')
+
+        #翻译失败时返回原字段名
+        return getattr(lang, string, string)
+    else:
+        return string
+
 
 def safe_decode(string):
     '''

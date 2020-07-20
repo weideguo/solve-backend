@@ -23,6 +23,14 @@ else:
     cas_url=''
         
 
+try:
+    translate_name=settings.TRANSLATE
+    translate=util.get_obj(translate_name)
+except:
+    def translate(string,request=None):
+        return string
+
+
 #使用cas proxy连接其他app时增加的函数
 
 def check_token(token):
