@@ -27,7 +27,11 @@ def translate(string,request=None):
     默认使用zh_cn/zh-CN
     '''
     if request:
-        lang= request.META['HTTP_ACCEPT_LANGUAGE']
+        try:
+            lang= request.META['HTTP_ACCEPT_LANGUAGE']
+        except:
+            lang=''
+
         if not lang:
             lang='zh_cn'
         #前端可能传入类型如 zh-CN
