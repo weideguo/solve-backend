@@ -1,4 +1,4 @@
-#coding:utf8
+# -*- coding: utf-8 -*- 
 
 exe_stats_time_gap=30               #首页的统计时常 天
 

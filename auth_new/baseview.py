@@ -1,4 +1,4 @@
-#coding:utf8
+# -*- coding: utf-8 -*- 
 from rest_framework.permissions import (
     IsAdminUser,
     IsAuthenticated,

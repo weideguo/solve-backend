@@ -1,4 +1,4 @@
-#coding:utf8
+# -*- coding: utf-8 -*- 
 from traceback import format_exc
 
 from redis.exceptions import ConnectionError

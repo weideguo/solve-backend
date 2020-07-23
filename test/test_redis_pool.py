@@ -1,4 +1,4 @@
-#coding:utf8
+# -*- coding: utf-8 -*- 
 from  threading import Thread
 import time
 from redis.exceptions import ConnectionError

@@ -1,4 +1,4 @@
-#coding:utf8
+# -*- coding: utf-8 -*- 
 
 #from django.urls import include
 from django.conf.urls import url,include

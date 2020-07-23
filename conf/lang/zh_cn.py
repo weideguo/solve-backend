@@ -1,4 +1,4 @@
-#coding:utf8
+# -*- coding: utf-8 -*- 
 
 change_password_success='密码修改成功'
 user_exist_already='用户名已经存在'

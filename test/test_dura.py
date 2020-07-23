@@ -1,4 +1,4 @@
-#coding:utf8
+# -*- coding: utf-8 -*- 
 from libs import redis_pool
 from core.dura import solve_dura
 
