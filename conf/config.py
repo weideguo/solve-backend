@@ -28,6 +28,8 @@ key_job_list="job_list"             #执行任务的队列
 prefix_kill="kill_"                 #key_<cluster id>  终止执行对象的key
 pre_close="close_"                  #插入key_conn_control中       关闭连接 close_<ip>  
 prefix_heart_beat="heart_beat_"     #heart_beat_<host ip>  主机心跳的key
+prefix_block="block_"               #block_<cluster id> 标记制定对象逐行阻塞执行 list类型，插入0正常运行被阻塞的命令然后阻塞，-1则结束阻塞之后的命令按顺序执行，其他则终止当前被阻塞的以及之后的
+
 
 #redis config
 prefix_realhost="realhost_"         #用于创建连接的主机的key开头

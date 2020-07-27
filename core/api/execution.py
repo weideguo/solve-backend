@@ -464,3 +464,19 @@ class FastExecution(baseview.BaseView):
 
         return Response({'status':1,'data':job_name}) 
 
+
+class pauseRun(baseview.BaseView): 
+    '''
+    阻塞任务的操作 停止阻塞 继续 中止 
+    '''    
+    def get(self, request, args = None):
+        target_id=request.GET['target_id']
+        block_type=request.GET['type']
+        #redis_log_client = redis_single['redis_log']
+        redis_send_client = redis_single['redis_send']
+
+        block_key=config.prefix_block+target_id
+        redis_send_client.rpush(block_key, block_type)
+        redis_send_client.expire(block_key, config.tmp_config_expire_sec)
+
+        return Response({'status':1}) 

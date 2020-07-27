@@ -5,7 +5,7 @@ from django.conf.urls import url,include
 from rest_framework.urlpatterns import format_suffix_patterns
 
 from core.api.order import Order
-from core.api.execution import Session,Execution,ExecutionInfo,FastExecution
+from core.api.execution import Session,Execution,ExecutionInfo,FastExecution,pauseRun
 from core.api.targetinfo import Target,Host
 from core.api.config import Config
 from core.api.home import Home
@@ -25,6 +25,7 @@ urlpatterns = [
     url(r'^api/v1/execution/(.*)', Execution.as_view()),
     url(r'^api/v1/session/(.*)', Session.as_view()),
     url(r'^api/v1/fast/(.*)', FastExecution.as_view()),
+    url(r'^api/v1/pauseRun/(.*)', pauseRun.as_view()),
     url(r'^api/v1/file/(.*)', File.as_view()),
     url(r'^api/v1/config/', Config.as_view()),
     url(r'^api/v1/', include('auth_new.urls')),

@@ -165,6 +165,11 @@ class Order(baseview.BaseView):
                 redis_send_client.set(config.prefix_kill+target_id,abort_time)                
                 #redis_send_client.expire('kill_'+target_id,60)
 
+                #处于断点执行时
+                redis_send_client.rpush(config.prefix_block+target_id, 'abort')
+                #设置较短的过期时间 因为通过阻塞获取
+                redis_send_client.expire(config.prefix_block+target_id, 100)
+
                 return Response({'status':1,'abort_time':0})
             else:
                 return Response({'status':-1,'abort_time':abort_time,'msg':util.safe_decode(translate('abort_alread_exist',request))})
@@ -179,10 +184,17 @@ class Order(baseview.BaseView):
             target_id = config.prefix_log_target+target_id
             l_len=redis_log_client.llen(target_id)
             exelist=[]
+            is_pause=0 
             if l_len:
-                exelist=redis_log_client.lrange(target_id,0,l_len-1)                
+                exelist=redis_log_client.lrange(target_id,0,l_len-1)
+                #当前最后执行命令的信息为 {'stdout': 'pausing'} 则说明当前的执行处于阻塞模式
+                tmp_last_info=redis_log_client.hgetall(exelist[-1])
+                if len(tmp_last_info) == 1 and str(tmp_last_info.get('stdout')) == 'pausing':
+                    is_pause=1
+            else:
+                is_pause=0                
 
-            return Response({'status':1,'exelist':exelist})
+            return Response({'status':1,'exelist':exelist,'pause':is_pause})
         
 
         elif args=='exedetail':
