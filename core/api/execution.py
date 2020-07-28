@@ -176,6 +176,7 @@ class Execution(baseview.BaseView):
         redis_manage_client = redis_single['redis_manage']
 
         exec_name = request.GET['filter']
+        debug_run = int(request.GET.get('debug',0))
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
         #jwt_str =jwt_str_raw.split('.')[1]+'=='     
         #user=json.loads(base64.b64decode(jwt_str))['username']
@@ -206,6 +207,17 @@ class Execution(baseview.BaseView):
         job_info['session'] = session_tag+config.spliter+job_id
         job_info['begin_time'] = time.time()        
         job_info['user'] = user   
+
+        if debug_run:
+            target_list=job_info['target'].split(',')
+            new_target_list=[]
+            for t in target_list:
+                target_uuid=uuid.uuid1().hex
+                new_target_list.append(t+config.spliter+target_uuid)
+                redis_send_client.rpush(config.prefix_block+target_uuid, 0)
+
+            job_info['target']=','.join(new_target_list)
+
 
         redis_job_client.hmset(job_name,job_info)        
 
