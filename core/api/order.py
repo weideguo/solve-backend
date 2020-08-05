@@ -204,7 +204,24 @@ class Order(baseview.BaseView):
             cmd_id = request.GET['id']
             
             exedetail=redis_log_client.hgetall(cmd_id)
-            return Response({'status':1, 'exedetail':exedetail})            
+
+            key_select_all=config.prefix_select+'_all'+config.spliter+cmd_id
+
+            select_all_str=redis_send_client.get(key_select_all)
+            if select_all_str:
+                #使用空格分割（命令返回值不能存在额外的空格）
+                if 'origin_cmd' in exedetail:
+                    cmd=exedetail['origin_cmd']
+                    try:
+                        select_var=cmd.split('=')[0].strip().split(config.prefix_select+'.')[1].strip() 
+                        return Response({'status':2, 'exedetail':exedetail, 'select':select_all_str.split(' '), 'select_var':select_var}) 
+                    except:
+                        return Response({'status':-1, 'msg':translate('not_select_error',request)})
+                else:
+                    return Response({'status':-2, 'msg':translate('not_origin_cmd',request)})
+                
+            else:
+                return Response({'status':1, 'exedetail':exedetail})            
             
 
         elif args=='summary':

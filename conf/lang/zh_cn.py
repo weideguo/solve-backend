@@ -43,5 +43,5 @@ close_success='断开成功'
 close_failed='断开失败'
 connect_success='连接成功'
 connect_timeout='连接超时'
-
-
+not_select_error='原命令不是select参数但存在选择key'
+not_origin_cmd='原始命令不存在'

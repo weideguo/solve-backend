@@ -33,9 +33,11 @@ prefix_block="block_"               #block_<cluster id> 标记制定对象逐行
 
 #redis config
 prefix_realhost="realhost_"         #用于创建连接的主机的key开头
+
+#redis_tmp
 prefix_global="global"             #全局变量对应的key开头 playbook中全局变量的开头 全局变量如 global.yyy
 prefix_session="session"           #输入变量对应的key开头 playbook中输入变量的开头 输入变量如 session.xxx
-
+prefix_select="select"              #输入变量对应的key开头 playbook中全局变量的开头 全局变量如 select.yyy
 
 #redis job
 prefix_job="job_"                   #每个任务的信息 job_<job id> 插入 key_job_list 
