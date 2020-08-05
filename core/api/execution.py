@@ -22,7 +22,7 @@ from libs.redis_pool import redis_single
 from libs.util import translate
 
 
-def get_session(pre_job_name,redis_manage_client,redis_config_client):
+def get_session(pre_job_name,redis_manage_client):
     tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
     playbook = redis_manage_client.hget(tmpl_key,'playbook')
     session_vars=[]
@@ -40,7 +40,7 @@ def get_session(pre_job_name,redis_manage_client,redis_config_client):
     
     session_tag = config.prefix_session
     session_info = {}
-    old_session_info = redis_config_client.hgetall(session_tag+config.spliter+pre_job_name)
+    old_session_info = redis_manage_client.hgetall(session_tag+config.spliter+pre_job_name)
 
     for v in session_vars:
         session_info[v] = old_session_info.get(v,'')
@@ -51,7 +51,6 @@ def get_session(pre_job_name,redis_manage_client,redis_config_client):
 class Session(baseview.BaseView):
 
     def get(self, request, args = None):
-        redis_config_client = redis_single['redis_config']
         redis_manage_client = redis_single['redis_manage']
 
         pre_job_name = request.GET['filter']
@@ -60,7 +59,7 @@ class Session(baseview.BaseView):
             '''
             获取playbook的session参数
             '''
-            session_info = get_session(pre_job_name,redis_manage_client,redis_config_client) 
+            session_info = get_session(pre_job_name,redis_manage_client) 
 
             return Response({'status':1,'vars':session_info})
 
@@ -101,7 +100,7 @@ class Session(baseview.BaseView):
             if not yaml_dict:
                 yaml_dict = {}
 
-            var=get_session(pre_job_name,redis_manage_client,redis_config_client)
+            var=get_session(pre_job_name,redis_manage_client)
 
             sesion_list=[]
             if 'session' in yaml_dict:
@@ -131,8 +130,8 @@ class Session(baseview.BaseView):
         提交session参数
         '''
         if not args:
-            redis_config_client = redis_single['redis_config']
-    
+            redis_manage_client = redis_single['redis_manage']
+            
             filter = request.GET['filter']
             data = request.data
     
@@ -140,7 +139,7 @@ class Session(baseview.BaseView):
             if data:
                 data=util.plain_dict(data)
     
-                redis_config_client.hmset(session_tag+config.spliter+filter,data)
+                redis_manage_client.hmset(session_tag+config.spliter+filter,data)
     
             return Response({'status':1,'vars':data})
 
@@ -189,7 +188,7 @@ class Execution(baseview.BaseView):
         session_tag = config.prefix_session
         if data:
             data=util.plain_dict(data)
-            redis_config_client.hmset(session_tag+config.spliter+exec_name,data)
+            redis_manage_client.hmset(session_tag+config.spliter+exec_name,data)
             redis_tmp_client.hmset(session_tag+config.spliter+job_id,data)
             redis_tmp_client.expire(session_tag+config.spliter+job_id,24*60*60)
 
