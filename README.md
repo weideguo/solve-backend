@@ -18,7 +18,7 @@ running
 ```shell
 #首次运行初始化
 #sh set_secret_key.sh               #重新生成SECRET_KEY于django的配置文件
-python manage.py resetsecretkey     #重新生成SECRET_KEY于django的配置文件
+python manage.py resetsecretkey     #重新生成SECRET_KEY于django的配置文件 使用该命令需要先设置redis且注释mongodb的信息
 python manage.py makemigrations     #创建数据库迁移文件 deploy.conf的mongodb设置必须先注释
 python manage.py migrate            #使用迁移文件初始化数据库
 python manage.py createsuperuser    #创建账号
