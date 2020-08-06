@@ -48,6 +48,25 @@ def get_session(pre_job_name,redis_manage_client):
     return session_info
 
 
+def set_debug_run(job_info,redis_send_client):
+    '''
+    job_info={'target':'aaa,bbb,ccc'}
+    '''
+    target_list=job_info['target'].split(',')
+    new_target_list=[]
+    for t in target_list:
+        if len(t.split(config.spliter)) >1:
+            target_uuid=t.split(config.spliter)[-1]
+            new_target_list.append(t)
+        else:
+            target_uuid=uuid.uuid1().hex
+            new_target_list.append(t+config.spliter+target_uuid)
+        
+        redis_send_client.rpush(config.prefix_block+target_uuid, 0)
+
+    job_info['target']=','.join(new_target_list)
+
+
 class Session(baseview.BaseView):
 
     def get(self, request, args = None):
@@ -131,7 +150,7 @@ class Session(baseview.BaseView):
         '''
         if not args:
             redis_manage_client = redis_single['redis_manage']
-            
+
             filter = request.GET['filter']
             data = request.data
     
@@ -208,15 +227,7 @@ class Execution(baseview.BaseView):
         job_info['user'] = user   
 
         if debug_run:
-            target_list=job_info['target'].split(',')
-            new_target_list=[]
-            for t in target_list:
-                target_uuid=uuid.uuid1().hex
-                new_target_list.append(t+config.spliter+target_uuid)
-                redis_send_client.rpush(config.prefix_block+target_uuid, 0)
-
-            job_info['target']=','.join(new_target_list)
-
+            set_debug_run(job_info,redis_send_client)
 
         redis_job_client.hmset(job_name,job_info)        
 
@@ -349,6 +360,8 @@ class FastExecution(baseview.BaseView):
         redis_send_client = redis_single['redis_send']
         redis_tmp_client = redis_single['redis_tmp']
         redis_job_client = redis_single['redis_job']
+        
+        debug_run = int(request.GET.get('debug',0))
 
         user=str(request.user)
         data = request.data
@@ -466,6 +479,8 @@ class FastExecution(baseview.BaseView):
         job_info['target_type'] ='temp'
         job_info['job_type'] ='temp'
 
+        if debug_run:
+            set_debug_run(job_info,redis_send_client)
 
         job_id = uuid.uuid1().hex
         job_name = config.prefix_job+job_id
