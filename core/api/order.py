@@ -16,6 +16,18 @@ class Order(baseview.BaseView):
     执行工单详细信息的查询 删除 终止 
 
     '''
+    def post(self, request, args = None):
+        redis_send_client = redis_single['redis_send']
+        if args == 'select':
+            cmd_id = request.GET['id']
+            select_list = request.data
+            select_value = ' '.join(select_list)
+            redis_send_client.rpush(config.prefix_select+config.spliter+cmd_id,select_value)
+            redis_send_client.delete(config.prefix_select+'_all'+config.spliter+cmd_id)
+
+            return Response({'status':1, 'select_str': select_value, 'keyid':cmd_id})
+
+
     def get(self, request, args = None):
         redis_send_client = redis_single['redis_send']
         redis_log_client = redis_single['redis_log']
@@ -169,6 +181,15 @@ class Order(baseview.BaseView):
                 redis_send_client.rpush(config.prefix_block+target_id, 'abort')
                 #设置较短的过期时间 因为通过阻塞获取
                 redis_send_client.expire(config.prefix_block+target_id, 100)
+
+                #判断select等待
+                log_len=redis_log_client.llen(config.prefix_log_target+target_id)
+                if log_len:
+                    last_cmd_id = redis_log_client.lrange(config.prefix_log_target+target_id,log_len-1,log_len-1)[0]
+                    step_info = redis_log_client.hget(last_cmd_id,'step')
+                    if step_info == 'waiting select':
+                        redis_send_client.rpush(config.prefix_select+config.spliter+last_cmd_id,' ')
+                        redis_send_client.delete(config.prefix_select+'_all'+config.spliter+last_cmd_id)
 
                 return Response({'status':1,'abort_time':0})
             else:
