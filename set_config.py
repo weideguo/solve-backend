@@ -14,7 +14,7 @@ if not redis_manage_client.keys(config.key_solve_config):
         ("tmpl_const","config_tmpl_const", 
             {"name":"必须const开头 存储常量key的名字 由英文以及下划线组成"}),
         ("tmpl_realhost","config_tmpl_realhost", 
-            {"name":"必须严格为 realhost_<ip>","ip":"与管理机网络互通的ip或者proxy:<proxy_mark>:<ip>" ,"user":"ssh登录以及执行命令账号" ,"passwd":"账号密码" ,"ssh_port":"ssh端口号","proxy":"使用的代理，不用代理设置为空。优先以ip为准。"}),
+            {"name":"必须严格为 realhost_<ip>","ip":"与管理机网络互通的ip或者proxy:<proxy_mark>:<ip>" ,"user":"ssh登录以及执行命令账号" ,"passwd":"账号密码 或 密码的加密串" ,"ssh_port":"ssh端口号","proxy":"使用的代理，不用代理设置为空。优先以ip为准。"}),
         ("tmpl_host","config_tmpl_host", 
             {"name":"host开头 以_分层级","realhost":"对应的真实主机realhost"}),
         ("tmpl_server","config_tmpl_server", 
