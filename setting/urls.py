@@ -15,20 +15,21 @@ from core.api.filemanage import File
 
 from core.api.test import Test
 
+
 # 使用"/"结尾可以避免后续扩展时要改前端的请求
 urlpatterns = [
-    url(r'^api/v1/home/(.*)', Home.as_view()),
-    url(r'^api/v1/order/(.*)', Order.as_view()),
-    url(r'^api/v1/target/(.*)', Target.as_view()),
-    url(r'^api/v1/host/(.*)', Host.as_view()),
-    url(r'^api/v1/executionInfo/(.*)', ExecutionInfo.as_view()),
-    url(r'^api/v1/execution/(.*)', Execution.as_view()),
-    url(r'^api/v1/session/(.*)', Session.as_view()),
-    url(r'^api/v1/fast/(.*)', FastExecution.as_view()),
-    url(r'^api/v1/pauseRun/(.*)', pauseRun.as_view()),
-    url(r'^api/v1/file/(.*)', File.as_view()),
-    url(r'^api/v1/config/', Config.as_view()),
-    url(r'^api/v1/', include('auth_new.urls')),
+    url(r'^api/v1/home/(.*)', Home.as_view(), name='home'),
+    url(r'^api/v1/order/(.*)', Order.as_view(), name='order'),
+    url(r'^api/v1/target/(.*)', Target.as_view(), name='target'),
+    url(r'^api/v1/host/(.*)', Host.as_view(), name='host'),
+    url(r'^api/v1/executionInfo/(.*)', ExecutionInfo.as_view(), name='executionInfo'),
+    url(r'^api/v1/execution/(.*)', Execution.as_view(), name='execution'),
+    url(r'^api/v1/session/(.*)', Session.as_view(), name='session'),
+    url(r'^api/v1/fast/(.*)', FastExecution.as_view(), name='fast'),
+    url(r'^api/v1/pauseRun/(.*)', pauseRun.as_view(), name='pauseRun'),
+    url(r'^api/v1/file/(.*)', File.as_view(), name='file'),
+    url(r'^api/v1/config/', Config.as_view(), name='config'),
+    url(r'^api/v1/', include('auth_new.urls', namespace='auth')),
     url(r'^api/v1/test/(.*)', Test.as_view()),   #用于测试 正式部署请务必删除
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)

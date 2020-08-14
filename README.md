@@ -47,7 +47,7 @@ gunicorn setting.wsgi:application -c gunicorn.conf -p solve_backend.pid -n solve
 #使用test目录下的测试样例
 cd test             
 curl http://...
-#使用测试框架
+#使用测试框架 执行前请先配置好文件deploy.conf且注释mongodb的配置
 python manage.py test auth_new
 python manage.py test core
 python manage.py test
