@@ -51,4 +51,13 @@ curl http://...
 python manage.py test auth_new
 python manage.py test core
 python manage.py test
+
+#统计测试覆盖率
+#pip install coverage    #安装coverage
+#清除之前的统计信息
+coverage erase
+#使用django test模块运行
+coverage run manage.py test
+#生成报告
+coverage report
 ```
