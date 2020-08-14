@@ -29,7 +29,7 @@ urlpatterns = [
     url(r'^api/v1/pauseRun/(.*)', pauseRun.as_view(), name='pauseRun'),
     url(r'^api/v1/file/(.*)', File.as_view(), name='file'),
     url(r'^api/v1/config/', Config.as_view(), name='config'),
-    url(r'^api/v1/', include('auth_new.urls', namespace='auth')),
+    url(r'^api/v1/', include(('auth_new.urls','auth'), namespace='auth') ),
     url(r'^api/v1/test/(.*)', Test.as_view()),   #用于测试 正式部署请务必删除
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
