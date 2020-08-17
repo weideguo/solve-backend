@@ -41,34 +41,36 @@ class UserInfo(baseview.BaseView):
 
 
     def put(self, request, args=None):
+        print(request.data)
         username = request.data['username']
         new_password = request.data['new']
-        
-        user = Account.objects.get(username__exact=username)
-        user.set_password(new_password)
-        user.save()
+        try:
+            user = Account.objects.get(username__exact=username)
+            user.set_password(new_password)
+            user.save()
 
-        return Response({'status':1,'data':util.safe_decode(username+' '+translate('change_password_success',request)) })
-
+            return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(translate('change_password_success',request)) })
+        except:
+            return Response({'status':-1,'data':util.safe_decode(username)+' '+util.safe_decode(translate('user_not_exist',request)) })
 
     def post(self, request, args=None):
         username = request.data['username']
         password = request.data['password']
 
         if Account.objects.filter(username=username):
-            return Response({'status':-1,'msg':util.safe_decode(username+' '+translate('user_exist_already',request))})
+            return Response({'status':-1,'msg':util.safe_decode(username)+' '+util.safe_decode(translate('user_exist_already',request))})
         else:
             user = Account.objects.create_user(
                 username=username,
                 password=password)
             user.save()
-            return Response({'status':1,'msg':util.safe_decode(username+' '+translate('user_register_success',request))})
+            return Response({'status':1,'msg':util.safe_decode(username)+' '+util.safe_decode(translate('user_register_success',request))})
 
     def delete(self, request, args=None):
         username=args
         Account.objects.filter(username=username).delete()
-        return Response({'status':1,'data':util.safe_decode(username+' '+translate('user_delete_success',request))})
-
+        #return Response({'status':1,'data':util.safe_decode(username+' '+translate('user_delete_success',request))})
+        return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(translate('user_delete_success',request))})
 
 class LoginAuth(baseview.AnyLogin):
 

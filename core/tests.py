@@ -3,33 +3,12 @@ import json
 from django.test import Client, TestCase
 from django.urls import reverse
 
-from auth_new.tests import get_login_client
-
-
-class BaseTestCase(TestCase):
-
-    @classmethod
-    def setUpClass(self):
-        self.login_client, self.login_info=get_login_client()
-
-
-    @classmethod
-    def tearDownClass(self):
-        print('----------------%s done--------------------------' % self.__name__)
-
-
-    def setUp(self):
-        #print('begin test') 
-        pass
-
-
-    def tearDown(self):
-       print(self.current_url, self.method,  'done') 
-
+#from auth_new.tests import get_login_client
+from auth_new.tests import LoginTestCase
 
 
 #测试用例
-class TestHome(BaseTestCase):
+class TestHome(LoginTestCase):
     def test_info(self): 
         self.method='get'
         self.current_url=str(reverse('home',args=('info',)))
@@ -49,7 +28,7 @@ class TestHome(BaseTestCase):
 
 
 
-class TestOrder(BaseTestCase):
+class TestOrder(LoginTestCase):
     def test_get_order(self):
         self.method='get'
         self.current_url=str(reverse('order',args=('',)))
@@ -57,7 +36,7 @@ class TestOrder(BaseTestCase):
         self.assertTrue(r.status_code,200)
 
 
-class TestTarget(BaseTestCase):
+class TestTarget(LoginTestCase):
     def test_get_target(self):
         self.method='get'
         self.current_url=str(reverse('target',args=('get',)))
