@@ -11,22 +11,20 @@
 #使用的认证表对应的models
 AUTH_USER_MODEL = 'auth_new.Account'
 
-INSTALLED_APPS += ['rest_framework','auth_new.apps.AuthNewConfig']
+INSTALLED_APPS += ['rest_framework','auth_new']
 
-# 使用CAS
-CAS_URL = 'http://192.168.59.132:9095/cas'
-#CAS_URL = ''
-'''
+# 用于auth_new模块
+"""
 CAS协议提供的接口：
 login                #登陆(前端使用)
 logout               #登出(前端使用)
 validate             #验证ticket 返回text格式 (后端使用)
 serviceValidate      #验证ticket 返回xml格式  (后端使用)
-'''
-
-# 用于接口函数错误捕获的装饰器  
-ERROR_CAPTURE = 'libs.wrapper.error_capture'
-#ERROR_CAPTURE = ''
+"""
+#cas地址的string对象
+CAS_URL='libs.wrapper.cas_url'
+#用于翻译的函数
+TRANSLATE='libs.util.translate'
 ```
 ```python
 #urls.py
