@@ -16,9 +16,9 @@ class BaseTestCase(TestCase):
         print('----------------%s done--------------------------' % self.__name__)
 
 
-    def setUp(self):
-        #print('begin test') 
+    def setUp(self): 
         pass
+
 
     def tearDown(self):
        print(self.current_url, self.method, 'done') 
@@ -58,16 +58,11 @@ def get_login_client():
     return Client(HTTP_AUTHORIZATION='JWT '+token), login_info
 
 
-#测试用例
-class TestAuth(BaseTestCase):
-    '''
-    测试普通账号登陆
-    '''
 
-    @classmethod
-    def setUpClass(self):
-        self.login_client, self.login_info=get_login_client()
-
+class TestAuth(LoginTestCase):
+    '''
+    测试普通账号登陆 账号增删改查
+    '''
     
     def test_login(self):  
         #print(self.login_info)
@@ -120,6 +115,7 @@ class TestAuth(BaseTestCase):
 #################################################################################################
 
 def get_cas_login_url(cls):
+    '''获取cas的登陆地址'''
     cls.client = Client()
     response=cls.client.get(str(reverse('auth:cas',args=('login',)))+'?service='+cls.service)
     try:
@@ -135,9 +131,7 @@ def get_cas_login_url(cls):
 
 
 def get_cas_ticket(cls):
-    '''
-    模拟前端页面登陆获取cas的ticket
-    '''
+    '''模拟前端页面登陆获取cas的ticket'''
     response=requests.get(cls.cas_login_url)
     
     y=response.headers['set-cookie']
@@ -193,7 +187,7 @@ def cas_auth(cls,pgtUrl=''):
     return Client(HTTP_AUTHORIZATION='JWT '+token)
 
 
-
+#请先按照实际情况更改以下参数再运行测试
 user="admin"                              #cas的账号
 password="weideguo"                       #cas的密码
 service='http://192.168.253.128:8080/'    #前端的回调地址，且必须与cas的回调设置一致
@@ -201,9 +195,7 @@ proxy_callback='https://127.0.0.1:9000/api/v1/cas/callback'                #自�
 another_service ='https://192.168.253.128:9000/api/v1/cas/proxyValidate'   #要连接的其他服务的验证地址，用于当前服务连接其他服务（需要为https，且cas中设置好允许的地址）
 
 class TestAuthCas(BaseTestCase):
-    '''
-    测试CAS登陆
-    '''
+    '''普通CAS使用'''
 
     @classmethod
     def setUpClass(self):
@@ -217,19 +209,19 @@ class TestAuthCas(BaseTestCase):
 
 
     def test_get_cas(self):
+        '''获取cas登陆url'''
         self.method='get'
         self.current_url=str(reverse('auth:cas',args=('login',)))
         
 
     def test_cas_login(self):
+        '''cas登陆'''
         self.method='get'
         self.current_url=str(reverse('auth:cas',args=('serviceValidate',)))
             
 
     def test_cas_logout(self):
-        '''
-        退出cas
-        '''
+        '''退出cas'''
         self.method='get'
         self.current_url=str(reverse('auth:logout'))
         if self.cas_login_url and self.cas_login_client:
@@ -239,9 +231,10 @@ class TestAuthCas(BaseTestCase):
             r=json.loads(r.content.decode('utf8'))
             self.assertEqual( r['status'], 1 )
 
-
+#测试这个必须先启动服务以提供回调地址
 class TestAuthCasProxy(BaseTestCase):
-    '''测试这个必须先启动服务以提供回调地址'''
+    '''proxy模式cas使用测试'''
+
     @classmethod
     def setUpClass(self):
         self.user=user          

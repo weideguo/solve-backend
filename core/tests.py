@@ -3,11 +3,9 @@ import json
 from django.test import Client, TestCase
 from django.urls import reverse
 
-#from auth_new.tests import get_login_client
 from auth_new.tests import LoginTestCase
 
 
-#测试用例
 class TestHome(LoginTestCase):
     def test_info(self): 
         self.method='get'
