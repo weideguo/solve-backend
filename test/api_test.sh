@@ -66,6 +66,7 @@ curl "http://127.0.0.1:8000/api/v1/target/update" -H "Authorization:JWT ${xx}" -
 
 curl "http://127.0.0.1:8000/api/v1/target/info?filter=host" -H "Authorization:JWT ${xx}"
 
+curl "http://127.0.0.1:8000/api/v1/target/tree?name=host_windows_10.10.19.13" -H "Authorization:JWT ${xx}"
 
 curl "http://127.0.0.1:8000/api/v1/executioninfo/get?filter=pre_exec:*&page=1" -H "Authorization:JWT ${xx}"
 
@@ -81,6 +82,7 @@ curl "http://127.0.0.1:8000/api/v1/session/?filter=xxxx" -H "Authorization:JWT $
 curl "http://127.0.0.1:8000/api/v1/session/extend?filter=exec:%E6%B5%8B%E8%AF%95playbook%E9%A6%96%E9%83%A8session%E8%AF%B4%E6%98%8E" -H "Authorization:JWT ${xx}"
 
 curl "http://127.0.0.1:8000/api/v1/execution/?filter=eweas123124" -H "Authorization:JWT ${xx}" -X POST -d "name=server_db12334987sd&a=daf&b=af"
+curl "http://127.0.0.1:8000/api/v1/execution/?filter=exec:%E8%8E%B7%E5%8F%96%E5%86%85%E7%BD%91ip&debug=1" -H "Authorization:JWT ${xx}" -X POST -d ""
 
 
 curl "http://127.0.0.1:8000/api/v1/session/?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:JWT ${xx}" -d "cmd=ls -altr /root"
@@ -88,6 +90,9 @@ curl "http://127.0.0.1:8000/api/v1/session/?filter=exec:%E6%89%A7%E8%A1%8Cshell"
 curl "http://127.0.0.1:8000/api/v1/session/temp" -H "Authorization:JWT ${xx}" -d "cmd=ls -altr /root"
 
 curl "http://127.0.0.1:8000/api/v1/fast/" -H "Authorization:JWT ${xx}" -X POST -d  "spliter=|&parallel=true&exeinfo=192.168.253.128      |  whoami    | pwd\n192.168.253.128      |  whoami    | pwd&playbook=[{{_1}}]     \necho {{_2}}  \necho {{_3}}  "
+
+curl "http://127.0.0.1:8000/api/v1/pauseRun/?target_id=8d0e0604cfda11eaa9cc000c295dd589&type=0" -H "Authorization:JWT ${xx}" 
+
 
 #文件管理
 
