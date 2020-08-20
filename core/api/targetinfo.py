@@ -5,6 +5,7 @@ import json
 import time
 import uuid
 from rest_framework.response import Response
+from redis.exceptions import ResponseError
 
 from auth_new import baseview
 from libs import util
@@ -21,7 +22,31 @@ class Target(baseview.BaseView):
     '''    
     def get(self, request, args = None):
         redis_config_client = redis_single['redis_config']
-        return HashCURD.get(redis_config_client,request, args)
+        if args=='tree':
+            '''
+            获取树状结构
+            '''
+            data=[]
+            target_name = request.GET['name']
+            target_info=redis_config_client.hgetall(target_name)
+            for k in target_info:
+                i={}
+                i['title']=k
+                i['value']=target_info[k]
+                try:
+                    if redis_config_client.hgetall(target_info[k]):
+                        #值为其他key的名字，则说明存在子节点，在此设置占位符
+                        i['children']=[{}]
+                except ResponseError:
+                    #可能出现值为其他key的名字，但key不为hash类型，则将key当成普通字符串对待
+                    pass
+
+                data.append(i)
+
+            return Response({'status':1,'data':data})
+        else:
+            #其他的 get del info 操作
+            return HashCURD.get(redis_config_client,request, args)
 
     def post(self, request, args = None):
         redis_config_client = redis_single['redis_config']
