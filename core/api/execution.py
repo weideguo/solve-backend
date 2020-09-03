@@ -402,7 +402,7 @@ class FastExecution(baseview.BaseView):
                     if re.match('(^(_\\d+)$)|(^__$)', c.strip()): 
                         if c.strip() in t:
                             playbook_new=re.sub('{{'+c+'}}',t[c.strip()],playbook_new)
-                            print(playbook_new)
+                            #print(playbook_new)
                         else:
                             raise Exception('render error')
 
