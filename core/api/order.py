@@ -1,4 +1,5 @@
 # -*- coding: utf-8 -*- 
+import ast
 import time
 import redis
 from rest_framework.response import Response
@@ -89,7 +90,7 @@ class Order(baseview.BaseView):
                 job_info=redis_log_client.hgetall(config.prefix_log+work_id)
                 
                 if (job_info):
-                    for c in eval(job_info.get('log')):
+                    for c in ast.literal_eval(job_info.get('log')):
                         x={}
                         x['target']=c[0].split(config.spliter+c[0].split(config.spliter)[-1])[0]
                         x['target_id']=c[0].split(config.spliter)[-1]
@@ -130,7 +131,7 @@ class Order(baseview.BaseView):
             playbook=redis_job_client.hget(work_id,'playbook')
             debug_list=redis_job_client.hget(work_id,'debug_list')
             if debug_list:
-                debug_list=eval(debug_list)
+                debug_list=ast.literal_eval(debug_list)
             else:
                 debug_list=[0]
 
@@ -261,7 +262,7 @@ class Order(baseview.BaseView):
             log_target=redis_log_client.hget(config.prefix_log+job_id,'log')
         
             if log_target: 
-                log_target_list=eval(log_target)
+                log_target_list=ast.literal_eval(log_target)
             else:
                 log_target_list=[]
 
@@ -269,7 +270,7 @@ class Order(baseview.BaseView):
             job_rerun=redis_log_client.hget(config.prefix_log+job_id,'rerun')
             if job_rerun:
                 for j in job_rerun.split(','):
-                    log_target_list +=eval(redis_log_client.hget('log_'+j,'log'))   
+                    log_target_list +=ast.literal_eval(redis_log_client.hget('log_'+j,'log'))   
                         
 
             tmp_summary={}

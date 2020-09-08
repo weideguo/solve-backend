@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
 import os
 import re
+import ast
 import sys
 import yaml
 import time
@@ -93,7 +94,8 @@ class SolveDura():
 
         log_job_info=self.redis_log_client.hgetall(key)
         if 'log' in log_job_info:
-            for tl in eval(log_job_info.get('log','[]')):
+            #for tl in eval(log_job_info.get('log','[]')):
+            for tl in ast.literal_eval(log_job_info.get('log','[]')):
                 target_list.append(tl[0])
                 target_log=tl[1]
                 target_id=target_log.split('_')[-1]
@@ -212,7 +214,8 @@ class SolveDura():
         log_job_info=self.get_key_info_from_mongo( self.redis_log_client, key)
 
         if 'log' in log_job_info:
-            for tl in eval(log_job_info.get('log','[]')):
+            #for tl in eval(log_job_info.get('log','[]')):
+            for tl in ast.literal_eval(log_job_info.get('log','[]')):
                 target_log=tl[1]
                 target_id=target_log.split('_')[-1]
                 target_log_list.append(target_log)

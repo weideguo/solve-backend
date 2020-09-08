@@ -1,5 +1,5 @@
 # -*- coding: utf-8 -*- 
-
+import ast
 import redis
 
 from libs.util import getcp
@@ -20,7 +20,8 @@ def get_redis_config(section):
     host=''
     port=0
     try:
-        sentinels=eval(cp.get(section,'sentinels'))
+        #sentinels=eval(cp.get(section,'sentinels'))
+        sentinels=ast.literal_eval(cp.get(section,'sentinels'))
         service_name=cp.get(section,'service_name')
     except:    
         host=cp.get(section,'host')

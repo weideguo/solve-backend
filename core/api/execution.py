@@ -1,6 +1,7 @@
 # -*- coding: utf-8 -*- 
 import os
 import re
+import ast
 import sys
 import uuid
 import time
@@ -520,7 +521,8 @@ class pauseRun(baseview.BaseView):
 
             _debug_list= redis_job_client.hget(workid, 'debug_list')
             if _debug_list:
-                debug_list=eval(_debug_list)
+                #debug_list=eval(_debug_list)
+                debug_list=ast.literal_eval(_debug_list)
                 #形如 [3, 4, 6] 
                 #当前行3在其中，则执行到第4行时阻塞；当前行4，执行到6；当前行6，结束阻塞
                 if current_line in debug_list and debug_list[-1]!=current_line:
