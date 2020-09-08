@@ -141,7 +141,12 @@ class Session(baseview.BaseView):
                 for k2 in var.keys():
                     sesion_list.append({'key':k2,'value':var[k2]})
 
-            return Response({'status':1,'session':sesion_list})
+            if 'pause' in yaml_dict:
+                pause_line=yaml_dict['pause']
+            else:
+                pause_line=0
+
+            return Response({'status':1,'session':sesion_list,'pause':pause_line})
 
 
     def post(self, request, args = None):
@@ -194,7 +199,8 @@ class Execution(baseview.BaseView):
         redis_manage_client = redis_single['redis_manage']
 
         exec_name = request.GET['filter']
-        debug_run = int(request.GET.get('debug',0))
+        _debug_run = request.GET.get('debug',0)
+        debug_run = [ int(i) for i in _debug_run.split(',') ]
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
         #jwt_str =jwt_str_raw.split('.')[1]+'=='     
         #user=json.loads(base64.b64decode(jwt_str))['username']
@@ -225,8 +231,9 @@ class Execution(baseview.BaseView):
         job_info['session'] = session_tag+config.spliter+job_id
         job_info['begin_time'] = time.time()        
         job_info['user'] = user   
+        job_info['debug_list']=str(debug_run)
 
-        if debug_run:
+        for i in range(debug_run[0]):
             set_debug_run(job_info,redis_send_client)
 
         redis_job_client.hmset(job_name,job_info)        
@@ -361,7 +368,8 @@ class FastExecution(baseview.BaseView):
         redis_tmp_client = redis_single['redis_tmp']
         redis_job_client = redis_single['redis_job']
         
-        debug_run = int(request.GET.get('debug',0))
+        _debug_run = request.GET.get('debug',0)
+        debug_run = [ int(i) for i in _debug_run.split(',') ]
 
         user=str(request.user)
         data = request.data
@@ -402,7 +410,7 @@ class FastExecution(baseview.BaseView):
                     if re.match('(^(_\\d+)$)|(^__$)', c.strip()): 
                         if c.strip() in t:
                             playbook_new=re.sub('{{'+c+'}}',t[c.strip()],playbook_new)
-                            #print(playbook_new)
+                            print(playbook_new)
                         else:
                             raise Exception('render error')
 
@@ -478,8 +486,9 @@ class FastExecution(baseview.BaseView):
         job_info['begin_time'] = time.time()
         job_info['target_type'] ='temp'
         job_info['job_type'] ='temp'
+        job_info['debug_list']=str(debug_run)
 
-        if debug_run:
+        for i in range(debug_run[0]):
             set_debug_run(job_info,redis_send_client)
 
         job_id = uuid.uuid1().hex
@@ -498,10 +507,38 @@ class pauseRun(baseview.BaseView):
     def get(self, request, args = None):
         target_id=request.GET['target_id']
         block_type=request.GET['type']
-        #redis_log_client = redis_single['redis_log']
-        redis_send_client = redis_single['redis_send']
 
         block_key=config.prefix_block+target_id
+        redis_send_client = redis_single['redis_send']
+
+        if block_type=='-1':
+            #继续执行所有可能需要特殊处理
+            workid=request.GET['workid']
+            current_line=int(request.GET['current_line'])
+
+            redis_job_client = redis_single['redis_job']
+
+            _debug_list= redis_job_client.hget(workid, 'debug_list')
+            if _debug_list:
+                debug_list=eval(_debug_list)
+                #形如 [3, 4, 6] 
+                #当前行3在其中，则执行到第4行时阻塞；当前行4，执行到6；当前行6，结束阻塞
+                if current_line in debug_list and debug_list[-1]!=current_line:
+                    next_line=0
+                    for i in range(len(debug_list)):
+                        if debug_list[i]==current_line:
+                            next_line=debug_list[i+1]
+                            break
+
+                    if next_line>current_line:
+                        for i in range(next_line-current_line):
+                            #只继续执行多少行然后阻塞
+                            redis_send_client.rpush(block_key, '0')
+                            redis_send_client.expire(block_key, config.tmp_config_expire_sec)
+
+                        return Response({'status':2}) 
+
+
         redis_send_client.rpush(block_key, block_type)
         redis_send_client.expire(block_key, config.tmp_config_expire_sec)
 

@@ -128,6 +128,11 @@ class Order(baseview.BaseView):
                             data.append(j)
             
             playbook=redis_job_client.hget(work_id,'playbook')
+            debug_list=redis_job_client.hget(work_id,'debug_list')
+            if debug_list:
+                debug_list=eval(debug_list)
+            else:
+                debug_list=[0]
 
             exe_sum = {'executing': 0,'done': 0,'fail': 0,'all': 0}
             new_data = []
@@ -143,9 +148,9 @@ class Order(baseview.BaseView):
             exe_sum['fail']=exe_sum['all'] - exe_sum['done'] - exe_sum['executing']
 
             if exclude:
-                return Response({'status':1, 'data': new_data, 'playbook':playbook,'sum':exe_sum})
+                return Response({'status':1, 'data': new_data, 'playbook':playbook,'sum':exe_sum,'debug_list':debug_list})
             else:
-                return Response({'status':1, 'data': data, 'playbook':playbook,'sum':exe_sum})
+                return Response({'status':1, 'data': data, 'playbook':playbook,'sum':exe_sum,'debug_list':debug_list})
 
 
         elif args=='del':
