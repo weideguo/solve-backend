@@ -523,22 +523,29 @@ class pauseRun(baseview.BaseView):
             if _debug_list:
                 #debug_list=eval(_debug_list)
                 debug_list=ast.literal_eval(_debug_list)
-                #形如 [3, 4, 6] 
-                #当前行3在其中，则执行到第4行时阻塞；当前行4，执行到6；当前行6，结束阻塞
-                if current_line in debug_list and debug_list[-1]!=current_line:
-                    next_line=0
-                    for i in range(len(debug_list)):
-                        if debug_list[i]==current_line:
-                            next_line=debug_list[i+1]
-                            break
-
-                    if next_line>current_line:
-                        for i in range(next_line-current_line):
-                            #只继续执行多少行然后阻塞
-                            redis_send_client.rpush(block_key, '0')
-                            redis_send_client.expire(block_key, config.tmp_config_expire_sec)
-
-                        return Response({'status':2}) 
+                #形如 [3, 7, 10]
+                #当前行<=3，则执行到第7行时阻塞；7<= 当前行 <10，执行到10；当前行>=10，结束阻塞
+                next_line=0
+                b=0
+                bn=debug_list[0]
+                _len=len(debug_list)
+                for i in range(_len):
+                    if b<=current_line  and current_line<bn:
+                        next_line=bn
+                        break
+                    elif i+1>=_len:
+                        break
+                    else:
+                        b=debug_list[i]
+                        bn=debug_list[i+1]                    
+                        
+                if next_line>current_line:
+                    for i in range(next_line-current_line):
+                        #只继续执行多少行然后阻塞
+                        redis_send_client.rpush(block_key, '0')
+                        redis_send_client.expire(block_key, config.tmp_config_expire_sec)
+                        
+                    return Response({'status':2}) 
 
 
         redis_send_client.rpush(block_key, block_type)
