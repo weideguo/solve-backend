@@ -278,21 +278,14 @@ class Order(baseview.BaseView):
                 x = {}
                 x['target'] = c[0].split(config.spliter+c[0].split(config.spliter)[-1])[0]
                 x['target_id']  = c[0].split(config.spliter)[-1]
-                x['last_stdout'] = redis_log_client.hget(config.prefix_sum+x['target_id'],'last_stdout')          
-                if not x['last_stdout']:
-                    x['last_stdout'] = ''
-                
                 last_uuid= redis_log_client.hget(config.prefix_sum+x['target_id'],'last_uuid')
-                if not last_uuid:                
-                    pass
-                elif not redis_log_client.hgetall(last_uuid):            
-                    pass
-                elif str(redis_log_client.hget(last_uuid,'exit_code')) != '0':
-                    stderr=redis_log_client.hget(last_uuid,'stderr')
-                    if stderr:
-                        x['last_stdout'] = 'stderr: '+stderr
-                    else:
-                        x['last_stdout'] = 'stderr: null'
+                if last_uuid and redis_log_client.hgetall(last_uuid):
+                    x['last_stdout']=redis_log_client.hget(last_uuid,'stdout')
+                    x['last_stderr']=redis_log_client.hget(last_uuid,'stderr') 
+                               
+                x['last_stdout'] = x.get('last_stdout') or ''
+                x['last_stderr'] = x.get('last_stderr') or ''
+
                 tmp_summary[x['target']]=x
 
             for k in tmp_summary.keys():
