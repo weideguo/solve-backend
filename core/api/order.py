@@ -216,7 +216,8 @@ class Order(baseview.BaseView):
                 exelist=redis_log_client.lrange(target_id,0,l_len-1)
                 #当前最后执行命令的信息为 {'stdout': 'pausing'} 则说明当前的执行处于阻塞模式
                 tmp_last_info=redis_log_client.hgetall(exelist[-1])
-                if str(tmp_last_info.get('stdout')) == 'pausing':
+                #if str(tmp_last_info.get('stdout')) == 'pausing':
+                if tmp_last_info.get('stdout') == 'pausing':
                     is_pause=1
             else:
                 is_pause=0                
