@@ -379,6 +379,7 @@ class FastExecution(baseview.BaseView):
             parallel = data['parallel']
             exeinfo = data['exeinfo']
             playbook = data['playbook']
+            comment = data.get('comment','').strip()
         except:
             return Response({'status':-1,'msg': util.safe_decode(translate('commit_date_attr_error',request)),'data':data}) 
         
@@ -462,7 +463,7 @@ class FastExecution(baseview.BaseView):
 
             job_info['target'] = ','.join(target_list)
             job_info['number'] = len(target_list)
-            job_info['comment'] = translate('fast_job_parallel',request)
+            job_info['comment'] = comment or translate('fast_job_parallel',request)
             
         else:
             #串行执行
@@ -479,7 +480,7 @@ class FastExecution(baseview.BaseView):
 
             job_info['target'] = target_name
             job_info['number'] = 1
-            job_info['comment'] = translate('fast_job_serial',request) 
+            job_info['comment'] = comment or translate('fast_job_serial',request) 
 
 
         job_info['playbook'] = playbook_file
