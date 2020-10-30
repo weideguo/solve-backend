@@ -1,5 +1,8 @@
 # solve-backend #
 
+[![Python 2.7|3.5|3.7](https://img.shields.io/badge/python-2.7%7C3.5%7C3.7-blue.svg)](https://github.com/zouzhicun/solve-backend) 
+[![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/zouzhicun/solve-backend/blob/master/LICENSE) 
+
 
 使用solve的web后端。通过jwt记录账号登陆状态。
 
@@ -9,10 +12,6 @@ running
 ### dependency servers ###
 * redis (>= 2.0.0)
 * solve
-
-### version support ###
-* python 2.7
-* python 3.5
 
 ### prerun ###
 ```shell
