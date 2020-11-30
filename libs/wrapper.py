@@ -9,7 +9,7 @@ from libs.util import MYLOGGER,MYLOGERROR,safe_decode
 
 from dura import solve_dura
 
-
+#如果每个api都用这里创建的连接实例，在重连redis时会出现一定概率报错，为什么？
 redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 
 

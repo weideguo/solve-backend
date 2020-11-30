@@ -200,7 +200,7 @@ class Execution(baseview.BaseView):
         redis_manage_client = redis_single['redis_manage']
 
         exec_name = request.GET['filter']
-        _debug_run = request.GET.get('debug',0)
+        _debug_run = request.GET.get('debug','0')
         debug_run = [ int(i) for i in _debug_run.split(',') ]
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
         #jwt_str =jwt_str_raw.split('.')[1]+'=='     
@@ -249,6 +249,7 @@ class Execution(baseview.BaseView):
         redis_log_client = redis_single['redis_log']
         redis_tmp_client = redis_single['redis_tmp']
         redis_job_client = redis_single['redis_job']
+        redis_config_client = redis_single['redis_config']
 
         old_job_id = request.GET['work_id']
         target = request.GET['target']  
@@ -288,7 +289,11 @@ class Execution(baseview.BaseView):
 
             new_target_id = uuid.uuid1().hex
             
-            redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_tmp_client.hgetall(target+config.spliter+target_id))
+            if begin_line:
+                redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_tmp_client.hgetall(target+config.spliter+target_id))
+            else:
+                 redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_config_client.hgetall(target))
+
             global_data=redis_tmp_client.hgetall(config.prefix_global+config.spliter+target_id)
             if global_data:
                 redis_tmp_client.hmset(config.prefix_global+config.spliter+new_target_id,global_data)
