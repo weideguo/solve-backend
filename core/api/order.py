@@ -8,7 +8,7 @@ from auth_new import baseview
 from libs import util
 from conf import config
 from dura import solve_dura
-
+from libs.wrapper import set_sort_key
 from libs.redis_pool import redis_single
 from libs.util import translate
 
@@ -38,41 +38,43 @@ class Order(baseview.BaseView):
             '''
             查询所有工单列表
             '''
-            page = request.GET.get('page',1)
+            page = int(request.GET.get('page',1))
             pagesize = int(request.GET.get('pagesize',16))
             sort_keyname = request.GET.get('orderby','begin_time')
             reverse = bool(int(request.GET.get('reverse',1)))           
                  
-            dura_flag=False    
+            dura_flag=False 
+            data=[]   
             if dura_flag:
                 data=[]
                 # 配置持久化数据库时执行工单列表全部通过数据库查询 如mongodb
+                # 有延迟？
             else:
-                alldata = []
-                i=0
-                job_key_list=redis_job_client.keys(config.prefix_job+'*')
-                page_number = len(job_key_list)
-                
-                start = (int(page) - 1) * pagesize
-                end = int(page) * pagesize
-                
-                for j in job_key_list:
-                    job_info=redis_job_client.hgetall(j)
-                    job_info['work_id']=j
-                
-                    alldata.append(job_info)
-                
-                def sortitem(element):
-                    return float(element[sort_keyname]) if sort_keyname in element else 0 
-                
-                alldata.sort(key=sortitem,reverse=reverse)    
-                
-                data=alldata[start:end]        
-    
+                cache_key='query_cache_job'
+                cache_list=[]
+
+                #if page == 1 or (not redis_job_client.exists(cache_key)):
+                #刷新cache_list
+                set_sort_key(redis_job_client, cache_key, config.prefix_job, sort_keyname, reverse)
+
+                #从缓存key查询 避免每次都进行全量查询再排序
+                cache_list=redis_job_client.lrange(cache_key,0,redis_job_client.llen(cache_key))
+
+                page_number = len(cache_list)
+
+                start = (page - 1) * pagesize
+                end = page * pagesize
+
+                query_key=cache_list[start:end] 
+                for k in query_key:
+                    job_info=redis_job_client.hgetall(k)
+                    job_info['work_id']=k
+                    data.append(job_info)
+
             return Response({'status':1,'data': data,'page': page_number})
 
 
-        if args=="detail":
+        if args=='detail':
             '''
             查询单个工单的详细
             '''
