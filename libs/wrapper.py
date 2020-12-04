@@ -197,28 +197,28 @@ class HashCURD():
                 return  Response({'status':-2,'msg':safe_decode('添加信息至少存在一个属性!')})
 
 
-def set_sort_key(redis_client, cache_key, key_prefix, sort_keyname, reverse):
+def set_sort_key(redis_client, cache_key, key_prefix, sort_key, reverse):
     '''由指定前缀的hash类型key使用指定字段生成排序'''
     _cache_len=redis_client.llen(cache_key)
-    job_key_list=redis_client.keys(key_prefix+'*')
+    key_list=redis_client.keys(key_prefix+'*')
 
-    #新增或删除已有的job都会刷新
-    if len(job_key_list) != _cache_len:
-        all_job_sort = []
-        for j in job_key_list:
-            job_info=[]
-            job_info.append(j)
-            job_info.append(redis_client.hget(j,sort_keyname) or 0)
-            all_job_sort.append(job_info)
+    #新增或删除已有的都会刷新
+    if len(key_list) != _cache_len:
+        all_sort = []
+        for j in key_list:
+            info=[]
+            info.append(j)
+            info.append(redis_client.hget(j,sort_key) or 0)
+            all_sort.append(info)
 
         def sortitem(element):
             return float(element[1]) 
         #排序
-        all_job_sort.sort(key=sortitem,reverse=reverse)  
-        _all_job_sort=[i for i,j in all_job_sort]
+        all_sort.sort(key=sortitem,reverse=reverse)  
+        _all_sort=[i for i,j in all_sort]
 
         redis_client.delete(cache_key)
-        redis_client.rpush(cache_key,*_all_job_sort)
+        redis_client.rpush(cache_key,*_all_sort)
 
 
 
