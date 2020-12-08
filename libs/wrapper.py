@@ -6,6 +6,7 @@ from rest_framework.response import Response
 
 from libs import util, redis_pool
 from libs.util import MYLOGGER,MYLOGERROR,safe_decode
+from libs.util import translate
 
 from dura import solve_dura
 
@@ -170,31 +171,31 @@ class HashCURD():
             info = request.data            
         target = info.pop('name','')
         if not target:
-            return  Response({'status':-4,'msg':safe_decode('name 字段必须存在')})
+            return  Response({'status':-4,'msg':safe_decode(translate('name_attribute_must_exist',request))})
 
         target_o = info.pop('name_o','')
         if target_o:
             #修改
             if not redis_client.keys(target_o):
-                return  Response({'status':-3,'msg':safe_decode('修改的对象不存在，请刷新后再试!')})
+                return  Response({'status':-3,'msg':safe_decode(translate('modified_target_not_exist',request))})
             elif target != target_o and redis_client.keys(target):
-                return  Response({'status':-2,'msg':safe_decode('对象名已经存在，不能修改为此!')})
+                return  Response({'status':-2,'msg':safe_decode(translate('change_to_target_already_exist',request))})
             else:
                 redis_client.delete(target_o)
                 if solve_dura:
                     solve_dura.real_delete(target_o,redis_client)
 
                 redis_client.hmset(target,info)
-                return  Response({'status':2,'msg':safe_decode('修改成功')})
+                return  Response({'status':2,'msg':safe_decode(translate('modify_success',request))})
         else:
             #增加
             if redis_client.keys(target):
-                return  Response({'status':-1,'msg':safe_decode('添加的信息已经存在，不能再插入!')})            
+                return  Response({'status':-1,'msg':safe_decode(translate('add_info_exist',request))})            
             elif info:
                 redis_client.hmset(target,info)    
-                return  Response({'status':1,'msg':safe_decode('添加成功!')})
+                return  Response({'status':1,'msg':safe_decode(translate('add_success',request))})
             else:
-                return  Response({'status':-2,'msg':safe_decode('添加信息至少存在一个属性!')})
+                return  Response({'status':-2,'msg':safe_decode(translate('add_info_null',request))})
 
 
 def set_sort_key(redis_client, cache_key, key_prefix, sort_key, reverse):
