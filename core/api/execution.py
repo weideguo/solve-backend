@@ -292,7 +292,11 @@ class Execution(baseview.BaseView):
             if begin_line:
                 redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_tmp_client.hgetall(target+config.spliter+target_id))
             else:
-                 redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_config_client.hgetall(target))
+                try:
+                    redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_config_client.hgetall(target))
+                except:
+                    #快速任务的对象没有在config存储，因而需要直接用tmp
+                    redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_tmp_client.hgetall(target+config.spliter+target_id))
 
             global_data=redis_tmp_client.hgetall(config.prefix_global+config.spliter+target_id)
             if global_data:
