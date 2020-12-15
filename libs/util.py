@@ -19,6 +19,17 @@ def my_md5(string):
     h.update(string.encode('utf8'))
     return h.hexdigest()
 
+def get_lang(request):
+    try:
+        lang= request.META['HTTP_ACCEPT_LANGUAGE']
+    except:
+        lang=''
+
+    if not lang:
+        lang='zh_cn'
+    #前端可能传入类型如 zh-CN
+    lang=lang.split(',')[0].replace('-','_').lower()  
+    return lang
 
 def translate(string,request=None):
     '''
@@ -27,15 +38,7 @@ def translate(string,request=None):
     默认使用zh_cn/zh-CN
     '''
     if request:
-        try:
-            lang= request.META['HTTP_ACCEPT_LANGUAGE']
-        except:
-            lang=''
-
-        if not lang:
-            lang='zh_cn'
-        #前端可能传入类型如 zh-CN
-        lang=lang.split(',')[0].replace('-','_').lower()  
+        lang=get_lang(request)
         try:
             lang=importlib.import_module('conf.lang.'+lang)
         except:
