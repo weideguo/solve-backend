@@ -5,6 +5,7 @@ import sys
 import time
 from rest_framework.response import Response
 from django.http import FileResponse
+from django.utils.encoding import escape_uri_path
 
 from auth_new import baseview
 from libs import util
@@ -84,7 +85,8 @@ class File(baseview.BaseView):
                 file = open(filename,mode='rb')
                 response=FileResponse(file)
                 response['Content-Type']='application/octet-stream'
-                response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
+                #response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))  
+                response['Content-Disposition']='%s;filename=%s' % (showtype, escape_uri_path(name))    
                 return response
             else:
                 return Response({'status':-1,'file':filename,'msg':util.safe_decode(translate('path_is_not_file',request))},status=404)

@@ -10,6 +10,7 @@ from traceback import format_exc
 
 from rest_framework.response import Response
 from django.http import FileResponse
+from django.utils.encoding import escape_uri_path
 
 from auth_new import baseview
 from libs import util
@@ -99,7 +100,8 @@ class FileProxy(baseview.BaseView):
                     #f=open("/path_to_file/xxx")
                     response=FileResponse(f)     #不会处理失败
                     response['Content-Type']='application/octet-stream'
-                    response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))   
+                    #response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))  
+                    response['Content-Disposition']='%s;filename=%s' % (showtype, escape_uri_path(name))  
                     return response
                 except:
                     r=result_parse(r,translate('download_success',request),translate('parse_result_failed_tips',request))
