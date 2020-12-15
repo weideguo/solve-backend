@@ -2,7 +2,10 @@
 import ast
 import time
 import redis
+import tempfile
 from rest_framework.response import Response
+from django.http import FileResponse
+from django.utils.encoding import escape_uri_path
 
 from auth_new import baseview
 from libs import util
@@ -10,7 +13,7 @@ from conf import config
 from dura import solve_dura
 from libs.wrapper import set_sort_key
 from libs.redis_pool import redis_single
-from libs.util import translate
+from libs.util import translate,get_lang
 
 class Order(baseview.BaseView):
     '''
@@ -19,6 +22,7 @@ class Order(baseview.BaseView):
     '''
     def post(self, request, args = None):
         redis_send_client = redis_single['redis_send']
+        redis_log_client = redis_single['redis_log']
         if args == 'select':
             cmd_id = request.GET['id']
             select_list = request.data
@@ -27,6 +31,45 @@ class Order(baseview.BaseView):
             redis_send_client.delete(config.prefix_select+'_all'+config.spliter+cmd_id)
 
             return Response({'status':1, 'select_str': select_value, 'keyid':cmd_id})
+
+        if args == 'download':
+            workid = request.GET['workid']
+            line = int(request.GET['line'])
+            keys = request.data
+            
+            config.prefix_log+workid
+            content = 'target,'+','.join(keys)
+            all_log_str=redis_log_client.hget(config.prefix_log+workid,'log') or '[]'
+            for t,l in ast.literal_eval(all_log_str):
+                target=t.split(config.spliter)[0]
+                _line='"%s"' % target
+
+                single_log_list=redis_log_client.lrange(l, line-1, line)
+                if single_log_list:
+                    for k in keys:
+                        _line_sub=redis_log_client.hget(single_log_list[0],k) or ''
+                        _line += ',"%s"' % _line_sub
+
+                content = content +'\n'+ _line
+    
+            if get_lang(request)=='zh_cn':
+                content=content.encode('gbk')    #windows中文 excel 默认以gbk编码打开
+            else:
+                content=content.encode('utf8')   #以utf8导出时excel需要以utf8导入才能查看
+
+            name='job_%s.csv' % time.strftime('%Y%m%d_%H%M%S',time.localtime())
+
+            f=tempfile.NamedTemporaryFile()
+            f.write(content)
+            f.flush()
+            f.seek(0)
+            response=FileResponse(f)     
+            response['Content-Type']='application/octet-stream'
+            response['Content-Disposition']='%s;filename=%s' % ('attachment', escape_uri_path(name))   
+            response['Access-Control-Expose-Headers'] = 'filename'         #设置前端能获取到的header
+            response['filename'] = escape_uri_path(name)                   #js通过此获取文件名 
+            return response
+            #return Response({'status':1,'workid':workid,'keys':keys})
 
 
     def get(self, request, args = None):
