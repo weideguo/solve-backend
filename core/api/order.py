@@ -24,6 +24,9 @@ class Order(baseview.BaseView):
         redis_send_client = redis_single['redis_send']
         redis_log_client = redis_single['redis_log']
         if args == 'select':
+            '''
+            select参数值的设置
+            '''
             cmd_id = request.GET['id']
             select_list = request.data
             select_value = ' '.join(select_list)
@@ -33,6 +36,9 @@ class Order(baseview.BaseView):
             return Response({'status':1, 'select_str': select_value, 'keyid':cmd_id})
 
         if args == 'download':
+            '''
+            将制定任务 指定行 指定字段的信息生成csv文件
+            '''
             workid = request.GET['workid']
             line = int(request.GET['line'])
             keys = request.data
@@ -41,7 +47,7 @@ class Order(baseview.BaseView):
             csv_field_terminated=','            #字段分割符
             csv_line_terminated='\n'            #行的结束符
             def csv_field_format(field):
-                """字段的格式 单个字段使用双引号包围，字段的双引号用两个双引号转义"""
+                '''字段的格式 单个字段使用双引号包围，字段的双引号用两个双引号转义'''
                 return '"%s"' % field.replace('"','""') 
 
             #首行
