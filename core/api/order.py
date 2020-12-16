@@ -37,20 +37,30 @@ class Order(baseview.BaseView):
             line = int(request.GET['line'])
             keys = request.data
             
-            config.prefix_log+workid
-            content = 'target,'+','.join(keys)
+            #csv文件的设置
+            csv_field_terminated=','            #字段分割符
+            csv_line_terminated='\n'            #行的结束符
+            def csv_field_format(field):
+                """字段的格式 单个字段使用双引号包围，字段的双引号用两个双引号转义"""
+                return '"%s"' % field.replace('"','""') 
+
+            #首行
+            content = 'target'+csv_field_terminated+csv_field_terminated.join(keys)
+
             all_log_str=redis_log_client.hget(config.prefix_log+workid,'log') or '[]'
             for t,l in ast.literal_eval(all_log_str):
                 target=t.split(config.spliter)[0]
-                _line='"%s"' % target
+                #_line='"%s"' % target.replace('"','""') 
+                _line=csv_field_format(target)
 
                 single_log_list=redis_log_client.lrange(l, line-1, line)
                 if single_log_list:
                     for k in keys:
                         _line_sub=redis_log_client.hget(single_log_list[0],k) or ''
-                        _line += ',"%s"' % _line_sub
+                        #_line += ',"%s"' % _line_sub.replace('"','""')   
+                        _line += csv_field_terminated+csv_field_format(_line_sub)        
 
-                content = content +'\n'+ _line
+                content = content +csv_line_terminated+ _line
     
             if get_lang(request)=='zh_cn':
                 content=content.encode('gbk')    #windows中文 excel 默认以gbk编码打开
