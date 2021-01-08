@@ -30,6 +30,12 @@ except:
     def translate(string,request=None):
         return string
 
+#cas_url=getattr(settings,'CAS_URL','')
+#
+#translate=getattr(settings,'TRANSLATE','')
+#if not translate:
+#    def translate(string,request=None):
+#        return string
 
 #使用cas proxy连接其他app时增加的函数
 

@@ -223,3 +223,9 @@ serviceValidate      #验证ticket 返回xml格式  (后端使用)
 CAS_URL='libs.wrapper.cas_url'
 #用于翻译的函数
 TRANSLATE='libs.util.translate'
+
+#创建其他进程时这种会导致多余的进程生成？
+#import libs
+#from libs import wrapper,util
+#CAS_URL=libs.wrapper.cas_url
+#TRANSLATE=libs.util.translate
