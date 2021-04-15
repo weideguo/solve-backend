@@ -23,8 +23,6 @@ serviceValidate      #验证ticket 返回xml格式  (后端使用)
 """
 #cas地址的string对象
 CAS_URL='libs.wrapper.cas_url'
-#用于翻译的函数
-TRANSLATE='libs.util.translate'
 ```
 ```python
 #urls.py
