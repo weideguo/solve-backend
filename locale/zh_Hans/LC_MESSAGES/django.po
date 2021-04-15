@@ -1,0 +1,221 @@
+# SOME DESCRIPTIVE TITLE.
+# Copyright (C) YEAR THE PACKAGE'S COPYRIGHT HOLDER
+# This file is distributed under the same license as the PACKAGE package.
+# FIRST AUTHOR <EMAIL@ADDRESS>, YEAR.
+#
+#, fuzzy
+msgid ""
+msgstr ""
+"Project-Id-Version: PACKAGE VERSION\n"
+"Report-Msgid-Bugs-To: \n"
+"POT-Creation-Date: 2021-04-15 15:34+0800\n"
+"PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
+"Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
+"Language-Team: LANGUAGE <LL@li.org>\n"
+"Language: \n"
+"MIME-Version: 1.0\n"
+"Content-Type: text/plain; charset=UTF-8\n"
+"Content-Transfer-Encoding: 8bit\n"
+"Plural-Forms: nplurals=1; plural=0;\n"
+
+#: auth_new/views.py:53
+msgid "change password success"
+msgstr "密码修改成功"
+
+#: auth_new/views.py:55 auth_new/views.py:98
+msgid "user not exist"
+msgstr "账号不存在"
+
+#: auth_new/views.py:62
+msgid "user exist already"
+msgstr "用户名已经存在"
+
+#: auth_new/views.py:68
+msgid "user register success"
+msgstr "用户注册成功"
+
+#: auth_new/views.py:74
+msgid "user delete success"
+msgstr "用户删除成功"
+
+#: auth_new/views.py:96
+msgid "password error"
+msgstr "密码错误"
+
+#: auth_new/views.py:127
+msgid "set cas before used"
+msgstr "必须先在后端设置CAS的地址才能使用"
+
+#: core/api/config.py:31
+msgid "key not exist"
+msgstr "key不存在"
+
+#: core/api/config.py:44
+msgid "redis key type error"
+msgstr "key在redis中的存储类型错误"
+
+#: core/api/config.py:64
+msgid "not commit empty info"
+msgstr "提交信息不能为空"
+
+#: core/api/config.py:92
+msgid "type constrict"
+msgstr "type必须为string list set hash之一"
+
+#: core/api/config.py:102
+msgid "type not match"
+msgstr "type类型不匹配"
+
+#: core/api/execution.py:175
+msgid "should not commit empty data"
+msgstr "空数据不必提交"
+
+#: core/api/execution.py:393
+msgid "commit date attr error"
+msgstr "提交的数据必须包含以下属性： spliter、parallel、exeinfo、playbook"
+
+#: core/api/execution.py:435
+#, python-format
+msgid "error in line %d"
+msgstr "第 %d 行配置信息错误！"
+
+#: core/api/execution.py:475
+msgid "fast job parallel"
+msgstr "快速任务-并行"
+
+#: core/api/execution.py:492
+msgid "fast job serial"
+msgstr "快速任务-串行"
+
+#: core/api/filemanage.py:26 core/api/filemanage.py:58 core/api/fileproxy.py:51
+#: core/api/fileproxy.py:67
+msgid "should not change in path"
+msgstr "路径不能存在.."
+
+#: core/api/filemanage.py:32
+msgid "path is dir"
+msgstr "路径为文件"
+
+#: core/api/filemanage.py:49 core/api/fileproxy.py:59
+msgid "upload success"
+msgstr "上传成功"
+
+#: core/api/filemanage.py:72
+msgid "read file failed"
+msgstr "读取文件失败"
+
+#: core/api/filemanage.py:92
+msgid "path is not file"
+msgstr "路径不为文件"
+
+#: core/api/filemanage.py:113
+msgid "path is not dir"
+msgstr "路径不为目录"
+
+#: core/api/filemanage.py:123 core/api/fileproxy.py:131
+msgid "create success"
+msgstr "创建成功"
+
+#: core/api/filemanage.py:126
+msgid "create failed"
+msgstr "创建失败"
+
+#: core/api/fileproxy.py:59
+msgid "upload failed tips"
+msgstr "上传出现错误，请查看日志"
+
+#: core/api/fileproxy.py:78
+msgid "read success"
+msgstr "读取成功"
+
+#: core/api/fileproxy.py:78
+msgid "read failed tips"
+msgstr "读取失败，请查看日志"
+
+#: core/api/fileproxy.py:107 core/api/fileproxy.py:110
+msgid "download success"
+msgstr "下载成功"
+
+#: core/api/fileproxy.py:107
+msgid "parse result failed tips"
+msgstr "解析返回失败，请查看日志"
+
+#: core/api/fileproxy.py:110
+msgid "download failed tips"
+msgstr "下载失败，请查看日志"
+
+#: core/api/fileproxy.py:121
+msgid "list success"
+msgstr "查看成功"
+
+#: core/api/fileproxy.py:121
+msgid "list failed tips"
+msgstr "查看失败，请查看日志"
+
+#: core/api/fileproxy.py:131
+msgid "create failed tips"
+msgstr "创建失败，请查看日志"
+
+#: core/api/order.py:179
+msgid "get log info failed"
+msgstr "获取日志信息失败"
+
+#: core/api/order.py:264
+msgid "abort alread exist"
+msgstr "已经存在中止操作"
+
+#: core/api/order.py:309
+msgid "not select error"
+msgstr "原命令不是select参数但存在选择key"
+
+#: core/api/order.py:311
+msgid "not origin cmd"
+msgstr "原始命令不存在"
+
+#: core/api/targetinfo.py:110
+msgid "close success"
+msgstr "断开成功"
+
+#: core/api/targetinfo.py:112
+msgid "close failed"
+msgstr "断开失败"
+
+#: core/api/targetinfo.py:127 core/api/targetinfo.py:131
+msgid "connect success"
+msgstr "连接成功"
+
+#: core/api/targetinfo.py:133
+msgid "connect timeout"
+msgstr "连接超时"
+
+#: core/api/test.py:19
+msgid "what you want to translate"
+msgstr ""
+
+#: libs/wrapper.py:174
+msgid "name attribute must exist"
+msgstr "name 字段必须存在"
+
+#: libs/wrapper.py:180
+msgid "modified target not exist"
+msgstr "修改的对象不存在，请刷新后再试!"
+
+#: libs/wrapper.py:182
+msgid "change to target already exist"
+msgstr "对象名已经存在，不能修改为此!"
+
+#: libs/wrapper.py:189
+msgid "modify success"
+msgstr "修改成功"
+
+#: libs/wrapper.py:193
+msgid "add info exist"
+msgstr "添加的信息已经存在，不能再插入!"
+
+#: libs/wrapper.py:196
+msgid "add success"
+msgstr "添加成功!"
+
+#: libs/wrapper.py:198
+msgid "add info null"
+msgstr "添加信息至少存在一个属性!"

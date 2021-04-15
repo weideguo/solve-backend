@@ -4,13 +4,13 @@ import redis
 import uuid
 import json
 from rest_framework.response import Response
+from django.utils.translation import gettext as _
 
 from auth_new import baseview
 from libs import util
 from conf import config
 
 from libs.redis_pool import redis_single
-from libs.util import translate
 
 #只会运行一次
 redis_manage_client=redis_single['redis_manage']
@@ -28,7 +28,7 @@ class Config(baseview.BaseView):
         if key_name:
             key_type=redis_manage_client.type(key_name)
         else:
-            return Response({'status':-1,'data':'','msg':util.safe_decode(translate('key_not_exist',request))})            
+            return Response({'status':-1,'data':'','msg':util.safe_decode(_('key not exist'))})            
         
 
         data=None
@@ -41,7 +41,7 @@ class Config(baseview.BaseView):
         elif key_type=='string':
             data=redis_manage_client.get(key_name)         
         else:
-            return Response({'status':-2,'data':'','msg':util.safe_decode(translate('redis_key_type_error',request))})
+            return Response({'status':-2,'data':'','msg':util.safe_decode(_('redis key type error'))})
             
 
         return Response({'status':1,'data':data})
@@ -61,7 +61,7 @@ class Config(baseview.BaseView):
             info = request.data
         
         if not info:
-            return Response({'status':-2,'msg':util.safe_decode(translate('not_commit_empty_info',request))})    
+            return Response({'status':-2,'msg':util.safe_decode(_('not commit empty info'))})    
 
         #redis_manage_client=redis_single['redis_manage']
 
@@ -89,7 +89,7 @@ class Config(baseview.BaseView):
                 redis_manage_client.hmset(key_name,info)
                 return Response({'status':1,'key':key,'type':key_type,'data':info})
             else:
-                return Response({'status':-1,'msg':util.safe_decode(translate('type_constrict',request))})  
+                return Response({'status':-1,'msg':util.safe_decode(_('type constrict'))})  
 
 
         key_name=redis_manage_client.hget(config.key_solve_config,key)    
@@ -99,7 +99,7 @@ class Config(baseview.BaseView):
             if o_key_type == key_type or (o_key_type=='none'):
                 return update_config(info)
             else:
-                return Response({'status':-2,'msg':util.safe_decode(translate('type_not_match',request))})  
+                return Response({'status':-2,'msg':util.safe_decode(_('type not match'))})  
         else:
             key_name=config.prefix_config+uuid.uuid1().hex
             redis_manage_client.hset(config.key_solve_config,key,key_name)

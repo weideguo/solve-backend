@@ -21,21 +21,6 @@ if cas_url_name:
     cas_url=util.get_obj(cas_url_name)
 else:
     cas_url=''
-        
-
-try:
-    translate_name=settings.TRANSLATE
-    translate=util.get_obj(translate_name)
-except:
-    def translate(string,request=None):
-        return string
-
-#cas_url=getattr(settings,'CAS_URL','')
-#
-#translate=getattr(settings,'TRANSLATE','')
-#if not translate:
-#    def translate(string,request=None):
-#        return string
 
 #使用cas proxy连接其他app时增加的函数
 

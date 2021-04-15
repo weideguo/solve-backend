@@ -13,6 +13,7 @@ import base64
 from jinja2 import Template
 from rest_framework.response import Response
 from django.conf import settings
+from django.utils.translation import gettext as _
 
 from auth_new import baseview
 from libs import util
@@ -20,7 +21,6 @@ from conf import config
 
 from libs.wrapper import HashCURD,playbook_root,playbook_temp
 from libs.redis_pool import redis_single
-from libs.util import translate
 
 
 def get_session(pre_job_name,redis_manage_client):
@@ -172,7 +172,7 @@ class Session(baseview.BaseView):
             #提交临时session
             data = request.data
             if not data:
-                return Response({'status':-1,'msg':util.safe_decode(translate('should_not_commit_empty_data',request))})
+                return Response({'status':-1,'msg':util.safe_decode(_('should not commit empty data'))})
 
             redis_tmp_client = redis_single['redis_tmp']
             
@@ -390,7 +390,7 @@ class FastExecution(baseview.BaseView):
             playbook = data['playbook']
             comment = data.get('comment','').strip()
         except:
-            return Response({'status':-1,'msg': util.safe_decode(translate('commit_date_attr_error',request)),'data':data}) 
+            return Response({'status':-1,'msg': util.safe_decode(_('commit date attr error')),'data':data}) 
         
         target_info=[]
         #使用配置信息构造playbook
@@ -432,7 +432,7 @@ class FastExecution(baseview.BaseView):
         except:
             from traceback import format_exc
             print(format_exc())
-            return Response({'status':-2,'msg': util.safe_decode((translate('error_in_line',request)+' \n%s') %(i, str(t)))}) 
+            return Response({'status':-2,'msg': util.safe_decode((_('error in line %d')+' \n%s') %(i, str(t)))}) 
 
         playbook_file = os.path.join(playbook_temp, config.prefix_temp + uuid.uuid1().hex)
         _path=os.path.dirname(playbook_file)
@@ -472,7 +472,7 @@ class FastExecution(baseview.BaseView):
 
             job_info['target'] = ','.join(target_list)
             job_info['number'] = len(target_list)
-            job_info['comment'] = comment or translate('fast_job_parallel',request)
+            job_info['comment'] = comment or _('fast job parallel')
             
         else:
             #串行执行
@@ -489,7 +489,7 @@ class FastExecution(baseview.BaseView):
 
             job_info['target'] = target_name
             job_info['number'] = 1
-            job_info['comment'] = comment or translate('fast_job_serial',request) 
+            job_info['comment'] = comment or _('fast job serial') 
 
 
         job_info['playbook'] = playbook_file

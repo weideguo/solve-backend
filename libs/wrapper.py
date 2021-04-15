@@ -3,10 +3,10 @@ import os
 import re
 
 from rest_framework.response import Response
+from django.utils.translation import gettext as _
 
 from libs import util, redis_pool
 from libs.util import MYLOGGER,MYLOGERROR,safe_decode
-from libs.util import translate
 
 from dura import solve_dura
 
@@ -171,31 +171,31 @@ class HashCURD():
             info = request.data            
         target = info.pop('name','')
         if not target:
-            return  Response({'status':-4,'msg':safe_decode(translate('name_attribute_must_exist',request))})
+            return  Response({'status':-4,'msg':safe_decode(_('name attribute must exist'))})
 
         target_o = info.pop('name_o','')
         if target_o:
             #修改
             if not redis_client.keys(target_o):
-                return  Response({'status':-3,'msg':safe_decode(translate('modified_target_not_exist',request))})
+                return  Response({'status':-3,'msg':safe_decode(_('modified target not exist'))})
             elif target != target_o and redis_client.keys(target):
-                return  Response({'status':-2,'msg':safe_decode(translate('change_to_target_already_exist',request))})
+                return  Response({'status':-2,'msg':safe_decode(_('change to target already exist'))})
             else:
                 redis_client.delete(target_o)
                 if solve_dura:
                     solve_dura.real_delete(target_o,redis_client)
 
                 redis_client.hmset(target,info)
-                return  Response({'status':2,'msg':safe_decode(translate('modify_success',request))})
+                return  Response({'status':2,'msg':safe_decode(_('modify success'))})
         else:
             #增加
             if redis_client.keys(target):
-                return  Response({'status':-1,'msg':safe_decode(translate('add_info_exist',request))})            
+                return  Response({'status':-1,'msg':safe_decode(_('add info exist'))})            
             elif info:
                 redis_client.hmset(target,info)    
-                return  Response({'status':1,'msg':safe_decode(translate('add_success',request))})
+                return  Response({'status':1,'msg':safe_decode(_('add success'))})
             else:
-                return  Response({'status':-2,'msg':safe_decode(translate('add_info_null',request))})
+                return  Response({'status':-2,'msg':safe_decode(_('add info null'))})
 
 
 def set_sort_key(redis_client, cache_key, key_prefix, sort_key, reverse):

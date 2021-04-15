@@ -36,10 +36,14 @@ gunicorn setting.wsgi:application -c gunicorn.conf -p solve_backend.pid -n solve
 ```
 
 ### multi language ###
-语言文件存放于目录 conf/lang  
-文件名使用小写+下划线分隔  
 语言选择由前端请求的http头 Accept-Languague （django request.META['HTTP_ACCEPT_LANGUAGUE'）控制  
-默认使用中文 zh_cn/zh-CN  
+默认使用中文 zh_cn/zh-CN  即对应 zh_Hans，前端的http头不区分大小写以及下划线，以及可以只匹配前部
+```shell
+# 后端设置
+# python manage.py makemessages -l en
+python manage.py makemessages -l zh_Hans    #设置语言包，每次修改要翻译的字符串时需要运行
+python manage.py compilemessages            #修改.po文件后需要运行
+```
 
 ### test ###
 ```shell

@@ -6,6 +6,7 @@ import tempfile
 from rest_framework.response import Response
 from django.http import FileResponse
 from django.utils.encoding import escape_uri_path
+from django.utils.translation import gettext as _
 
 from auth_new import baseview
 from libs import util
@@ -13,7 +14,7 @@ from conf import config
 from dura import solve_dura
 from libs.wrapper import set_sort_key
 from libs.redis_pool import redis_single
-from libs.util import translate,get_lang
+from libs.util import get_lang
 
 class Order(baseview.BaseView):
     '''
@@ -175,7 +176,7 @@ class Order(baseview.BaseView):
             try:
                 data=get_summary(work_id)
             except:
-                return Response({'status':-1, 'msg':util.safe_decode(translate('get_log_info_failed',request))})
+                return Response({'status':-1, 'msg':util.safe_decode(_('get log info failed'))})
             
             rerun_str=redis_log_client.hget(config.prefix_log+work_id,'rerun')
             if not rerun_str:
@@ -260,7 +261,7 @@ class Order(baseview.BaseView):
 
                 return Response({'status':1,'abort_time':0})
             else:
-                return Response({'status':-1,'abort_time':abort_time,'msg':util.safe_decode(translate('abort_alread_exist',request))})
+                return Response({'status':-1,'abort_time':abort_time,'msg':util.safe_decode(_('abort alread exist'))})
             
             
         elif args=='exelist':
@@ -305,9 +306,9 @@ class Order(baseview.BaseView):
                         select_var=cmd.split('=')[0].strip().split(config.prefix_select+'.')[1].strip() 
                         return Response({'status':2, 'exedetail':exedetail, 'select':select_all_str.split(' '), 'select_var':select_var}) 
                     except:
-                        return Response({'status':-1, 'msg':translate('not_select_error',request)})
+                        return Response({'status':-1, 'msg':_('not select error')})
                 else:
-                    return Response({'status':-2, 'msg':translate('not_origin_cmd',request)})
+                    return Response({'status':-2, 'msg':_('not origin cmd')})
                 
             else:
                 return Response({'status':1, 'exedetail':exedetail})            

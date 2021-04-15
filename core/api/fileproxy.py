@@ -11,13 +11,13 @@ from traceback import format_exc
 from rest_framework.response import Response
 from django.http import FileResponse
 from django.utils.encoding import escape_uri_path
+from django.utils.translation import gettext as _
 
 from auth_new import baseview
 from libs import util
 from conf import config
 from libs.util import MYLOGGER,MYLOGERROR
 from libs.wrapper import file_root,playbook_root,fileserver_bind,fileserver_port
-from libs.util import translate
 
 
 def result_parse(res,msg1,msg2):
@@ -48,7 +48,7 @@ class FileProxy(baseview.BaseView):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path']   
         if re.match('.*\.\..*',path):
-            return Response({'status':-1,'file':path,'msg':util.safe_decode(translate('should_not_change_in_path',request))})
+            return Response({'status':-1,'file':path,'msg':util.safe_decode(_('should not change in path'))})
 
         path=os.path.join(file_root,'./'+path)
         
@@ -56,7 +56,7 @@ class FileProxy(baseview.BaseView):
         url=self.base_url+"?path="+path
         r = requests.post(url, files=file)
         
-        r=result_parse(r,translate('upload_success',request),translate('upload_failed_tips',request))
+        r=result_parse(r,_('upload success'),_('upload failed tips'))
 
         return Response(r)
 
@@ -64,7 +64,7 @@ class FileProxy(baseview.BaseView):
 
         for path in [request.GET.get('file',''),request.GET.get('path','')]:
             if re.match('.*\.\..*',path):
-                return Response({'status':-1,'path':path,'msg':util.safe_decode(translate('should_not_change_in_path',request))})
+                return Response({'status':-1,'path':path,'msg':util.safe_decode(_('should not change in path'))})
 
         self.base_url=self.base_url+args
         if args == 'content':
@@ -75,7 +75,7 @@ class FileProxy(baseview.BaseView):
             
             url=self.base_url+"?file="+filename
             r = requests.get(url)
-            r=result_parse(r,translate('read_success',request),translate('read_failed_tips',request))
+            r=result_parse(r,_('read success'),_('read failed tips'))
             return Response(r)
                 
         if args == 'download':
@@ -104,10 +104,10 @@ class FileProxy(baseview.BaseView):
                     response['Content-Disposition']='%s;filename=%s' % (showtype, escape_uri_path(name))  
                     return response
                 except:
-                    r=result_parse(r,translate('download_success',request),translate('parse_result_failed_tips',request))
+                    r=result_parse(r,_('download success'),_('parse result failed tips'))
                     return Response(r)
             else:
-                r=result_parse(r,translate('download_success',request),translate('download_failed_tips',request))
+                r=result_parse(r,_('download success'),_('download failed tips'))
                 return Response(r,status=404)
        
 
@@ -118,7 +118,7 @@ class FileProxy(baseview.BaseView):
             
             url=self.base_url+"?path="+root_path
             r = requests.get(url)
-            r=result_parse(r,translate('list_success',request),translate('list_failed_tips',request))
+            r=result_parse(r,_('list success'),_('list failed tips'))
             return Response(r)
 
         if args == 'create':
@@ -128,5 +128,5 @@ class FileProxy(baseview.BaseView):
             
             url=self.base_url+"?path="+create_path
             r = requests.get(url)
-            r=result_parse(r,translate('create_success',request),translate('create_failed_tips',request))
+            r=result_parse(r,_('create success'),_('create failed tips'))
             return Response(r)

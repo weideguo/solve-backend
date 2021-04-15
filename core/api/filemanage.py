@@ -6,13 +6,13 @@ import time
 from rest_framework.response import Response
 from django.http import FileResponse
 from django.utils.encoding import escape_uri_path
+from django.utils.translation import gettext as _
 
 from auth_new import baseview
 from libs import util
 from conf import config
 
 from libs.wrapper import file_root,playbook_root
-from libs.util import translate
 
 class File(baseview.BaseView):
     '''
@@ -23,13 +23,13 @@ class File(baseview.BaseView):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path'] 
         if re.match('.*\.\..*',path):
-            return Response({'status':-1,'path':path,'msg':util.safe_decode(translate('should_not_change_in_path',request))})
+            return Response({'status':-1,'path':path,'msg':util.safe_decode(_('should not change in path'))})
 
         filename=fr.name
         #print filename 
         save_path=os.path.join(file_root,'./'+path)
         if os.path.isfile(save_path):
-            msg=util.safe_decode(translate('path_is_dir',request))
+            msg=util.safe_decode(_('path is dir'))
             status=-1
             return Response({'file':save_path,'msg':msg,'status':status})
         elif not os.path.exists(save_path):
@@ -46,7 +46,7 @@ class File(baseview.BaseView):
                f.write(chunk) 
 
             status=1
-            msg=util.safe_decode(translate('upload_success',request))
+            msg=util.safe_decode(_('upload success'))
 
         return Response({'status':status,'file':full_path,'msg':msg})
 
@@ -55,7 +55,7 @@ class File(baseview.BaseView):
         
         for path in [request.GET.get('file',''),request.GET.get('path','')]:
             if re.match('.*\.\..*',path):
-                return Response({'status':-1,'path':path,'msg':util.safe_decode(translate('should_not_change_in_path',request))})
+                return Response({'status':-1,'path':path,'msg':util.safe_decode(_('should not change in path'))})
         
         if args == 'content':
             filename = request.GET['file']
@@ -69,7 +69,7 @@ class File(baseview.BaseView):
 
                 return Response({'status':1,'file':filename,'content':util.safe_decode(content)})
             except:
-                return Response({'status':-1,'file':filename,'msg':util.safe_decode(translate('read_file_failed',request))})
+                return Response({'status':-1,'file':filename,'msg':util.safe_decode(_('read file failed'))})
 
         
         if args == 'download':
@@ -89,7 +89,7 @@ class File(baseview.BaseView):
                 response['Content-Disposition']='%s;filename=%s' % (showtype, escape_uri_path(name))    
                 return response
             else:
-                return Response({'status':-1,'file':filename,'msg':util.safe_decode(translate('path_is_not_file',request))},status=404)
+                return Response({'status':-1,'file':filename,'msg':util.safe_decode(_('path is not file'))},status=404)
        
 
         if args == 'list':
@@ -110,7 +110,7 @@ class File(baseview.BaseView):
                 dirs.sort()
                 return Response({'status':1,'path':root_path,'files':files,'dirs':dirs})
             else:
-                return Response({'status':-1,'path':root_path,'msg':util.safe_decode(translate('path_is_not_dir',request))}) 
+                return Response({'status':-1,'path':root_path,'msg':util.safe_decode(_('path is not dir'))}) 
 
 
         if args == 'create':
@@ -120,10 +120,10 @@ class File(baseview.BaseView):
             try:
                 os.makedirs(create_path)
                 status=1
-                msg=util.safe_decode(translate('create_success',request))
+                msg=util.safe_decode(_('create success'))
             except OSError:
                 status=-1
-                msg=util.safe_decode(translate('create_failed',request))
+                msg=util.safe_decode(_('create failed'))
 
             return Response({'status':status,'path':create_path,'msg':msg})
 

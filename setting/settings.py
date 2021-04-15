@@ -46,6 +46,7 @@ MIDDLEWARE = [
     'django.middleware.security.SecurityMiddleware',
     'django.middleware.csrf.CsrfViewMiddleware',
     'django.middleware.clickjacking.XFrameOptionsMiddleware',
+    'django.middleware.locale.LocaleMiddleware', 
     'django.middleware.common.CommonMiddleware',
     'corsheaders.middleware.CorsMiddleware',
     'libs.middleware.MyMiddleware',
@@ -122,8 +123,10 @@ AUTH_PASSWORD_VALIDATORS = [
 
 # Internationalization
 # https://docs.djangoproject.com/en/1.11/topics/i18n/
+# 由此确认名字 $site-packages/django/conf/locale/
+LANGUAGE_CODE = 'zh-Hans'
 
-LANGUAGE_CODE = 'en-us'
+LOCALE_PATHS = ['locale'] 
 
 TIME_ZONE = 'Asia/Shanghai'
 
@@ -223,5 +226,3 @@ validate             #验证ticket 返回text格式 (后端使用)
 serviceValidate      #验证ticket 返回xml格式  (后端使用)
 """
 CAS_URL='libs.wrapper.cas_url'
-#用于翻译的函数
-TRANSLATE='libs.util.translate'

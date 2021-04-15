@@ -31,25 +31,6 @@ def get_lang(request):
     lang=lang.split(',')[0].replace('-','_').lower()  
     return lang
 
-def translate(string,request=None):
-    '''
-    翻译
-    由前端请求的http头Accept-Language指定后端返回的语言
-    默认使用zh_cn/zh-CN
-    '''
-    if request:
-        lang=get_lang(request)
-        try:
-            lang=importlib.import_module('conf.lang.'+lang)
-        except:
-            lang=importlib.import_module('conf.lang.zh_cn')
-
-        #翻译失败时返回原字段名
-        return getattr(lang, string, string)
-    else:
-        return string
-
-
 def safe_decode(string):
     '''
     由其他编码转换成unicode

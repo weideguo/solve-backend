@@ -10,11 +10,12 @@ from rest_framework.response import Response
 from rest_framework_jwt.settings import api_settings
 from django.contrib.auth import authenticate
 from django.shortcuts import redirect
+from django.utils.translation import gettext as _
 
 from . import baseview,util
 from .models import Account,CASProxyPgt
 from .serializers import UserINFO
-from .wrapper import cas_url,translate
+from .wrapper import cas_url
 
 
 
@@ -49,28 +50,28 @@ class UserInfo(baseview.BaseView):
             user.set_password(new_password)
             user.save()
 
-            return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(translate('change_password_success',request)) })
+            return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(_('change password success')) })
         except:
-            return Response({'status':-1,'data':util.safe_decode(username)+' '+util.safe_decode(translate('user_not_exist',request)) })
+            return Response({'status':-1,'data':util.safe_decode(username)+' '+util.safe_decode(_('user not exist')) })
 
     def post(self, request, args=None):
         username = request.data['username']
         password = request.data['password']
 
         if Account.objects.filter(username=username):
-            return Response({'status':-1,'msg':util.safe_decode(username)+' '+util.safe_decode(translate('user_exist_already',request))})
+            return Response({'status':-1,'msg':util.safe_decode(username)+' '+util.safe_decode(_('user exist already'))})
         else:
             user = Account.objects.create_user(
                 username=username,
                 password=password)
             user.save()
-            return Response({'status':1,'msg':util.safe_decode(username)+' '+util.safe_decode(translate('user_register_success',request))})
+            return Response({'status':1,'msg':util.safe_decode(username)+' '+util.safe_decode(_('user register success'))})
 
     def delete(self, request, args=None):
         username=args
         Account.objects.filter(username=username).delete()
-        #return Response({'status':1,'data':util.safe_decode(username+' '+translate('user_delete_success',request))})
-        return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(translate('user_delete_success',request))})
+        #return Response({'status':1,'data':util.safe_decode(username+' '+_('user delete success'))})
+        return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(_('user delete success'))})
 
 class LoginAuth(baseview.AnyLogin):
 
@@ -92,9 +93,9 @@ class LoginAuth(baseview.AnyLogin):
             #token = jwt_encode_handler(x)
             return Response({'status':1,'token': token})
         elif Account.objects.filter(username=user):
-            return Response({'status':-1,'token': '','msg':util.safe_decode(translate('password_error',request))})
+            return Response({'status':-1,'token': '','msg':util.safe_decode(_('password error'))})
         else:
-            return Response({'status':-2,'token': '','msg':util.safe_decode(translate('user_not_exist',request))})
+            return Response({'status':-2,'token': '','msg':util.safe_decode(_('user not exist'))})
 
 
 
@@ -123,7 +124,7 @@ class AuthCAS(baseview.AnyLogin):
     '''
     def get(self, request, args = None):
         if not cas_url:
-            return Response({'status':-3,'msg':util.safe_decode(translate('set_cas_before_used',request))})
+            return Response({'status':-3,'msg':util.safe_decode(_('set cas before used'))})
 
         if args == 'login':
             '''

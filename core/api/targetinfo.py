@@ -6,6 +6,7 @@ import time
 import uuid
 from rest_framework.response import Response
 from redis.exceptions import ResponseError
+from django.utils.translation import gettext as _
 
 from auth_new import baseview
 from libs import util
@@ -13,7 +14,6 @@ from conf import config
 
 from libs.wrapper import HashCURD
 from libs.redis_pool import redis_single
-from libs.util import translate
 
 
 class Target(baseview.BaseView):
@@ -107,9 +107,9 @@ class Host(baseview.BaseView):
                 deletelist = redis_send_client.keys('*'+ip+'*')
                 for d in deletelist:
                     redis_send_client.delete(d)
-                return  Response({'status':1, 'msg':util.safe_decode(translate('close_success',request)), 'delete_list':deletelist}) 
+                return  Response({'status':1, 'msg':util.safe_decode(_('close success')), 'delete_list':deletelist}) 
             else:
-                return  Response({'status':-1, 'msg':util.safe_decode(translate('close_failed',request))})
+                return  Response({'status':-1, 'msg':util.safe_decode(_('close failed'))})
 
         
         elif args=='conn': 
@@ -124,11 +124,11 @@ class Host(baseview.BaseView):
 
             exit_code=redis_log_client.hget(conn_uuid,'exit_code')
             if exit_code=='0':
-                return  Response({'status':1, 'msg':util.safe_decode(translate('connect_success',request))})
+                return  Response({'status':1, 'msg':util.safe_decode(_('connect success'))})
             elif exit_code:
                 return  Response({'status':-1, 'msg': util.safe_decode(exit_code)})
             elif conn_counter<100:
-                return  Response({'status':1, 'msg':util.safe_decode(translate('connect_success',request))})
+                return  Response({'status':1, 'msg':util.safe_decode(_('connect success'))})
             else:
-                return  Response({'status':-2, 'msg':util.safe_decode(translate('connect_timeout',request))})
+                return  Response({'status':-2, 'msg':util.safe_decode(_('connect timeout'))})
 
