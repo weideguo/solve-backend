@@ -12,7 +12,7 @@ from auth_new import baseview
 from libs import util
 from conf import config
 from dura import solve_dura
-from libs.wrapper import set_sort_key
+from libs.wrapper import set_sort_key,get_list_info,get_list_key_info
 from libs.redis_pool import redis_single
 from libs.util import get_lang
 
@@ -118,7 +118,8 @@ class Order(baseview.BaseView):
                 set_sort_key(redis_job_client, cache_key, config.prefix_job, sort_keyname, reverse)
 
                 #从缓存key查询 避免每次都进行全量查询再排序
-                cache_list=redis_job_client.lrange(cache_key,0,redis_job_client.llen(cache_key))
+                #cache_list=redis_job_client.lrange(cache_key,0,redis_job_client.llen(cache_key))
+                cache_list=get_list_info(redis_job_client, cache_key)
 
                 page_number = len(cache_list)
 
@@ -153,11 +154,15 @@ class Order(baseview.BaseView):
                 
                 if (job_info):
                     for c in ast.literal_eval(job_info.get('log')):
+                        target_full=c[0]  #包含id的执行对象
+                        target_log=c[1]   #记录执行对象执行日志的key
                         x={}
-                        x['target']=c[0].split(config.spliter+c[0].split(config.spliter)[-1])[0]
-                        x['target_id']=c[0].split(config.spliter)[-1]
+                        x['target_id']=target_full.split(config.spliter)[-1]
+                        #可能存在多个config.spliter，因此不能简单分割
+                        #x['target']=c[0].split(config.spliter+c[0].split(config.spliter)[-1])[0]
+                        x['target']=target_full.split(config.spliter+x['target_id'])[0]
                         x['playbook_rownum']=job_info.get('playbook_rownum')    
-                        x['exe_rownum']=redis_log_client.llen(c[1])
+                        x['exe_rownum']=redis_log_client.llen(target_log)
                         
                         log_target_sum=redis_log_client.hgetall('sum_'+x['target_id'])
                         x['begin_date']=log_target_sum.get('begin_timestamp')
@@ -168,7 +173,9 @@ class Order(baseview.BaseView):
                         if log_target_sum.get('stop_str'):
                             x['exe_status']=log_target_sum.get('stop_str')
                         else:
-                            x['exe_status']='executing'
+                            #先获取最后一行的step 然后再确定为executing状态
+                            last_cmd_id, last_step_info = get_list_key_info(redis_log_client,target_log,'step')
+                            x['exe_status'] = last_step_info if last_step_info else 'executing'
 
                         data.append(x)
                 return data
@@ -205,7 +212,7 @@ class Order(baseview.BaseView):
                     exe_sum['done'] += 1
                 else:
                     new_data.append(d)
-                    if not ('exe_status' in d) or (('exe_status' in d) and (d['exe_status']=='executing')):
+                    if not ('exe_status' in d) or (('exe_status' in d) and (d['exe_status'] in [ 'executing','pausing','waiting select'])):
                         exe_sum['executing'] += 1
 
             exe_sum['fail']=exe_sum['all'] - exe_sum['done'] - exe_sum['executing']
@@ -250,14 +257,11 @@ class Order(baseview.BaseView):
                 #设置较短的过期时间 因为通过阻塞获取
                 redis_send_client.expire(config.prefix_block+target_id, 100)
 
-                #判断select等待
-                log_len=redis_log_client.llen(config.prefix_log_target+target_id)
-                if log_len:
-                    last_cmd_id = redis_log_client.lrange(config.prefix_log_target+target_id,log_len-1,log_len-1)[0]
-                    step_info = redis_log_client.hget(last_cmd_id,'step')
-                    if step_info == 'waiting select':
-                        redis_send_client.rpush(config.prefix_select+config.spliter+last_cmd_id,' ')
-                        redis_send_client.delete(config.prefix_select+'_all'+config.spliter+last_cmd_id)
+                #判断select等待 通过获取最后一个key的step判断
+                last_cmd_id, last_step_info = get_list_key_info(redis_log_client,config.prefix_log_target+target_id,'step')
+                if last_step_info == 'waiting select':
+                    redis_send_client.rpush(config.prefix_select+config.spliter+last_cmd_id,' ')
+                    redis_send_client.delete(config.prefix_select+'_all'+config.spliter+last_cmd_id)
 
                 return Response({'status':1,'abort_time':0})
             else:
@@ -271,18 +275,14 @@ class Order(baseview.BaseView):
             target_id = request.GET['id']
 
             target_id = config.prefix_log_target+target_id
-            l_len=redis_log_client.llen(target_id)
-            exelist=[]
-            is_pause=0 
-            if l_len:
-                exelist=redis_log_client.lrange(target_id,0,l_len-1)
-                #当前最后执行命令的信息为 {'stdout': 'pausing'} 则说明当前的执行处于阻塞模式
+            
+            exelist=get_list_info(redis_log_client,target_id) 
+            is_pause=0
+            if exelist:
                 tmp_last_info=redis_log_client.hgetall(exelist[-1])
-                #if str(tmp_last_info.get('stdout')) == 'pausing':
-                if tmp_last_info.get('stdout') == 'pausing':
+                #当前最后执行命令的信息为 {'step': 'pausing'} 则说明当前的执行处于阻塞模式
+                if tmp_last_info.get('step') == 'pausing':
                     is_pause=1
-            else:
-                is_pause=0                
 
             return Response({'status':1,'exelist':exelist,'pause':is_pause})
         

@@ -222,4 +222,26 @@ def set_sort_key(redis_client, cache_key, key_prefix, sort_key, reverse):
         redis_client.rpush(cache_key,*_all_sort)
 
 
+def get_list_info(redis_client, key, start=0, end=0):
+    """
+    获取redis list类型的数据
+    start 从第几个开始
+    end   只获取到倒数第几个 0或者负数
+    """
+    l_len=redis_client.llen(key)
+    r=[]
+    if l_len:
+        r=redis_client.lrange(key,0+start,l_len-1+end)
+    return r
 
+def get_list_key_info(redis_client, key, key_field="", pos=-1 ):
+    """
+    获取redis list类型的数据第几个对应key的实际值 
+    -1 最后一个
+    -2 倒数第二个
+    """
+    sub_key = redis_client.lrange(key, pos, pos)[0]
+    if key_field:
+        return sub_key, redis_client.hget(sub_key, key_field)
+    else:
+        return sub_key, redis_client.hgetall(sub_key)
