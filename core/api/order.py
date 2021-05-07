@@ -172,10 +172,12 @@ class Order(baseview.BaseView):
 
                         if log_target_sum.get('stop_str'):
                             x['exe_status']=log_target_sum.get('stop_str')
+                            x['finish']=1      #1 执行已经结束，0 还在执行中
                         else:
                             #先获取最后一行的step 然后再确定为executing状态
                             last_cmd_id, last_step_info = get_list_key_info(redis_log_client,target_log,'step')
                             x['exe_status'] = last_step_info if last_step_info else 'executing'
+                            x['finish']=0
 
                         data.append(x)
                 return data
@@ -208,11 +210,18 @@ class Order(baseview.BaseView):
             new_data = []
             for d in data:
                 exe_sum['all'] += 1
-                if ('exe_status' in d) and (d['exe_status']=='done'):
+                # if ('exe_status' in d) and (d['exe_status']=='done'):
+                #     exe_sum['done'] += 1
+                # else:
+                #     new_data.append(d)
+                #     if not ('exe_status' in d) or (('exe_status' in d) and (d['exe_status'] in [ 'executing','pausing','waiting select'])):
+                #         exe_sum['executing'] += 1
+                if d.get('exe_status')=='done' and d['finish']:
                     exe_sum['done'] += 1
                 else:
+                    # 未执行结束或者执行发生失败
                     new_data.append(d)
-                    if not ('exe_status' in d) or (('exe_status' in d) and (d['exe_status'] in [ 'executing','pausing','waiting select'])):
+                    if not d['finish']:
                         exe_sum['executing'] += 1
 
             exe_sum['fail']=exe_sum['all'] - exe_sum['done'] - exe_sum['executing']
