@@ -348,16 +348,9 @@ class SolveDura():
 
 MONGODB_CONFIG={}
 cp=util.getcp()
-if cp.has_section("mongodb") and cp.has_option("mongodb","host"):
-    MONGODB_CONFIG['host']=cp.get('mongodb','host')
-    MONGODB_CONFIG['port']=int(cp.get('mongodb','port'))
+if cp.has_section('mongodb') and cp.has_option('mongodb','uri') and cp.has_option('mongodb','db'):
+    MONGODB_CONFIG['uri']=cp.get('mongodb','uri')
     MONGODB_CONFIG['db']=cp.get('mongodb','db')
-    try:
-        #允许不设置账号密码，不推荐
-        MONGODB_CONFIG['user']=cp.get('mongodb','user')
-        MONGODB_CONFIG['passwd']=cp.get('mongodb','passwd')
-    except:
-        pass
 
 if MONGODB_CONFIG:
     #单例模式

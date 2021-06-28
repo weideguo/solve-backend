@@ -39,15 +39,11 @@ class Dura():
         self.zset_name = zset_name           #zset类型的值存储在mongodb的字段
 
         
-        #pymongo内置连接池，可以自动处理网络波动问题，阻塞等待
-        conn=MongoClient(host=mongodb_config['host'], port=mongodb_config['port'])
+        #pymongo内置连接池，可以自动处理网络波动问题，阻塞等待        
+        conn=MongoClient(mongodb_config['uri'])
         self.db=conn[mongodb_config['db']]
-        if ('user' in mongodb_config) and mongodb_config['user']:
-            self.db.authenticate(mongodb_config['user'], mongodb_config['passwd']) 
-        
-        #self.db=mongodb_db
+
         self.redis_client_set=redis_client_set
-        #self.__backgroup()
 
 
     def save(self):
