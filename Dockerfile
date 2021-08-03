@@ -2,7 +2,7 @@
 # Version 1.0
 
 # Base images 
-FROM python:3.5
+FROM python:3.7
 LABEL maintainer="wdg(https://github.com/weideguo)"
 
 ARG INDEX_URL="https://pypi.org/simple/"
