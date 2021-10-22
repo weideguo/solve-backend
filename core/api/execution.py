@@ -163,7 +163,6 @@ class Session(baseview.BaseView):
             session_tag = config.prefix_session
             if data:
                 data=util.plain_dict(data)
-    
                 redis_manage_client.hmset(session_tag+config.spliter+filter,data)
     
             return Response({'status':1,'vars':data})
@@ -183,6 +182,24 @@ class Session(baseview.BaseView):
             return Response({'status':1,'job_id':job_id,'session':session_name})
 
         #return Response({'status':-1,'msg':"error args","args":args})
+
+
+class Golbal(baseview.BaseView):
+    def post(self, request, args = None):
+        '''
+        提交global参数
+        '''
+        target_id = request.GET['target_id']
+        data = request.data
+        if not data:
+            return Response({'status':-1,'msg':util.safe_decode(_('should not commit empty data'))})
+        
+        redis_tmp_client = redis_single['redis_tmp']
+        
+        global_key = config.prefix_global+config.spliter+target_id
+        redis_tmp_client.delete(global_key)
+        redis_tmp_client.hmset(global_key,data)
+        return Response({'status':1,'global_key':global_key})
 
 
 class Execution(baseview.BaseView): 
@@ -339,7 +356,13 @@ class Execution(baseview.BaseView):
             except:
                 session_data={}
 
+            try:            
+                global_data=redis_tmp_client.hgetall(config.prefix_global+config.spliter+target_id)
+            except:
+                global_data={}
+            
             rerun_info[config.prefix_session]=session_data
+            rerun_info[config.prefix_global]=global_data
             
             readonly={}
             readonly['playbook']=job_info['playbook']
