@@ -94,6 +94,9 @@ curl "http://127.0.0.1:8000/api/v1/fast/" -H "Authorization:JWT ${xx}" -X POST -
 curl "http://127.0.0.1:8000/api/v1/pauseRun/?target_id=8d0e0604cfda11eaa9cc000c295dd589&type=0" -H "Authorization:JWT ${xx}" 
 
 
+curl "http://127.0.0.1:8000/api/v1/global/?target_id=6cec337832e911ec8f80005056337d90" -H "Authorization:JWT ${xx}" -d "xx=123&&yy=abc"
+
+
 #文件管理
 
 curl  "http://127.0.0.1:8000/api/v1/file/?path=./" -F "file=@/root/xxx.sh"  -H "Authorization:JWT ${xx}"
