@@ -158,7 +158,7 @@ class HashCURD():
             target_list=redis_client.keys(filter)
             new_target_list = []
             for k in target_list:
-                if filter_tmp and len(t.split(filter_tmp))>=2 and re.match('^[a-zA-Z0-9]{32}$',t.split(filter_tmp)[-1]):
+                if filter_tmp and len(k.split(filter_tmp))>=2 and re.match('^[a-zA-Z0-9]{32}$',k.split(filter_tmp)[-1]):
                     continue
                 
                 new_target_list.append(k)
