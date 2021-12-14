@@ -46,7 +46,7 @@ class Target(baseview.BaseView):
             return Response({'status':1,'data':data})
         else:
             #其他的 get del info 操作
-            return HashCURD.get(redis_config_client,request, args)
+            return HashCURD.get(redis_config_client, request, args, filter_tmp=config.spliter)
 
     def post(self, request, args = None):
         redis_config_client = redis_single['redis_config']

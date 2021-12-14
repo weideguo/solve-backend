@@ -41,8 +41,10 @@ class Home(baseview.BaseView):
 
             real_all_target=[]
             for k in all_target:
-                if not re.match('^\S{32}$',k.split(config.spliter)[-1]):
-                    real_all_target.append(k)    
+                if len(k.split(config.spliter))>=2 and re.match('^[a-zA-Z0-9]{32}$',k.split(config.spliter)[-1]):
+                    continue
+                
+                real_all_target.append(k)    
 
             info['target'] = len(real_all_target)
             return Response(info) 

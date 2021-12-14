@@ -97,7 +97,7 @@ class HashCURD():
     对hash类型的增删改查
     '''
     @staticmethod
-    def get(redis_client,request, args = None):
+    def get(redis_client, request, args = None, filter_tmp=''):
 
         if args=='get':
             '''
@@ -109,17 +109,18 @@ class HashCURD():
             orderby = request.GET.get('orderby','')
             reverse = bool(int(request.GET.get('reverse',1))) 
             
-            filter=filter
-            
             new_target_list = []
             
             target_list=redis_client.keys(filter)
             
             for t in target_list:
-                if not re.match('^\S{32}$',t.split('_')[-1]):
-                    b=redis_client.hgetall(t)
-                    b.update({'name':t})
-                    new_target_list.append(b)
+                # 如以 68b329da9893e34099c7d8ad5cb9c940 结尾的可能是临时对象，可能需要过滤
+                if filter_tmp and len(t.split(filter_tmp))>=2 and re.match('^[a-zA-Z0-9]{32}$',t.split(filter_tmp)[-1]):
+                    continue
+                        
+                b=redis_client.hgetall(t)
+                b.update({'name':t})
+                new_target_list.append(b)
             
             page_number=len(new_target_list)
 
@@ -154,12 +155,13 @@ class HashCURD():
             简单的匹配列表
             '''
             filter = request.GET['filter']        
-            filter=filter
             target_list=redis_client.keys(filter)
             new_target_list = []
             for k in target_list:
-                if not re.match('^\S{32}$',k.split('_')[-1]):
-                    new_target_list.append(k)
+                if filter_tmp and len(t.split(filter_tmp))>=2 and re.match('^[a-zA-Z0-9]{32}$',t.split(filter_tmp)[-1]):
+                    continue
+                
+                new_target_list.append(k)
 
             return Response({'status':1, 'data':new_target_list}) 
 
