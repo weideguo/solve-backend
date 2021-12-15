@@ -9,6 +9,7 @@ from django.utils.encoding import escape_uri_path
 from django.utils.translation import gettext as _
 
 from auth_new import baseview
+from auth_new.decorators import super_privilege
 from libs import util
 from conf import config
 from dura import solve_dura
@@ -230,22 +231,8 @@ class Order(baseview.BaseView):
                 return Response({'status':1, 'data': new_data, 'playbook':playbook,'sum':exe_sum,'debug_list':debug_list})
             else:
                 return Response({'status':1, 'data': data, 'playbook':playbook,'sum':exe_sum,'debug_list':debug_list})
-
-
-        elif args=='del':
-            '''
-            删除单条工单信息
-            '''
-            work_id = request.GET['workid']
-
-            redis_job_client.delete(work_id)
-            if solve_dura:
-                solve_dura.delete(config.prefix_log+work_id)
-                solve_dura.real_delete(work_id,redis_job_client)
-
-            return Response({'status':1})
-
-
+        
+        
         elif args=='abort':
             '''
             终止单个执行
@@ -364,3 +351,18 @@ class Order(baseview.BaseView):
                 summary.append(tmp_summary[k])           
 
             return Response({'status':1,'data':summary})                               
+    
+    
+    @super_privilege(msg=util.safe_decode(_('only super user can delete')))
+    def delete(self, request, args = None):
+        '''
+        删除单条工单信息
+        '''
+        redis_job_client = redis_single['redis_job']
+        work_id = request.GET['workid']
+        redis_job_client.delete(work_id)
+        if solve_dura:
+            solve_dura.delete(config.prefix_log+work_id)
+            solve_dura.real_delete(work_id,redis_job_client)
+        return Response({'status':1})
+    

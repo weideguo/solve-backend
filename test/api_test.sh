@@ -39,7 +39,7 @@ curl "http://127.0.0.1:8000/api/v1/order/?page=1&pagesize=16" -H "Authorization:
 
 curl "http://127.0.0.1:8000/api/v1/order/detail?workid=job_0ba06dba38b311e9add3000c29e7008f" -H "Authorization:JWT ${xx}"
 
-curl "http://127.0.0.1:8000/api/v1/order/del?workid=job_0ba06dba38b311e9add3000c29e7008f" -H "Authorization:JWT ${xx}"
+curl "http://127.0.0.1:8000/api/v1/order/?workid=job_0ba06dba38b311e9add3000c29e7008f" -H "Authorization:JWT ${xx}"  -X DELETE 
 
 curl "http://127.0.0.1:8000/api/v1/order/abort?cluster_id=0ba06dba38b311e9add3000c29e7008f" -H "Authorization:JWT ${xx}"
 

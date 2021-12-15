@@ -16,6 +16,7 @@ from . import baseview,util
 from .models import Account,CASProxyPgt
 from .serializers import UserINFO
 from .wrapper import cas_url
+from .decorators import super_privilege
 
 
 
@@ -39,10 +40,9 @@ class UserInfo(baseview.BaseView):
         info = UserINFO(info, many=True).data 
         
         return Response({'status':1,'page': page_number, 'data': info})
-
-
+    
+    @super_privilege(msg=util.safe_decode(_('only super user can change password')))
     def put(self, request, args=None):
-        print(request.data)
         username = request.data['username']
         new_password = request.data['new']
         try:
@@ -54,6 +54,7 @@ class UserInfo(baseview.BaseView):
         except:
             return Response({'status':-1,'data':util.safe_decode(username)+' '+util.safe_decode(_('user not exist')) })
 
+    @super_privilege(msg=util.safe_decode(_('only super user can add user')))
     def post(self, request, args=None):
         username = request.data['username']
         password = request.data['password']
@@ -67,10 +68,10 @@ class UserInfo(baseview.BaseView):
             user.save()
             return Response({'status':1,'msg':util.safe_decode(username)+' '+util.safe_decode(_('user register success'))})
 
+    @super_privilege(msg=util.safe_decode(_('only super user can delete')))
     def delete(self, request, args=None):
         username=args
         Account.objects.filter(username=username).delete()
-        #return Response({'status':1,'data':util.safe_decode(username+' '+_('user delete success'))})
         return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(_('user delete success'))})
 
 class LoginAuth(baseview.AnyLogin):

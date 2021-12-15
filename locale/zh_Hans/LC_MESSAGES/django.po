@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-04-15 15:34+0800\n"
+"POT-Creation-Date: 2021-12-15 14:42+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,31 +18,43 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
+#: auth_new/views.py:44
+msgid "only super user can change password"
+msgstr "只有超级用户可以修改密码"
+
 #: auth_new/views.py:53
 msgid "change password success"
 msgstr "密码修改成功"
 
-#: auth_new/views.py:55 auth_new/views.py:98
+#: auth_new/views.py:55 auth_new/views.py:99
 msgid "user not exist"
 msgstr "账号不存在"
 
-#: auth_new/views.py:62
+#: auth_new/views.py:57
+msgid "only super user can add user"
+msgstr "只有超级用户可以增加用户"
+
+#: auth_new/views.py:63
 msgid "user exist already"
 msgstr "用户名已经存在"
 
-#: auth_new/views.py:68
+#: auth_new/views.py:69
 msgid "user register success"
 msgstr "用户注册成功"
 
-#: auth_new/views.py:74
+#: auth_new/views.py:71 core/api/order.py:356
+msgid "only super user can delete"
+msgstr "只有超级用户可以删除"
+
+#: auth_new/views.py:75
 msgid "user delete success"
 msgstr "用户删除成功"
 
-#: auth_new/views.py:96
+#: auth_new/views.py:97
 msgid "password error"
 msgstr "密码错误"
 
-#: auth_new/views.py:127
+#: auth_new/views.py:128
 msgid "set cas before used"
 msgstr "必须先在后端设置CAS的地址才能使用"
 
@@ -66,24 +78,24 @@ msgstr "type必须为string list set hash之一"
 msgid "type not match"
 msgstr "type类型不匹配"
 
-#: core/api/execution.py:175
+#: core/api/execution.py:174 core/api/execution.py:195
 msgid "should not commit empty data"
 msgstr "空数据不必提交"
 
-#: core/api/execution.py:393
+#: core/api/execution.py:416
 msgid "commit date attr error"
 msgstr "提交的数据必须包含以下属性： spliter、parallel、exeinfo、playbook"
 
-#: core/api/execution.py:435
+#: core/api/execution.py:458
 #, python-format
 msgid "error in line %d"
 msgstr "第 %d 行配置信息错误！"
 
-#: core/api/execution.py:475
+#: core/api/execution.py:498
 msgid "fast job parallel"
 msgstr "快速任务-并行"
 
-#: core/api/execution.py:492
+#: core/api/execution.py:515
 msgid "fast job serial"
 msgstr "快速任务-串行"
 
@@ -156,7 +168,7 @@ msgstr "查看失败，请查看日志"
 msgid "create failed tips"
 msgstr "创建失败，请查看日志"
 
-#: core/api/order.py:179
+#: core/api/order.py:189
 msgid "get log info failed"
 msgstr "获取日志信息失败"
 
@@ -164,11 +176,11 @@ msgstr "获取日志信息失败"
 msgid "abort alread exist"
 msgstr "已经存在中止操作"
 
-#: core/api/order.py:309
+#: core/api/order.py:305
 msgid "not select error"
 msgstr "原命令不是select参数但存在选择key"
 
-#: core/api/order.py:311
+#: core/api/order.py:307
 msgid "not origin cmd"
 msgstr "原始命令不存在"
 
@@ -192,30 +204,30 @@ msgstr "连接超时"
 msgid "what you want to translate"
 msgstr ""
 
-#: libs/wrapper.py:174
+#: libs/wrapper.py:176
 msgid "name attribute must exist"
 msgstr "name 字段必须存在"
 
-#: libs/wrapper.py:180
+#: libs/wrapper.py:182
 msgid "modified target not exist"
 msgstr "修改的对象不存在，请刷新后再试!"
 
-#: libs/wrapper.py:182
+#: libs/wrapper.py:184
 msgid "change to target already exist"
 msgstr "对象名已经存在，不能修改为此!"
 
-#: libs/wrapper.py:189
+#: libs/wrapper.py:191
 msgid "modify success"
 msgstr "修改成功"
 
-#: libs/wrapper.py:193
+#: libs/wrapper.py:195
 msgid "add info exist"
 msgstr "添加的信息已经存在，不能再插入!"
 
-#: libs/wrapper.py:196
+#: libs/wrapper.py:198
 msgid "add success"
 msgstr "添加成功!"
 
-#: libs/wrapper.py:198
+#: libs/wrapper.py:200
 msgid "add info null"
 msgstr "添加信息至少存在一个属性!"
