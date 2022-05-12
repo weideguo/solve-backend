@@ -279,7 +279,8 @@ class Execution(baseview.BaseView):
             重新执行单个执行
             ''' 
             
-            begin_line = int(request.GET.get('begin_line',0))            
+            begin_line = int(request.GET.get('begin_line',0)) 
+            use_old_target = int(request.GET.get('use_old_target',1))             
 
             _job_id = request.GET.get('new_job_id','')
             if _job_id:
@@ -306,8 +307,16 @@ class Execution(baseview.BaseView):
 
             new_target_id = uuid.uuid1().hex
             
-            if begin_line:
-                redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_tmp_client.hgetall(target+config.spliter+target_id))
+            # 隔离原则 target session global ，即重新运行的任务尽量使用父任务的信息。只允许playbook更改。
+            # 按默认使用父任务target。 
+            if use_old_target:
+                try:
+                    old_target_info = redis_tmp_client.hgetall(target+config.spliter+target_id)
+                except:
+                    # 可能出现旧的执行对象已经被清除，因此中断这次执行
+                    return Response({'status':-1,'msg': util.safe_decode(_('get old target info failed, it may not exist'))}) 
+                 
+                redis_tmp_client.hmset(target+config.spliter+new_target_id,old_target_info)
             else:
                 try:
                     redis_tmp_client.hmset(target+config.spliter+new_target_id,redis_config_client.hgetall(target))
