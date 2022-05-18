@@ -47,7 +47,7 @@ curl "http://127.0.0.1:8000/api/v1/order/exelist?id=log_cluster_904b1b827aa811e9
 
 curl "http://127.0.0.1:8000/api/v1/order/exedetail?id=904b7b727aa811e980d5005056b64b9c" -H "Authorization:JWT ${xx}"
 
-
+curl "http://127.0.0.1:8000/api/v1/order/run_target_list?workid=job_03799d7ed68411ec81cc005056337d90&target_name=cluster1" -H "Authorization:JWT ${xx}"
 
 
 

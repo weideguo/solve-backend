@@ -233,6 +233,35 @@ class Order(baseview.BaseView):
                 return Response({'status':1, 'data': data, 'playbook':playbook,'sum':exe_sum,'debug_list':debug_list})
         
         
+        elif args=='run_target_list':
+            '''
+            获取单个子任务所有的历史执行对象id，由最新开始排
+            '''
+            work_id = request.GET['workid']
+            target_name = request.GET['target_name']
+            
+            run_target_list = []
+            job_info_list = []
+            
+            job_info = redis_log_client.hgetall(config.prefix_log+work_id)
+            if 'rerun' in job_info and job_info['rerun']:
+                for _work_id in job_info['rerun'].split(",")[::-1]:
+                    job_info_list.append(redis_log_client.hgetall(config.prefix_log+_work_id))
+            
+            # 包含rerun任务以及最初的任务，根据时间倒叙
+            job_info_list.append(job_info)
+            # 过滤只获取指定对象的执行信息
+            for _job_info in job_info_list:
+                target_pairs = ast.literal_eval(_job_info['log'])
+                for target_pair in target_pairs:
+                    _target_pair = target_pair[0].split(config.spliter)
+                    if _target_pair[0] == target_name:
+                        run_target_list.append(_target_pair[1])
+                        break
+            
+            return Response({'status':1, 'data':run_target_list})
+            
+            
         elif args=='abort':
             '''
             终止单个执行
