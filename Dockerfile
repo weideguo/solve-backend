@@ -2,7 +2,7 @@
 # Version 1.0
 
 # Base images 
-FROM python:3.7
+FROM python:3.9
 LABEL maintainer="wdg(https://github.com/weideguo)"
 
 ARG INDEX_URL="https://pypi.org/simple/"
@@ -28,7 +28,7 @@ RUN cp docker-entrypoint.sh /usr/local/bin/
 RUN mv db.sqlite3.demo db.sqlite3
 
 #RUN pip install -r requirements.txt ; echo "skip DEPRECATION info"
-RUN pip install -r requirements3.7.txt  --index-url ${INDEX_URL} --trusted-host ${TRUSTED_HOST} ; echo "skip DEPRECATION info"
+RUN pip install -r requirements3.9.txt  --index-url ${INDEX_URL} --trusted-host ${TRUSTED_HOST} ; echo "skip DEPRECATION info"
 
 #ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["docker-entrypoint.sh"]
