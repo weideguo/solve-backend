@@ -144,8 +144,8 @@ class HashCURD():
             '''
             target =  request.GET['target']
             redis_client.delete(target)
-            if solve_dura:
-                solve_dura.real_delete(target,redis_client)
+            
+            solve_dura.real_delete(target,redis_client)
 
             return Response({'status':1})
 
@@ -184,8 +184,8 @@ class HashCURD():
                 return  Response({'status':-2,'msg':safe_decode(_('change to target already exist'))})
             else:
                 redis_client.delete(target_o)
-                if solve_dura:
-                    solve_dura.real_delete(target_o,redis_client)
+                
+                solve_dura.real_delete(target_o,redis_client)
 
                 redis_client.hmset(target,info)
                 return  Response({'status':2,'msg':safe_decode(_('modify success'))})

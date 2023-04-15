@@ -148,8 +148,7 @@ class Order(baseview.BaseView):
             def get_summary(work_id):
                 data=[]
                 #log_job_xxx 不存在则从mongodb加载到redis
-                if solve_dura:
-                    solve_dura.reload(config.prefix_log+work_id,0)
+                solve_dura.reload(config.prefix_log+work_id,0)
 
                 job_info=redis_log_client.hgetall(config.prefix_log+work_id)
                 
@@ -390,8 +389,8 @@ class Order(baseview.BaseView):
         redis_job_client = redis_single['redis_job']
         work_id = request.GET['workid']
         redis_job_client.delete(work_id)
-        if solve_dura:
-            solve_dura.delete(config.prefix_log+work_id)
-            solve_dura.real_delete(work_id,redis_job_client)
+        
+        solve_dura.delete(config.prefix_log+work_id)
+        solve_dura.real_delete(work_id,redis_job_client)
         return Response({'status':1})
     

@@ -9,6 +9,9 @@ import redis
 from threading import Thread
 from multiprocessing import Process
 
+base_dir=os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
+sys.path.append(base_dir)
+
 from pymongo.errors import PyMongoError,ServerSelectionTimeoutError
 from redis.exceptions import ConnectionError
 from django.conf import settings
@@ -55,7 +58,7 @@ class SolveDura():
         self.dura = self.getDura()
 
         self.time_gap=time_gap
-        db=self.__background()
+        # self.__background()
     
 
     def redis_refresh(self):
@@ -322,7 +325,7 @@ class SolveDura():
         dura.load()
 
 
-    def __background_t(self):
+    def background_t(self):
         '''
         线程模型 
         GIL Global Interpreter Lock
@@ -336,7 +339,7 @@ class SolveDura():
         t3.start()
 
 
-    def __background(self):
+    def background(self):
         p1=Process(target=self.__expire,args=())
         p2=Process(target=self.__save,args=())   
         t1=Thread(target=self.__load,args=())     
@@ -344,6 +347,24 @@ class SolveDura():
         p2.start()
         t1.start()
         #启动时加载使用线程模式，防止存在僵死进程
+
+
+class BaseDura():
+    def get_keys(self, *arg, **kwargs): 
+        pass
+    def reload(self, *arg, **kwargs):
+        pass
+    def expire(self, *arg, **kwargs):
+        pass
+    def delete( *arg, **kwargs):
+        pass
+    def real_delete(self, *arg, **kwargs):
+        pass
+    def background_t(self, *arg, **kwargs):
+        pass
+    def background(self, *arg, **kwargs):
+        pass
+
 
 
 MONGODB_CONFIG={}
@@ -354,8 +375,9 @@ if cp.has_section('mongodb') and cp.has_option('mongodb','uri') and cp.has_optio
 
 if MONGODB_CONFIG:
     #单例模式
-    #solve_dura=None
+    MYLOGGER.info('durability for MONGODB_CONFIG [ %s ] in settings ' % str(MONGODB_CONFIG))
     solve_dura=SolveDura(MONGODB_CONFIG)
 else:
     MYLOGGER.info('no durability for MONGODB_CONFIG [ %s ] in settings ' % str(MONGODB_CONFIG))
-    solve_dura=None
+    solve_dura=BaseDura()
+

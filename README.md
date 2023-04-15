@@ -16,18 +16,21 @@ running
 ### prerun ###
 ```shell
 #首次运行初始化
+vim deploy.conf                     #设置redis、mongodb、cas 以及其他相关参数
 #sh set_secret_key.sh               #重新生成SECRET_KEY于django的配置文件
-python manage.py resetsecretkey     #重新生成SECRET_KEY于django的配置文件 使用该命令需要先设置redis且注释mongodb的信息
-python manage.py makemigrations     #创建数据库迁移文件 deploy.conf的mongodb设置必须先注释
+python manage.py resetsecretkey     #重新生成SECRET_KEY于django的配置文件 使用该命令需要先设置redis
+python manage.py makemigrations     #创建数据库迁移文件
 python manage.py migrate            #使用迁移文件初始化数据库
 python manage.py createsuperuser    #创建账号
-vim deploy.conf                     #设置redis、mongodb、cas 以及其他相关参数
 python set_config.py                #初始化执行对象、执行模板等的一些默认配置，这些配置也可以在web界面重新修改
 ```
 
 ### start ###
 ```shell
 export LC_ALL=en_US.UTF-8           #中文支持
+# 持久化进程
+nohup python durable_server.py &
+# web进程
 nohup python manage.py runserver 127.0.0.1:8000 &
 
 #正式环境使用gunicorn 提供更好性能
