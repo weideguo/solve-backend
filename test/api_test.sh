@@ -4,7 +4,7 @@
 #登录 
 curl "http://127.0.0.1:8000/api/v1/login/" -d "username=admin&password=weideguo"
 
-curl -H "Content-Type:application/json" -H "Accept:application/json"  -d "{\"username\":\"admin\",\"password\":\"weideguo\"}" "http://127.0.0.1:8000/login/"
+curl -H "Content-Type:application/json" -H "Accept:application/json"  -d "{\"username\":\"admin\",\"password\":\"weideguo\"}" "http://127.0.0.1:8000/api/v1/login/"
 
 xx=`curl "http://127.0.0.1:8000/api/v1/login/" -d "username=admin&password=weideguo" | grep -oP "(?<=token\":\").*?(?=\")"`
 
@@ -134,4 +134,40 @@ curl  "http://127.0.0.1:8000/api/v1/dura/?id=job_3d10ade82b8711ea82d8000c295dd58
 #test
 curl  "http://127.0.0.1:8000/api/v1/test/" -H "Authorization:JWT ${xx}"
 
+
+# permanent_token
+permanent_token="675ab0baa7f747813903e8b7dbd14de3"
+curl  "http://127.0.0.1:8000/api/v1/home/info" -H "Authorization:permanent_token ${permanent_token}"
+
+curl  "http://127.0.0.1:8000/api/v1/home/info?permanent_token=${permanent_token}"
+
+
+curl "http://127.0.0.1:8000/api/v1/target/add?a=aaa&b=bbb" -H "Authorization:permanent_token ${permanent_token}" -H "Content-Type:application/json" -d "{\"name\":\"server_db12334987\",\"sda\":\"daf\",\"b\":\"af\"}"
+
+curl "http://127.0.0.1:8000/api/v1/target/update" -H "Authorization:permanent_token ${permanent_token}" -X POST -d "name=server_db12334987sd&a=daf&b=afd"
+
+
+# 容易被猜测
+# echo `date +%s`.${RANDOM} | md5sum
+
+# 安全的token生成
+openssl rand -base64 2048 | md5sum
+python -c 'import random;begin_char=33;end_char=126;key_len=2048;print(("".join(map(lambda i : chr(random.randint(begin_char,end_char)) ,range(key_len)))).encode("latin1"))' | md5sum
+## db
+
+insert auth_new_permanenttoken
+(id, token, username, create_date, validate_date, max_invoke, invoke_rule_ids, is_validate)
+values
+(1,'675ab0baa7f747813903e8b7dbd14de3','admin',
+'2023-04-12 20:00:00', '2023-05-10 20:00:00',
+,9999,'1,4',-1);
+
+insert into auth_new_apiinvokerule values 
+(1, '["/api/v1/target/info"]', '["127.0.0.1"]', '["GET","POST"]', '[{"a": "aaaa", "v": "vvv"},{"a": "aaa"},{"a": "aaaaa"}]', '[{"a": "aaaa", "v": "vvv"}]');
+insert into auth_new_apiinvokerule values 
+(2, '["/api/v1/target/stats"]', '["127.0.0.1"]', '["GET","POST"]', null, null);
+insert into auth_new_apiinvokerule values 
+(3, '["/api/v1/target/add"]', '["127.0.0.1"]', '["GET","POST"]', null, '[{"name": "server_.*", "v": "vvv"}]');
+insert into auth_new_apiinvokerule values 
+(4, '["/api/v1/target/update"]', '["127.0.0.1"]', '["GET","POST"]', '[{"a": "a.*", "b": "b.*"}]', '[{"name": "server_.*", "v": "v.*"}]');
 

@@ -3,7 +3,9 @@ import re
 import copy
 import datetime
 import redis
+
 from rest_framework.response import Response
+from django.utils.translation import gettext as _
 
 from auth_new.models import Account
 from auth_new import baseview
@@ -100,4 +102,7 @@ class Home(baseview.BaseView):
           
             return Response(r)
 
+
+        else:
+            return Response({'status':-2,'msg':util.safe_decode(_('request url not implemented'))})
 

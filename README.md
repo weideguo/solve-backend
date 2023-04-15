@@ -53,7 +53,8 @@ python manage.py compilemessages            #修改.po文件后需要运行
 #使用test目录下的测试样例
 cd test             
 curl http://...
-#使用测试框架 执行前请先配置好文件deploy.conf且注释mongodb的配置
+#使用测试框架 执行前请先配置好文件deploy.conf
+python manage.py test auth_new.test_token_auth
 python manage.py test auth_new
 python manage.py test core
 python manage.py test

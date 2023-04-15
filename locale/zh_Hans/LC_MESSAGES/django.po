@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2021-12-15 14:42+0800\n"
+"POT-Creation-Date: 2023-05-08 17:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,6 +17,43 @@ msgstr ""
 "Content-Type: text/plain; charset=UTF-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
+
+#: auth_new/token_auth.py:34
+msgid "Invalid Authorization header. No credentials provided."
+msgstr ""
+
+#: auth_new/token_auth.py:37
+msgid ""
+"Invalid Authorization header. Credentials string should not contain spaces."
+msgstr ""
+
+#: auth_new/token_auth.py:76
+msgid "permanent token do not work as invoke rule is null"
+msgstr "调用规则为空，该permanent token不生效"
+
+#: auth_new/token_auth.py:83
+msgid "permanent token exceed invoke limit"
+msgstr "permanent token调用次数超过限制"
+
+#: auth_new/token_auth.py:87
+msgid "permanent token is not validated"
+msgstr "permanent token不在生效状态"
+
+#: auth_new/token_auth.py:92
+msgid "permanent token is not in validated date"
+msgstr "permanent token不在有效日期"
+
+#: auth_new/token_auth.py:99
+msgid "Invalid signature."
+msgstr ""
+
+#: auth_new/token_auth.py:150
+msgid "no invoke rule match"
+msgstr "没有调用规则匹配"
+
+#: auth_new/token_auth.py:154
+msgid "invoke url params not allow"
+msgstr "调用参数检查不通过"
 
 #: auth_new/views.py:44
 msgid "only super user can change password"
@@ -42,7 +79,7 @@ msgstr "用户名已经存在"
 msgid "user register success"
 msgstr "用户注册成功"
 
-#: auth_new/views.py:71 core/api/order.py:356
+#: auth_new/views.py:71 core/api/order.py:384
 msgid "only super user can delete"
 msgstr "只有超级用户可以删除"
 
@@ -168,19 +205,23 @@ msgstr "查看失败，请查看日志"
 msgid "create failed tips"
 msgstr "创建失败，请查看日志"
 
-#: core/api/order.py:189
+#: core/api/home.py:107
+msgid "request url not implemented"
+msgstr ""
+
+#: core/api/order.py:188
 msgid "get log info failed"
 msgstr "获取日志信息失败"
 
-#: core/api/order.py:264
+#: core/api/order.py:292
 msgid "abort alread exist"
 msgstr "已经存在中止操作"
 
-#: core/api/order.py:305
+#: core/api/order.py:333
 msgid "not select error"
 msgstr "原命令不是select参数但存在选择key"
 
-#: core/api/order.py:307
+#: core/api/order.py:335
 msgid "not origin cmd"
 msgstr "原始命令不存在"
 

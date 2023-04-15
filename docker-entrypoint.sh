@@ -13,4 +13,5 @@ SECRET_KEY=`echo ${SECRET_KEY} | sed "s|&|\\\\\\&|g"` \
 && sed -i "s|^SECRET_KEY.*|SECRET_KEY = '${SECRET_KEY}'|g"  ./setting/settings.py
 fi
 python set_config.py   
+nohup python durable_server.py &
 python manage.py runserver 0.0.0.0:8000
