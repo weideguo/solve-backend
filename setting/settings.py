@@ -51,8 +51,8 @@ MIDDLEWARE = [
     'corsheaders.middleware.CorsMiddleware',
     'libs.middleware.MyMiddleware',
 ]
-CORS_ORIGIN_ALLOW_ALL = True
 CSRF_ORIGIN_ALLOW_ALL = True
+CORS_ORIGIN_ALLOW_ALL = True
 CORS_ALLOW_CREDENTIALS = True
 CORS_ALLOW_METHODS = (
     'DELETE',
