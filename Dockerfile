@@ -18,6 +18,7 @@ ENV REDIS_PORT=6379
 
 #EXPOSE 8000:8000
 
+RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
 RUN mkdir -p /data/solve-backend
 
 ADD ./  /data/solve-backend/
