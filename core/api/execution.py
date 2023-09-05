@@ -146,8 +146,10 @@ class Session(baseview.BaseView):
                 pause_line=yaml_dict['pause']
             else:
                 pause_line=0
+            
+            target_constrict=yaml_dict['target'] if 'target' in yaml_dict else []
 
-            return Response({'status':1,'session':sesion_list,'pause':pause_line})
+            return Response({'status':1,'session':sesion_list,'pause':pause_line,'target_constrict':target_constrict})
 
 
     def post(self, request, args = None):
@@ -219,6 +221,9 @@ class Execution(baseview.BaseView):
         exec_name = request.GET['filter']
         _debug_run = request.GET.get('debug','0')
         debug_run = [ int(i) for i in _debug_run.split(',') ]
+        
+        target = request.GET.get('target','')
+        
         #jwt_str_raw=request.META['HTTP_AUTHORIZATION']  #需要在header的字段前加http_ 同时必须为大写
         #jwt_str =jwt_str_raw.split('.')[1]+'=='     
         #user=json.loads(base64.b64decode(jwt_str))['username']
@@ -250,6 +255,11 @@ class Execution(baseview.BaseView):
         job_info['begin_time'] = time.time()        
         job_info['user'] = user   
         job_info['debug_list']=str(debug_run)
+        
+        if target:
+            job_info['target'] = target
+            job_info['number'] = 1
+        
 
         for i in range(debug_run[0]):
             set_debug_run(job_info,redis_send_client)
