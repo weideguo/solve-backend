@@ -123,14 +123,14 @@ def request_params_check(invoke_rule_ids, request):
     for invoke_rule in invoke_rules:
         # 必须存在匹配项
         # '/api/v1/home/info', ['/api/v1/home/info'] 
-        must_matchs = [(request.path, json.loads(invoke_rule.path.strip()   )  if invoke_rule.path.strip()  else []  ),
-                      (request.method,  json.loads(invoke_rule.method.strip() )  if invoke_rule.source.strip() else []  ),
-                      (from_host,  json.loads(invoke_rule.source.strip() )  if invoke_rule.method.strip() else []  ),]
+        must_matchs = [(request.path, json.loads(invoke_rule.path.strip()   )  if invoke_rule.path and invoke_rule.path.strip()  else []  ),
+                      (request.method,  json.loads(invoke_rule.method.strip() )  if invoke_rule.method and invoke_rule.method.strip() else []  ),
+                      (from_host,  json.loads(invoke_rule.source.strip() )  if invoke_rule.source and invoke_rule.source.strip() else []  ),]
         
         # 如果key存在匹配，则值必须存在匹配项
         # 
-        choice_matchs = [(request.GET, json.loads(invoke_rule.params.strip() )  if invoke_rule.params.strip() else []  ),
-                         (request.data, json.loads(invoke_rule.body.strip()   )  if invoke_rule.body.strip()   else []  ),]             
+        choice_matchs = [(request.GET, json.loads(invoke_rule.params.strip() )  if invoke_rule.params and invoke_rule.params.strip() else []  ),
+                         (request.data, json.loads(invoke_rule.body.strip()   )  if invoke_rule.body and invoke_rule.body.strip()   else []  ),]             
         
         def must_match_check(must_match):
             # print(must_match[0], must_match[1],regexp_check(must_match[0], must_match[1]))

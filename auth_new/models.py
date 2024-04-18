@@ -52,12 +52,12 @@ class PermanentToken(models.Model):
 
 class ApiInvokeRule(models.Model):
     id = models.AutoField(primary_key=True)
-    path = models.CharField(max_length=100)                                                        # 路径
-                                                                                                   # 规则为空则允许所有，规则非空，则需要至少匹配一条规则
+    path = models.CharField(max_length=100, blank=True, null=True)                                 # 路径，使用正则 ["路径1","路径2"]
+                                                                                                   # 规则为空则允许所有，规则非空，则需要至少匹配一条规则，空可以为null、"[]"、""
     source =  models.CharField(max_length=512, blank=True, null=True)                              # 发起请求的IP，使用正则 ["限制1","限制2"]
-    method = models.CharField(max_length=50, blank=True, null=True)                                # 请求方法
+    method = models.CharField(max_length=50, blank=True, null=True)                                # 请求方法 ["GET","POST"]
     params = models.CharField(max_length=512, blank=True, null=True)                               # 请求参数，使用正则 ["限制1","限制2"]
-    body = models.CharField(max_length=512, blank=True, null=True )                                # 请求体，使用正则 ["限制1","限制2"]
+    body = models.CharField(max_length=512, blank=True, null=True)                                 # 请求体，使用正则 ["限制1","限制2"]
     
     
     
