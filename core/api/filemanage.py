@@ -12,6 +12,7 @@ from auth_new import baseview
 from libs import util
 from conf import config
 
+from libs.util import MYLOGGER,MYLOGERROR
 from libs.wrapper import file_root,playbook_root
 
 class File(baseview.BaseView):
@@ -74,6 +75,16 @@ class File(baseview.BaseView):
         
         if args == 'download':
             filename = request.GET['file']
+            
+            seek_pos = 0
+            if 'HTTP_RANGE' in request.META: 
+                range_header = request.META['HTTP_RANGE']
+                try:
+                    # 实现断点续传
+                    # "bytes=1000-2000"
+                    seek_pos,_ = [int(b) for b in range_header.split('=')[1].split('-')]
+                except:
+                    MYLOGERROR.info("http header [Range] in wrong format: %s" % range_header)
 
             name=os.path.basename(filename)
             filename = os.path.join(file_root,'./'+filename)
@@ -83,6 +94,7 @@ class File(baseview.BaseView):
 
             if os.path.isfile(filename):
                 file = open(filename,mode='rb')
+                file.seek(seek_pos)
                 response=FileResponse(file)
                 response['Content-Type']='application/octet-stream'
                 #response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))  
