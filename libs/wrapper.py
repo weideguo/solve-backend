@@ -1,6 +1,8 @@
 # -*- coding: utf-8 -*- 
 import os
 import re
+import sys
+import yaml
 
 from rest_framework.response import Response
 from django.utils.translation import gettext as _
@@ -92,7 +94,7 @@ fileserver_bind=get_params('fileserver_bind')
 fileserver_port=get_params('fileserver_port')
 
 
-class HashCURD():
+class HashCRUD():
     '''
     对hash类型的增删改查
     '''
@@ -247,3 +249,37 @@ def get_list_key_info(redis_client, key, key_field="", pos=-1 ):
         return sub_key, redis_client.hget(sub_key, key_field)
     else:
         return sub_key, redis_client.hgetall(sub_key)
+
+def get_playbook_describe(playbook):
+    """传入playbook的路径，获取playbook的描述信息"""
+    playbook = os.path.join(playbook_root,playbook)
+    playbook_str =  open(playbook).read()
+    #在playbook头部以注释引入session说明时格式如下
+    """
+    #CONTENT-BEGIN
+    #yaml_str
+    #CONTENT-END
+    """
+    yaml_str_raw=re.findall('#CONTENT-BEGIN([\\w|\\W]*?)#CONTENT-END',playbook_str)
+    if yaml_str_raw:
+        yaml_str=yaml_str_raw[0].replace('\n#','\n')
+    else:
+        try:
+            #或者通过单独的yaml文件说明session格式
+            yaml_str =  open(playbook+'.conf').read()
+        except:
+            yaml_str =  ""
+    
+    if sys.version_info>(3,0):
+        from io import StringIO
+        f=StringIO(yaml_str)
+        yaml_dict=yaml.load(f,Loader=yaml.FullLoader)
+    else:
+        from StringIO import StringIO
+        f=StringIO(yaml_str)
+        yaml_dict=yaml.load(f)            
+    
+    if not yaml_dict:
+        yaml_dict = {} 
+    
+    return yaml_dict

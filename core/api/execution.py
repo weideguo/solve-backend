@@ -5,7 +5,6 @@ import ast
 import sys
 import uuid
 import time
-import yaml
 import redis
 import json
 import base64
@@ -19,7 +18,7 @@ from auth_new import baseview
 from libs import util
 from conf import config
 
-from libs.wrapper import HashCURD,playbook_root,playbook_temp
+from libs.wrapper import HashCRUD,playbook_root,playbook_temp,get_playbook_describe
 from libs.redis_pool import redis_single
 
 
@@ -89,42 +88,14 @@ class Session(baseview.BaseView):
             '''
             tmpl_key = redis_manage_client.hget(pre_job_name,config.prefix_exec_tmpl)
             playbook = redis_manage_client.hget(tmpl_key,'playbook')
-            playbook = os.path.join(playbook_root,playbook)
-            playbook_str =  open(playbook).read()
-
-            #在playbook头部以注释引入session说明时格式如下
-            """
-            #CONTENT-BEGIN
-            #yaml_str
-            #CONTENT-END
-            """
-            yaml_str_raw=re.findall('#CONTENT-BEGIN([\\w|\\W]*?)#CONTENT-END',playbook_str)
-            if yaml_str_raw:
-                yaml_str=yaml_str_raw[0].replace('\n#','\n')
-            else:
-                try:
-                    #或者通过单独的yaml文件说明session格式
-                    yaml_str =  open(playbook+'.conf').read()
-                except:
-                    yaml_str =  ""
-
-            if sys.version_info>(3,0):
-                from io import StringIO
-                f=StringIO(yaml_str)
-                yaml_dict=yaml.load(f,Loader=yaml.FullLoader)
-            else:
-                from StringIO import StringIO
-                f=StringIO(yaml_str)
-                yaml_dict=yaml.load(f)            
-
-            if not yaml_dict:
-                yaml_dict = {}
+            
+            playbook_describe = get_playbook_describe(playbook)
 
             var=get_session(pre_job_name,redis_manage_client)
 
             sesion_list=[]
-            if 'session' in yaml_dict:
-                for k1 in yaml_dict['session']:
+            if 'session' in playbook_describe:
+                for k1 in playbook_describe['session']:
                     for k2 in var.keys():
                         if k1['key']==k2:
                             k1['value']=var[k2]
@@ -132,7 +103,7 @@ class Session(baseview.BaseView):
                         sesion_list.append(k1)
                 
                 key_constrict=[]
-                for k1 in yaml_dict['session']:
+                for k1 in playbook_describe['session']:
                     key_constrict.append(k1['key'])
                 
                 for k2 in var.keys():
@@ -142,12 +113,12 @@ class Session(baseview.BaseView):
                 for k2 in var.keys():
                     sesion_list.append({'key':k2,'value':var[k2]})
 
-            if 'pause' in yaml_dict:
-                pause_line=yaml_dict['pause']
+            if 'pause' in playbook_describe:
+                pause_line=playbook_describe['pause']
             else:
                 pause_line=0
             
-            target_constrict=yaml_dict['target'] if 'target' in yaml_dict else []
+            target_constrict=playbook_describe['target'] if 'target' in playbook_describe else []
 
             return Response({'status':1,'session':sesion_list,'pause':pause_line,'target_constrict':target_constrict})
 
@@ -394,11 +365,27 @@ class ExecutionInfo(baseview.BaseView):
     '''    
     def get(self, request, args = None):
         redis_manage_client = redis_single['redis_manage']
-        return HashCURD.get(redis_manage_client,request, args)
+                
+        __response = HashCRUD.get(redis_manage_client,request,args)
+        _response = __response.data
+        
+        # 从playbook描述文件中获取target_type替换前端设置的
+        if 'data' in _response and all([ isinstance(d,dict) and 'playbook' in d and 'target_type' in d for d in _response['data'] ]):
+            for d in _response['data']:
+                playbook = d['playbook']
+                try:
+                    playbook_describe = get_playbook_describe(playbook)
+                    if 'target_type' in playbook_describe:
+                        d['target_type'] = playbook_describe['target_type']
+                except:
+                    # 不处理playbook不存在时获取描述文件的异常情况
+                    pass
+        
+        return Response(_response)
 
     def post(self, request, args = None):
         redis_manage_client = redis_single['redis_manage']
-        return HashCURD.post(redis_manage_client,request, args)
+        return HashCRUD.post(redis_manage_client,request, args)
 
 
 class FastExecution(baseview.BaseView): 
