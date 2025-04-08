@@ -292,11 +292,13 @@ class SolveDura():
         '''
         redis_client.delete(key)
         connection_name=self.dura.get_collection_name(key, redis_client)
-        r=self.dura.db[connection_name].remove({self.dura.primary_key: key})
+        r=self.dura.db[connection_name].delete_many({self.dura.primary_key: key})
         #print(connection_name,{self.dura.primary_key: key})
         #{'ok': 1.0, 'n': 0}
         #{'ok': 1.0, 'n': 1}
-        if 'n' in r and r['n']:
+        #if 'n' in r and r['n']:
+        #DeleteResult({'n': 0, 'ok': 1.0}, acknowledged=True)
+        if r.deleted_count:
             return key
         else:
             return None
