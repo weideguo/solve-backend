@@ -87,7 +87,8 @@ class Dura():
         '''
         value = {}
         #根据pid判定在mongodb中是否存在
-        exist_count = self.db[collection_name].find({self.primary_key: key}).count()
+        #exist_count = self.db[collection_name].find({self.primary_key: key}).count()
+        exist_count = self.db[collection_name].count_documents({self.primary_key: key})
         key_type = redis_client.type(key)
         value[self.type_name] = key_type
         value[self.primary_key] = key
@@ -114,7 +115,8 @@ class Dura():
 
                 new_list=all_list[i:]
                 #print('save key -------%s %s  %s' % (new_list, key, str(i)))
-                self.db[collection_name].update({self.primary_key: key},{'$push':{self.list_name: {'$each': new_list}}})
+                #self.db[collection_name].update({self.primary_key: key},{'$push':{self.list_name: {'$each': new_list}}})
+                self.db[collection_name].update_many({self.primary_key: key},{'$push':{self.list_name: {'$each': new_list}}})
                 return key,'update reduce'
             elif exist_count and is_update==0:
                 #mongodb中记录存在或者key类型为不更新
@@ -122,12 +124,14 @@ class Dura():
             elif exist_count and is_update==1:
                 #mongodb中记录存在且key类型为全量替换
                 value[self.list_name]=all_list
-                self.db[collection_name].update({self.primary_key: key}, value)
+                #self.db[collection_name].update({self.primary_key: key}, value)
+                self.db[collection_name].update_many({self.primary_key: key}, {"$set": value})
                 return key, 'update'
             else:
                 #mongodb中记录不存在
                 value[self.list_name]=all_list
-                self.db[collection_name].insert(value)
+                #self.db[collection_name].insert(value)
+                self.db[collection_name].insert_one(value)
                 return key, 'insert'
         else:
             if key_type == 'hash':
@@ -151,11 +155,13 @@ class Dura():
 
             if exist_count and is_update:
                 #在mongodb中存在且key类型为更新
-                self.db[collection_name].update({self.primary_key: key}, value)
+                #self.db[collection_name].update({self.primary_key: key}, value)
+                self.db[collection_name].update_many({self.primary_key: key}, {"$set": value})
                 return key,'update'
             elif not exist_count:
                 #在mongodb中不存在
-                self.db[collection_name].insert(value)
+                #self.db[collection_name].insert(value)
+                self.db[collection_name].insert_one(value)
                 return key,'insert'
             else:
                 #存在且key类型为不更新则跳过

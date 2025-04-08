@@ -6,9 +6,8 @@ import datetime
 
 from django.db.models import F
 from django.contrib.auth import get_user_model
-from django.utils.encoding import smart_text
-from django.utils.translation import ugettext as _
-from rest_framework import exceptions
+from django.utils.translation import gettext as _
+from rest_framework import exceptions,HTTP_HEADER_ENCODING
 from rest_framework.authentication import (
     BaseAuthentication, get_authorization_header
 )
@@ -24,10 +23,14 @@ class PermanentTokenAuthentication(BaseAuthentication):
         也可以从请求参数获取token       md5 时间+大随机数
         优先从header取值
         """
-        auth = get_authorization_header(request).split()
+        header = get_authorization_header(request)
+        if isinstance(header, bytes):
+            header = header.decode(HTTP_HEADER_ENCODING)
+
+        auth = header.split()
         
         auth_header_prefix = 'permanent_token'        
-        if auth and smart_text(auth[0].lower()) != auth_header_prefix:
+        if auth and str(auth[0].lower()) != auth_header_prefix:
             return None
 
         if len(auth) == 1:
@@ -50,7 +53,7 @@ class PermanentTokenAuthentication(BaseAuthentication):
         自行查询数据库然后验证
         """
         token_value = self.get_token_value(request)
-        token_value = smart_text(token_value)
+        token_value = str(token_value)
         if token_value is None:
             return None
         

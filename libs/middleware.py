@@ -7,7 +7,6 @@ from rest_framework.response import Response
 from django.http import HttpResponse
 from django.utils.datastructures import MultiValueDictKeyError
 from django.utils.deprecation import MiddlewareMixin
-from django.utils.encoding import smart_text
 from rest_framework.authentication import get_authorization_header
 
 
@@ -37,7 +36,7 @@ class MyMiddleware(MiddlewareMixin):
         if request_params:
             request_params = '?'+request_params 
             
-        MYLOGGER.info("REQUEST  %s %s %s" % (from_host, smart_text(request.META['PATH_INFO'])+request_params, smart_text(get_authorization_header(request)) ))
+        MYLOGGER.info("REQUEST  %s %s %s" % (from_host, str(request.META['PATH_INFO'])+request_params, str(get_authorization_header(request)) ))
     
     
     def process_response(self, request, response):
@@ -50,7 +49,7 @@ class MyMiddleware(MiddlewareMixin):
         if not hasattr(request,'user'):
             request.user='NullUser'
             
-        MYLOGGER.info("RESPONSE %s %s %s %s" % (from_host, smart_text(request.META['PATH_INFO']), response.status_code, smart_text(request.user), ))
+        MYLOGGER.info("RESPONSE %s %s %s %s" % (from_host, str(request.META['PATH_INFO']), response.status_code, str(request.user), ))
         
         return response
 

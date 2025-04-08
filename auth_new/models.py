@@ -20,7 +20,9 @@ class CASProxyPgt(models.Model):
     date_generate = models.DateTimeField(auto_now = True)
 
     class Meta:
-        index_together=('date_generate',)
+        indexes = [
+            models.Index(fields=['date_generate',]),
+        ]
 
 
 class CASProxyToken(models.Model):

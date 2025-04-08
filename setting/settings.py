@@ -143,7 +143,8 @@ REST_FRAMEWORK = {
         'rest_framework.permissions.IsAuthenticated',
     ),
     'DEFAULT_AUTHENTICATION_CLASSES': (
-        'rest_framework_jwt.authentication.JSONWebTokenAuthentication', 'auth_new.token_auth.PermanentTokenAuthentication'
+        'rest_framework_simplejwt.authentication.JWTAuthentication', 
+        'auth_new.token_auth.PermanentTokenAuthentication',
     ),
     'DEFAULT_RENDERER_CLASSES': (
         'rest_framework.renderers.JSONRenderer',
@@ -155,11 +156,16 @@ REST_FRAMEWORK = {
     },
 }
 
-JWT_AUTH = {
-    'JWT_RESPONSE_PAYLOAD_HANDLER':
-        'rest_framework_jwt.utils.jwt_response_payload_handler',
-    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=86400),
+#JWT_AUTH = {
+#    'JWT_RESPONSE_PAYLOAD_HANDLER': 'rest_framework_simplejwt.utils.jwt_response_payload_handler',
+#    'JWT_EXPIRATION_DELTA': datetime.timedelta(seconds=86400),
+#}
+
+SIMPLE_JWT = {
+    'ACCESS_TOKEN_LIFETIME': datetime.timedelta(seconds=86400),
+    'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
 }
+
 
 LOGGING = {
     'version': 1,

@@ -7,7 +7,8 @@ import uuid
 import datetime
 import requests
 from rest_framework.response import Response
-from rest_framework_jwt.settings import api_settings
+#from rest_framework_simplejwt.settings import api_settings
+from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
@@ -20,8 +21,8 @@ from .decorators import super_privilege
 
 
 
-jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+#jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+#jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
 class UserInfo(baseview.BaseView):
@@ -87,12 +88,16 @@ class LoginAuth(baseview.AnyLogin):
         #print(permissions) 
         
         if permissions:
-            token = jwt_encode_handler(jwt_payload_handler(permissions))
+            #token = jwt_encode_handler(jwt_payload_handler(permissions))
+            refresh = RefreshToken.for_user(permissions)
+            access_token = str(refresh.access_token)
+            # refresh_token = str(refresh)
+            # refresh_new = RefreshToken(refresh_token)    # 使用refresh_token
             #使用jwt验证时依旧会查询数据库进行校验 仅对于此情况 并不是jwt的标准
             #如果需要外部数据库的账号表 可以在查询后再同步到本地
             #x = {'username': user, 'exp': datetime.datetime.fromtimestamp(time.time()+30000)}
             #token = jwt_encode_handler(x)
-            return Response({'status':1,'token': token})
+            return Response({'status':1,'token': access_token})
         elif Account.objects.filter(username=user):
             return Response({'status':-1,'token': '','msg':util.safe_decode(_('password error'))})
         else:
@@ -115,7 +120,9 @@ def get_cas_user_token(user):
         password=password)
     session_user.save()
     permissions = authenticate(username=tmp_user, password=password)
-    token = jwt_encode_handler(jwt_payload_handler(permissions))
+    #token = jwt_encode_handler(jwt_payload_handler(permissions))
+    refresh = RefreshToken.for_user(permissions)
+    token = str(refresh.access_token)
     return token
 
 
