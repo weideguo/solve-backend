@@ -16,7 +16,7 @@ running
 ### prerun ###
 ```shell
 #首次运行初始化
-vim deploy.conf                     #设置redis、mongodb、cas 以及其他相关参数
+cp deploy.conf.sample deploy.conf   #设置redis、mongodb、cas 以及其他相关参数
 #sh set_secret_key.sh               #重新生成SECRET_KEY于django的配置文件
 python manage.py resetsecretkey     #重新生成SECRET_KEY于django的配置文件 使用该命令需要先设置redis
 python manage.py makemigrations     #创建数据库迁移文件

@@ -115,3 +115,4 @@ core/migrations/
 *.pid
 *_initial.py
 nohup.out
+deploy.conf
