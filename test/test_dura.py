@@ -1,6 +1,6 @@
 # -*- coding: utf-8 -*- 
 from libs import redis_pool
-from core.dura import solve_dura
+from dura import solve_dura
 
 redis_send_client,redis_log_client,redis_tmp_client,redis_config_client,redis_job_client,redis_manage_client = redis_pool.redis_init()
 

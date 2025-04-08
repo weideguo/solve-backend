@@ -166,6 +166,7 @@ SIMPLE_JWT = {
     'REFRESH_TOKEN_LIFETIME': datetime.timedelta(days=1),
 }
 
+DEFAULT_AUTO_FIELD = 'django.db.models.AutoField'
 
 LOGGING = {
     'version': 1,

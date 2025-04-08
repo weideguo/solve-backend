@@ -2,7 +2,7 @@ Django
 django-cors-headers
 django-filter
 djangorestframework
-djangorestframework-jwt
+djangorestframework-simplejwt
 redis
 PyYAML
 pymongo
