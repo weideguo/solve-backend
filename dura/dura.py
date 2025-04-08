@@ -55,16 +55,16 @@ class Dura():
             
             redis_client=self.redis_client_set[pos]
 
-            all_keys = []
-            cursor,v =redis_client.scan()
-            all_keys += v
-            while cursor:
-                cursor,v =redis_client.scan(cursor)
-                all_keys += v
+            #all_keys = []
+            #cursor,v =redis_client.scan()
+            #all_keys += v
+            #while cursor:
+            #    cursor,v =redis_client.scan(cursor)
+            #    all_keys += v
 
             #可能太大 使用scan代替
-            #for k in redis_client.keys():
-            for k in all_keys:      
+            #for k in all_keys:  
+            for k in redis_client.scan_iter():
                 for key_config in db_config[pos]:
                     if re.match(key_config['key_pattern'], k):
                         collection_name = key_config['collection']

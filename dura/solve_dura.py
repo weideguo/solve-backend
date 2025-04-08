@@ -85,7 +85,7 @@ class SolveDura():
         job_id=key.split('_')[-1]
         #session
         #session_list=self.redis_tmp_client.keys('session_'+'*'+job_id)
-        session_list=self.redis_tmp_client.keys(config.prefix_session+'*'+job_id)
+        session_list = [ k for k in self.redis_tmp_client.scan_iter(config.prefix_session+'*'+job_id) ]
 
         target_log_list=[]
         global_list=[]
@@ -103,9 +103,9 @@ class SolveDura():
                 target_log=tl[1]
                 target_id=target_log.split('_')[-1]
                 target_log_list.append(target_log)
-                global_list += self.redis_tmp_client.keys(config.prefix_global+target_id)
+                global_list += [ k for k in self.redis_tmp_client.scan_iter(config.prefix_global+target_id) ]
                 #global_target_list += self.redis_tmp_client.keys('*'+target_id)
-                sum_list    += self.redis_log_client.keys(config.prefix_sum+target_id)
+                sum_list    += [ k for k in self.redis_log_client.scan_iter(config.prefix_sum+target_id) ]
                 log_list    += self.redis_log_client.lrange(target_log, 0, self.redis_log_client.llen(target_log))
 
 
@@ -137,7 +137,7 @@ class SolveDura():
         self.redis_refresh()
         log_prefix=config.prefix_log+config.prefix_job
         while True:
-            for k in self.redis_log_client.keys(log_prefix+'*'):
+            for k in self.redis_log_client.scan_iter(log_prefix+'*'):
                 
                 if self.redis_log_client.ttl(k) <= 0:
                     self.expire(k)
