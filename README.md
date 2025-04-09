@@ -1,6 +1,6 @@
 # solve-backend #
 
-[![Python 3.7|3.9](https://img.shields.io/badge/python-3.7%7C3.9-blue.svg)](https://github.com/weideguo/solve-backend) 
+[![Python 3.9|3.11|3.13](https://img.shields.io/badge/python-3.9%7C3.11%7C3.13-blue.svg)](https://github.com/weideguo/solve-backend) 
 [![License](https://img.shields.io/badge/license-MIT-green.svg)](https://github.com/weideguo/solve-backend/blob/master/LICENSE) 
 
 
