@@ -113,7 +113,7 @@ class HashCRUD():
             
             new_target_list = []
             
-            target_list=redis_client.scan_iter(filter)
+            target_list = redis_client.scan_iter(filter)
             
             for t in target_list:
                 # 如以 68b329da9893e34099c7d8ad5cb9c940 结尾的可能是临时对象，可能需要过滤
@@ -157,7 +157,7 @@ class HashCRUD():
             简单的匹配列表
             '''
             filter = request.GET['filter']        
-            target_list=redis_client.scan_iter(filter)
+            target_list = redis_client.scan_iter(filter)
             new_target_list = []
             for k in target_list:
                 if filter_tmp and len(k.split(filter_tmp))>=2 and re.match('^[a-zA-Z0-9]{32}$',k.split(filter_tmp)[-1]):
@@ -180,9 +180,9 @@ class HashCRUD():
         target_o = info.pop('name_o','')
         if target_o:
             #修改
-            if not redis_client.scan_iter(target_o):
+            if not list(redis_client.scan_iter(target_o)):
                 return  Response({'status':-3,'msg':safe_decode(_('modified target not exist'))})
-            elif target != target_o and redis_client.scan_iter(target):
+            elif target != target_o and list(redis_client.scan_iter(target)):
                 return  Response({'status':-2,'msg':safe_decode(_('change to target already exist'))})
             else:
                 redis_client.delete(target_o)
@@ -193,7 +193,7 @@ class HashCRUD():
                 return  Response({'status':2,'msg':safe_decode(_('modify success'))})
         else:
             #增加
-            if redis_client.scan_iter(target):
+            if list(redis_client.scan_iter(target)):
                 return  Response({'status':-1,'msg':safe_decode(_('add info exist'))})            
             elif info:
                 redis_client.hmset(target,info)    
@@ -205,7 +205,7 @@ class HashCRUD():
 def set_sort_key(redis_client, cache_key, key_prefix, sort_key, reverse):
     '''由指定前缀的hash类型key使用指定字段生成排序'''
     _cache_len=redis_client.llen(cache_key)
-    key_list = [ k for k in redis_client.scan_iter(key_prefix+'*') ]
+    key_list = list(redis_client.scan_iter(key_prefix+'*'))
 
     #新增或删除已有的都会刷新
     if len(key_list) != _cache_len:

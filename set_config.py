@@ -5,7 +5,7 @@ from conf import config
 from libs.redis_pool import redis_single
 redis_manage_client=redis_single['redis_manage']
 #当不存在对应key时，以默认值初始化
-if not redis_manage_client.scan_iter(config.key_solve_config):
+if not list(redis_manage_client.scan_iter(config.key_solve_config)):
     origin_config=[
         ("job_types","config_job_types",
             set(["default","update","test"])),
