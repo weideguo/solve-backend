@@ -86,8 +86,8 @@ class Home(baseview.BaseView):
                 else:
                     break
             
-            job_types.add('all')
             all_types=list(job_types)
+            all_types.append('all')
             mytime=sorted(stats.keys())
             r={}
             #r['stats']=stats
