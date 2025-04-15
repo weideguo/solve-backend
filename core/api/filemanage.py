@@ -82,7 +82,7 @@ class File(baseview.BaseView):
                 try:
                     # 实现断点续传
                     # "bytes=1000-2000"
-                    seek_pos,_ = [int(b) for b in range_header.split('=')[1].split('-')]
+                    seek_pos,seek_end = [int(b) for b in range_header.split('=')[1].split('-')]
                 except:
                     MYLOGERROR.info("http header [Range] in wrong format: %s" % range_header)
 
