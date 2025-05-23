@@ -6,7 +6,7 @@
 #
 cd /data/solve-backend
 sed -i "s|my_redis_passwd|${REDIS_PASSWORD}|g" ./deploy.conf
-if [[ -n ${REDIS_HOST} ]]; then sed -i "s|host=127.0.0.1|host=${REDIS_HOST}|g" ./deploy.conf;fi
+if [[ -n ${REDIS_HOST} ]]; then sed -i "s|'127.0.0.1'|'${REDIS_HOST}'|g" ./deploy.conf;fi
 if [[ -n ${REDIS_PORT} ]]; then sed -i "s|6379|${REDIS_PORT}|g" ./deploy.conf;fi
 if [[ -n ${MONGO_URI}  ]]; then sed -i "s|#uri=.*|uri=${MONGO_URI}|g" ./deploy.conf;fi
 if [[ -n ${MONGO_DB}   ]]; then sed -i "s|#db=solve|db=${MONGO_DB}|g" ./deploy.conf;fi
