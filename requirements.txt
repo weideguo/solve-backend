@@ -3,6 +3,7 @@ django-cors-headers
 django-filter
 djangorestframework
 djangorestframework-simplejwt
+django-environ
 redis
 PyYAML
 pymongo
