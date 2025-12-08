@@ -6,7 +6,13 @@ curl "http://127.0.0.1:8000/api/v1/login/" -d "username=admin&password=weideguo"
 
 curl -H "Content-Type:application/json" -H "Accept:application/json"  -d "{\"username\":\"admin\",\"password\":\"weideguo\"}" "http://127.0.0.1:8000/api/v1/login/"
 
-curl -H "Content-Type:application/json" -H "Accept:application/json"  -d '{"username":"admin","password":"weideguo"}' "http://127.0.0.1:8000/api/v1/login/"
+curl "http://127.0.0.1:8000/api/v1/login/"    \
+  -H "Content-Type:application/json"          \
+  -H "Accept:application/json"                \
+  -d '{
+       "username":"admin",
+       "password":"weideguo"
+     }' 
 
 xx=`curl "http://127.0.0.1:8000/api/v1/login/" -d "username=admin&password=weideguo" | grep -oP "(?<=token\":\").*?(?=\")"`
 
