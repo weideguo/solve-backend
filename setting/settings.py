@@ -14,10 +14,12 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # SECURITY WARNING: keep the secret key used in production secret!
 environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
 env = environ.Env(
-    SECRET_KEY=(str, "yjs)1t@pw$02_ja@*pxg2a$*i_5z=kaucx1$!qtj92^oemh*pi"),
+    SECRET_KEY=(str, "CHANGE_ME_IN_PRODUCTION!!!"),
 )
 
 SECRET_KEY = env("SECRET_KEY")
+if SECRET_KEY == "CHANGE_ME_IN_PRODUCTION!!!":
+    raise RuntimeError("SECRET_KEY not validate!")
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False
