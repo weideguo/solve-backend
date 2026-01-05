@@ -44,6 +44,46 @@ class Target(baseview.BaseView):
                 data.append(i)
 
             return Response({'status':1,'data':data})
+        if args=='detail':
+            '''
+            获取详细信息
+            '''
+            data = {}
+            target_name = request.GET['name']
+            target_field = request.GET.get('field','')
+            
+            target_info = redis_config_client.hgetall(target_name)
+
+            if not target_info:
+                return Response({'status':-1, 'data':'', 'msg': util.safe_decode(_('target not exist')) })
+            if  target_field == '':
+                return Response({'status':1,'data':target_info})
+            
+            next_target_name = ''
+            # field字段可以为多层次的比如 const.host
+            sub_key = ''
+            for k in target_field.split('.'):
+                sub_key = sub_key+'.'+k
+                next_target_name = target_info.get(k)
+
+                # if not next_target_name:   # 不能如此判断，可能为0、''
+                if next_target_name == None:
+                    #return Response({'status':-1, 'data':'', 'msg':'在对象%s获取字段%s信息失败' % (target_name,sub_key[1:]) })
+                    return Response({'status':-1, 'data':'', 'msg': 
+                                        util.safe_decode(
+                                            _('get info of target [%(target_name)s] field [%(field)s] failed') 
+                                            % {'target_name':target_name, 'field':sub_key[1:]} 
+                                        ) 
+                                    })
+
+                target_info = redis_config_client.hgetall(next_target_name)
+                
+                if not target_info and sub_key[1:] == target_field:
+                    # 对于最后一级的获取，可以只返回对象名
+                    return Response({'status':2,'data':next_target_name})
+            
+            # 对于一般情况，需要返回最后一级的对象信息
+            return Response({'status':1,'data':target_info})
         else:
             #其他的 get del info 操作
             return HashCRUD.get(redis_config_client, request, args, filter_tmp=config.spliter)
