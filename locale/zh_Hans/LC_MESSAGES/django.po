@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2023-05-08 17:51+0800\n"
+"POT-Creation-Date: 2026-01-05 14:51+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,80 +18,80 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: auth_new/token_auth.py:34
+#: auth_new/token_auth.py:37
 msgid "Invalid Authorization header. No credentials provided."
 msgstr ""
 
-#: auth_new/token_auth.py:37
+#: auth_new/token_auth.py:40
 msgid ""
 "Invalid Authorization header. Credentials string should not contain spaces."
 msgstr ""
 
-#: auth_new/token_auth.py:76
+#: auth_new/token_auth.py:79
 msgid "permanent token do not work as invoke rule is null"
 msgstr "调用规则为空，该permanent token不生效"
 
-#: auth_new/token_auth.py:83
+#: auth_new/token_auth.py:86
 msgid "permanent token exceed invoke limit"
 msgstr "permanent token调用次数超过限制"
 
-#: auth_new/token_auth.py:87
+#: auth_new/token_auth.py:90
 msgid "permanent token is not validated"
 msgstr "permanent token不在生效状态"
 
-#: auth_new/token_auth.py:92
+#: auth_new/token_auth.py:95
 msgid "permanent token is not in validated date"
 msgstr "permanent token不在有效日期"
 
-#: auth_new/token_auth.py:99
+#: auth_new/token_auth.py:102
 msgid "Invalid signature."
 msgstr ""
 
-#: auth_new/token_auth.py:150
+#: auth_new/token_auth.py:153
 msgid "no invoke rule match"
 msgstr "没有调用规则匹配"
 
-#: auth_new/token_auth.py:154
+#: auth_new/token_auth.py:157
 msgid "invoke url params not allow"
 msgstr "调用参数检查不通过"
 
-#: auth_new/views.py:44
+#: auth_new/views.py:45
 msgid "only super user can change password"
 msgstr "只有超级用户可以修改密码"
 
-#: auth_new/views.py:53
+#: auth_new/views.py:54
 msgid "change password success"
 msgstr "密码修改成功"
 
-#: auth_new/views.py:55 auth_new/views.py:99
+#: auth_new/views.py:56 auth_new/views.py:104
 msgid "user not exist"
 msgstr "账号不存在"
 
-#: auth_new/views.py:57
+#: auth_new/views.py:58
 msgid "only super user can add user"
 msgstr "只有超级用户可以增加用户"
 
-#: auth_new/views.py:63
+#: auth_new/views.py:64
 msgid "user exist already"
 msgstr "用户名已经存在"
 
-#: auth_new/views.py:69
+#: auth_new/views.py:70
 msgid "user register success"
 msgstr "用户注册成功"
 
-#: auth_new/views.py:71 core/api/order.py:384
+#: auth_new/views.py:72 core/api/order.py:384
 msgid "only super user can delete"
 msgstr "只有超级用户可以删除"
 
-#: auth_new/views.py:75
+#: auth_new/views.py:76
 msgid "user delete success"
 msgstr "用户删除成功"
 
-#: auth_new/views.py:97
+#: auth_new/views.py:102
 msgid "password error"
 msgstr "密码错误"
 
-#: auth_new/views.py:128
+#: auth_new/views.py:135
 msgid "set cas before used"
 msgstr "必须先在后端设置CAS的地址才能使用"
 
@@ -115,57 +115,57 @@ msgstr "type必须为string list set hash之一"
 msgid "type not match"
 msgstr "type类型不匹配"
 
-#: core/api/execution.py:174 core/api/execution.py:195
+#: core/api/execution.py:147 core/api/execution.py:168
 msgid "should not commit empty data"
 msgstr "空数据不必提交"
 
-#: core/api/execution.py:416
+#: core/api/execution.py:413
 msgid "commit date attr error"
 msgstr "提交的数据必须包含以下属性： spliter、parallel、exeinfo、playbook"
 
-#: core/api/execution.py:458
+#: core/api/execution.py:455
 #, python-format
 msgid "error in line %d"
 msgstr "第 %d 行配置信息错误！"
 
-#: core/api/execution.py:498
+#: core/api/execution.py:495
 msgid "fast job parallel"
 msgstr "快速任务-并行"
 
-#: core/api/execution.py:515
+#: core/api/execution.py:512
 msgid "fast job serial"
 msgstr "快速任务-串行"
 
-#: core/api/filemanage.py:26 core/api/filemanage.py:58 core/api/fileproxy.py:51
+#: core/api/filemanage.py:27 core/api/filemanage.py:59 core/api/fileproxy.py:51
 #: core/api/fileproxy.py:67
 msgid "should not change in path"
 msgstr "路径不能存在.."
 
-#: core/api/filemanage.py:32
+#: core/api/filemanage.py:33
 msgid "path is dir"
 msgstr "路径为文件"
 
-#: core/api/filemanage.py:49 core/api/fileproxy.py:59
+#: core/api/filemanage.py:50 core/api/fileproxy.py:59
 msgid "upload success"
 msgstr "上传成功"
 
-#: core/api/filemanage.py:72
+#: core/api/filemanage.py:73
 msgid "read file failed"
 msgstr "读取文件失败"
 
-#: core/api/filemanage.py:92
+#: core/api/filemanage.py:104
 msgid "path is not file"
 msgstr "路径不为文件"
 
-#: core/api/filemanage.py:113
+#: core/api/filemanage.py:125
 msgid "path is not dir"
 msgstr "路径不为目录"
 
-#: core/api/filemanage.py:123 core/api/fileproxy.py:131
+#: core/api/filemanage.py:135 core/api/fileproxy.py:131
 msgid "create success"
 msgstr "创建成功"
 
-#: core/api/filemanage.py:126
+#: core/api/filemanage.py:138
 msgid "create failed"
 msgstr "创建失败"
 
@@ -225,19 +225,28 @@ msgstr "原命令不是select参数但存在选择key"
 msgid "not origin cmd"
 msgstr "原始命令不存在"
 
-#: core/api/targetinfo.py:110
+#: core/api/targetinfo.py:57
+msgid "target not exist"
+msgstr "执行对象不存在"
+
+#: core/api/targetinfo.py:73
+#, python-format
+msgid "get info of target [%(target_name)s] field [%(field)s] failed"
+msgstr "执行对象 [%(target_name)s] 字段 [%(field)s] 获取信息失败"
+
+#: core/api/targetinfo.py:149
 msgid "close success"
 msgstr "断开成功"
 
-#: core/api/targetinfo.py:112
+#: core/api/targetinfo.py:151
 msgid "close failed"
 msgstr "断开失败"
 
-#: core/api/targetinfo.py:127 core/api/targetinfo.py:131
+#: core/api/targetinfo.py:166 core/api/targetinfo.py:170
 msgid "connect success"
 msgstr "连接成功"
 
-#: core/api/targetinfo.py:133
+#: core/api/targetinfo.py:172
 msgid "connect timeout"
 msgstr "连接超时"
 
@@ -245,30 +254,30 @@ msgstr "连接超时"
 msgid "what you want to translate"
 msgstr ""
 
-#: libs/wrapper.py:176
+#: libs/wrapper.py:178
 msgid "name attribute must exist"
 msgstr "name 字段必须存在"
 
-#: libs/wrapper.py:182
+#: libs/wrapper.py:184
 msgid "modified target not exist"
 msgstr "修改的对象不存在，请刷新后再试!"
 
-#: libs/wrapper.py:184
+#: libs/wrapper.py:186
 msgid "change to target already exist"
 msgstr "对象名已经存在，不能修改为此!"
 
-#: libs/wrapper.py:191
+#: libs/wrapper.py:193
 msgid "modify success"
 msgstr "修改成功"
 
-#: libs/wrapper.py:195
+#: libs/wrapper.py:197
 msgid "add info exist"
 msgstr "添加的信息已经存在，不能再插入!"
 
-#: libs/wrapper.py:198
+#: libs/wrapper.py:200
 msgid "add success"
 msgstr "添加成功!"
 
-#: libs/wrapper.py:200
+#: libs/wrapper.py:202
 msgid "add info null"
 msgstr "添加信息至少存在一个属性!"
