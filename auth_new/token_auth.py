@@ -1,5 +1,4 @@
 # -*- coding: utf-8 -*- 
-# 实现一个新的认证方式，用于永久对外提供接口
 import re
 import json
 import datetime
@@ -7,6 +6,7 @@ import datetime
 from django.db.models import F
 from django.contrib.auth import get_user_model
 from django.utils.translation import gettext as _
+from django.core.cache import cache
 from rest_framework import exceptions,HTTP_HEADER_ENCODING
 from rest_framework.authentication import (
     BaseAuthentication, get_authorization_header
@@ -16,47 +16,18 @@ from .models import PermanentToken,ApiInvokeRule
 
 
 class PermanentTokenAuthentication(BaseAuthentication):
-
-    def get_token_value(self, request):
-        """
-        要支持既可以从header获取token   Authorization: permanent_token 675ab0baa7f747813903e8b7dbd14de3
-        也可以从请求参数获取token       md5 时间+大随机数
-        优先从header取值
-        """
-        header = get_authorization_header(request)
-        if isinstance(header, bytes):
-            header = header.decode(HTTP_HEADER_ENCODING)
-
-        auth = header.split()
-        
-        auth_header_prefix = 'permanent_token'        
-        if auth and str(auth[0].lower()) != auth_header_prefix:
-            return None
-
-        if len(auth) == 1:
-            msg = _('Invalid Authorization header. No credentials provided.')
-            raise exceptions.AuthenticationFailed(msg)
-        elif len(auth) > 2:
-            msg = _('Invalid Authorization header. Credentials string should not contain spaces.')
-            raise exceptions.AuthenticationFailed(msg)
-        
-        # 从请求参数中获取
-        if not auth:
-            return request.GET.get(auth_header_prefix)
-        
-        return auth[1]
-
-
-
+    """
+    持久token认证
+    """
     def authenticate(self, request):
         """
         自行查询数据库然后验证
         """
-        token_value = self.get_token_value(request)
-        token_value = str(token_value)
+        token_value = get_token_value(request,auth_header_prefix='permanent_token')
         if token_value is None:
             return None
-        
+
+        token_value = str(token_value)
         permanent_token = PermanentToken.objects.filter(token=token_value)
         _permanent_token = permanent_token.first()
         if _permanent_token:
@@ -106,6 +77,55 @@ class PermanentTokenAuthentication(BaseAuthentication):
 
         return (user, token_value)
 
+
+class TemporaryTokenAuthentication(BaseAuthentication):
+    """
+    临时token认证
+    """
+    def authenticate(self, request):
+        auth_header_prefix='temp_token'
+        token_value = get_token_value(request, auth_header_prefix=auth_header_prefix)
+        
+        if token_value is None:
+            raise exceptions.AuthenticationFailed(_('temp token is not in request parameters'))
+
+        token_value = str(token_value)
+        if cache.get(auth_header_prefix+'_'+token_value):
+            # 查询user表第一条记录，虚构一个认证对象
+            User = get_user_model()
+            user = User.objects.first()
+            return (user, None)
+        else:
+            raise exceptions.AuthenticationFailed(_('temp token [%(token_value)s] not validated') % {'token_value':token_value})
+
+
+def get_token_value(request, auth_header_prefix='permanent_token'):
+    """
+    要支持既可以从header获取token   Authorization: permanent_token 675ab0baa7f747813903e8b7dbd14de3
+    也可以从请求参数获取token       md5 时间+大随机数
+    优先从header取值
+    """
+    header = get_authorization_header(request)
+    if isinstance(header, bytes):
+        header = header.decode(HTTP_HEADER_ENCODING)
+
+    auth = header.split()
+      
+    if auth and str(auth[0].lower()) != auth_header_prefix:
+        return None
+
+    if len(auth) == 1:
+        msg = _('Invalid Authorization header. No credentials provided.')
+        raise exceptions.AuthenticationFailed(msg)
+    elif len(auth) > 2:
+        msg = _('Invalid Authorization header. Credentials string should not contain spaces.')
+        raise exceptions.AuthenticationFailed(msg)
+    
+    # 从请求参数中获取
+    if not auth:
+        return request.GET.get(auth_header_prefix)
+    
+    return auth[1]
 
 
 def request_params_check(invoke_rule_ids, request):

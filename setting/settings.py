@@ -12,14 +12,53 @@ BASE_DIR = os.path.dirname(os.path.dirname(os.path.abspath(__file__)))
 # See https://docs.djangoproject.com/en/5.2/howto/deployment/checklist/
 
 # SECURITY WARNING: keep the secret key used in production secret!
-environ.Env.read_env(os.path.join(BASE_DIR, ".env"))
+environ.Env.read_env(os.path.join(BASE_DIR, '.env'))
 env = environ.Env(
-    SECRET_KEY=(str, "CHANGE_ME_IN_PRODUCTION!!!"),
+    SECRET_KEY=(str, 'CHANGE_ME_IN_PRODUCTION!!!'),
+    #CACHE_URL=(str, 'redis://127.0.0.1:6379/0'),
+    REDIS_URL=(str, 'redis://127.0.0.1:6379/0'),
+    REDIS_SENTINEL=(str, ''),
+    REDIS_PASSWORD=(str, ''),
 )
 
-SECRET_KEY = env("SECRET_KEY")
-if SECRET_KEY == "CHANGE_ME_IN_PRODUCTION!!!":
-    raise RuntimeError("SECRET_KEY not validate!")
+SECRET_KEY = env('SECRET_KEY')
+if SECRET_KEY == 'CHANGE_ME_IN_PRODUCTION!!!':
+    raise RuntimeError('SECRET_KEY not validate!')
+
+if env('REDIS_SENTINEL'):
+    import ast
+
+    DJANGO_REDIS_CONNECTION_FACTORY = 'django_redis.pool.SentinelConnectionFactory'
+    
+    # SENTINELS = [
+    #     ('127.0.0.1', 26479),
+    #     ('127.0.0.1', 26480),
+    #     ('127.0.0.1', 26481),
+    # ]
+    SENTINELS = ast.literal_eval(env('REDIS_SENTINEL'))
+    
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': env('REDIS_URL'),
+            'OPTIONS': {
+                #'CLIENT_CLASS': 'django_redis.client.SentinelClient',
+                #'CONNECTION_POOL_CLASS': 'redis.sentinel.SentinelConnectionPool',
+                'SENTINELS': SENTINELS,
+                'PASSWORD': env('REDIS_PASSWORD'),
+            },
+            'KEY_PREFIX': 'solvestack',
+        }
+    }
+else:
+    CACHES = {
+        'default': {
+            'BACKEND': 'django_redis.cache.RedisCache',
+            'LOCATION': env('REDIS_URL'),
+            'KEY_PREFIX': 'solvestack',
+        }
+    }
+
 
 # SECURITY WARNING: don't run with debug turned on in production!
 DEBUG = False

@@ -7,8 +7,11 @@ from rest_framework.permissions import (
 
 from rest_framework.views import APIView
 from rest_framework.throttling import ScopedRateThrottle
+import rest_framework_simplejwt
 
 from django.http import HttpResponse
+
+import auth_new
 
 class DefaultView(object):
     '''
@@ -48,6 +51,13 @@ class AnyLogin(DefaultView, APIView):
     #settings.py REST_FRAMEWORK.DEFAULT_THROTTLE_RATES设置访问频率
     throttle_scope='anylogin'
     throttle_classes = [ScopedRateThrottle]
+
+
+class MultiTokenView(DefaultView, APIView):
+    permission_classes = ()
+    authentication_classes = (rest_framework_simplejwt.authentication.JWTAuthentication,
+                              auth_new.token_auth.PermanentTokenAuthentication,
+                              auth_new.token_auth.TemporaryTokenAuthentication)
 
 
 class TestView(DefaultView, APIView):

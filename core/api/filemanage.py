@@ -3,10 +3,13 @@ import os
 import re
 import sys
 import time
+import random
+
 from rest_framework.response import Response
 from django.http import FileResponse
 from django.utils.encoding import escape_uri_path
 from django.utils.translation import gettext as _
+from django.core.cache import cache
 
 from auth_new import baseview
 from libs import util
@@ -23,7 +26,7 @@ class File(baseview.BaseView):
     def post(self, request, args = None):
         fr=request.FILES.get('file',None)      #curl "$url" -F "file=@/root/x.txt"  
         path=request.GET['path'] 
-        if re.match('.*\.\..*',path):
+        if re.match(r'.*\.\..*',path):
             return Response({'status':-1,'path':path,'msg':util.safe_decode(_('should not change in path'))})
 
         filename=fr.name
@@ -55,7 +58,7 @@ class File(baseview.BaseView):
     def get(self, request, args = None):
         
         for path in [request.GET.get('file',''),request.GET.get('path','')]:
-            if re.match('.*\.\..*',path):
+            if re.match(r'.*\.\..*',path):
                 return Response({'status':-1,'path':path,'msg':util.safe_decode(_('should not change in path'))})
         
         if args == 'content':
@@ -73,36 +76,42 @@ class File(baseview.BaseView):
                 return Response({'status':-1,'file':filename,'msg':util.safe_decode(_('read file failed'))})
 
         
-        if args == 'download':
-            filename = request.GET['file']
-            
-            seek_pos = 0
-            if 'HTTP_RANGE' in request.META: 
-                range_header = request.META['HTTP_RANGE']
-                try:
-                    # 实现断点续传
-                    # "bytes=1000-2000"
-                    seek_pos,seek_end = [int(b) for b in range_header.split('=')[1].split('-')]
-                except:
-                    MYLOGERROR.info("http header [Range] in wrong format: %s" % range_header)
-
-            name=os.path.basename(filename)
-            filename = os.path.join(file_root,'./'+filename)
-
-            #attachment下载文件, inline 和 attachment inline 在浏览器中显示
-            showtype = ['attachment','inline', 'attachment inline'][0]
-
-            if os.path.isfile(filename):
-                file = open(filename,mode='rb')
-                file.seek(seek_pos)
-                response=FileResponse(file)
-                response['Content-Type']='application/octet-stream'
-                #response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))  
-                response['Content-Disposition']='%s;filename=%s' % (showtype, escape_uri_path(name))    
-                return response
-            else:
-                return Response({'status':-1,'file':filename,'msg':util.safe_decode(_('path is not file'))},status=404)
+        #if args == 'download':
+        #    filename = request.GET['file']
+        #    
+        #    seek_pos = 0
+        #    if 'HTTP_RANGE' in request.META: 
+        #        range_header = request.META['HTTP_RANGE']
+        #        try:
+        #            # 实现断点续传
+        #            # "bytes=1000-2000"
+        #            seek_pos,seek_end = [int(b) for b in range_header.split('=')[1].split('-')]
+        #        except:
+        #            MYLOGERROR.info("http header [Range] in wrong format: %s" % range_header)
+        #            
+        #    name=os.path.basename(filename)
+        #    filename = os.path.join(file_root,'./'+filename)
+        #    
+        #    #attachment下载文件, inline 和 attachment inline 在浏览器中显示
+        #    showtype = ['attachment','inline', 'attachment inline'][0]
+        #    
+        #    if os.path.isfile(filename):
+        #        file = open(filename,mode='rb')
+        #        file.seek(seek_pos)
+        #        response=FileResponse(file)
+        #        response['Content-Type']='application/octet-stream'
+        #        #response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))  
+        #        response['Content-Disposition']='%s;filename=%s' % (showtype, escape_uri_path(name))    
+        #        return response
+        #    else:
+        #        return Response({'status':-1,'file':filename,'msg':util.safe_decode(_('path is not file'))},status=404)
        
+        if args == 'preDownload':
+            
+            token_value = util.my_md5(str(random.randint(1,10000)+time.time()))
+            from_host = util.get_from_host(request)
+            cache.set('temp_token'+'_'+token_value, from_host ,timeout=config.temporary_token_expire_time)
+            return Response({'status':1,'temp_token':token_value})
 
         if args == 'list':
             root_path = request.GET['path']
@@ -140,4 +149,38 @@ class File(baseview.BaseView):
             return Response({'status':status,'path':create_path,'msg':msg})
 
 
+class FileDownload(baseview.MultiTokenView):
+    def get(self, request, args = None):
+        for path in [request.GET.get('file',''),request.GET.get('path','')]:
+            if re.match(r'.*\.\..*',path):
+                return Response({'status':-1,'path':path,'msg':util.safe_decode(_('should not change in path'))})
+
+        filename = request.GET['file']
+        
+        seek_pos = 0
+        if 'HTTP_RANGE' in request.META: 
+            range_header = request.META['HTTP_RANGE']
+            try:
+                # 实现断点续传
+                # "bytes=1000-2000"
+                seek_pos,seek_end = [int(b) for b in range_header.split('=')[1].split('-')]
+            except:
+                MYLOGERROR.info("http header [Range] in wrong format: %s" % range_header)
+
+        name=os.path.basename(filename)
+        filename = os.path.join(file_root,'./'+filename)
+
+        #attachment下载文件, inline 和 attachment inline 在浏览器中显示
+        showtype = ['attachment','inline', 'attachment inline'][0]
+
+        if os.path.isfile(filename):
+            file = open(filename,mode='rb')
+            file.seek(seek_pos)
+            response=FileResponse(file)
+            response['Content-Type']='application/octet-stream'
+            #response['Content-Disposition']='%s;filename=%s' % (showtype, name.encode('utf8'))  
+            response['Content-Disposition']='%s;filename=%s' % (showtype, escape_uri_path(name))    
+            return response
+        else:
+            return Response({'status':-1,'file':filename,'msg':util.safe_decode(_('path is not file'))},status=404)
 

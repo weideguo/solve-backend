@@ -11,7 +11,7 @@ from core.api.targetinfo import Target,Host
 from core.api.config import Config
 from core.api.home import Home
 
-from core.api.filemanage import File
+from core.api.filemanage import File,FileDownload
 #from core.api.fileproxy import FileProxy as File
 
 from core.api.test import Test
@@ -30,6 +30,7 @@ urlpatterns = [
     re_path(r'^api/v1/fast/(.*)', FastExecution.as_view(), name='fast'),
     re_path(r'^api/v1/pauseRun/(.*)', pauseRun.as_view(), name='pauseRun'),
     re_path(r'^api/v1/file/(.*)', File.as_view(), name='file'),
+    re_path(r'^api/v1/fileDownload', FileDownload.as_view(), name='fileDownload'),
     re_path(r'^api/v1/config/', Config.as_view(), name='config'),
     re_path(r'^api/v1/', include(('auth_new.urls','auth'), namespace='auth') ),
     re_path(r'^api/v1/test/(.*)', Test.as_view()),   #用于测试 正式部署请务必删除

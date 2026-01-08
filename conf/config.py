@@ -16,6 +16,7 @@ job_rerun="rerun"                   #用于标记重新运行的任务类型
 prefix_exec="exec"                  #可执行任务key的开头
 prefix_exec_tmpl="tmpl"             #任务模板key的开头
 
+temporary_token_expire_time=3600    # temp_token的过期时间
 
 ###############################以下的参数需要与solve的配置相同############################################################################
 tmp_config_expire_sec=24*60*60     #复制的对象 global session过期的时间 每个job复制一次
