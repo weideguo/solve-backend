@@ -10,7 +10,7 @@ from django.utils.deprecation import MiddlewareMixin
 from rest_framework.authentication import get_authorization_header
 
 
-from libs.util import MYLOGGER,MYLOGERROR
+from libs.util import MYLOGGER,MYLOGERROR,get_from_host
 
 
 class MyMiddleware(MiddlewareMixin):
@@ -26,11 +26,7 @@ class MyMiddleware(MiddlewareMixin):
 
     
     def process_view(self, request, view_func, view_args, view_kwargs):
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            from_host=str(request.META['HTTP_X_FORWARDED_FOR'])
-        else:
-            from_host=str(request.META['REMOTE_ADDR'])
-
+        from_host = get_from_host(request)
         #此时还没转换认证成user
         request_params = request.GET.urlencode(safe=None)
         if request_params:
@@ -40,11 +36,7 @@ class MyMiddleware(MiddlewareMixin):
     
     
     def process_response(self, request, response):
-        if 'HTTP_X_FORWARDED_FOR' in request.META:
-            from_host=str(request.META['HTTP_X_FORWARDED_FOR'])
-        else:
-            from_host=str(request.META['REMOTE_ADDR'])
-
+        from_host = get_from_host(request)
         #路径找不到时user不存在
         if not hasattr(request,'user'):
             request.user='NullUser'
