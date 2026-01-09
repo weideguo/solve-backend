@@ -90,13 +90,15 @@ class TemporaryTokenAuthentication(BaseAuthentication):
             raise exceptions.AuthenticationFailed(_('temp token is not in request parameters'))
 
         token_value = str(token_value)
-        if cache.get(auth_header_prefix+'_'+token_value):
-            # 查询user表第一条记录，虚构一个认证对象
+        token_info = cache.get(auth_header_prefix+'_'+token_value)
+        if token_info:
             User = get_user_model()
-            user = User.objects.first()
+            username = token_info.get('user')
+            user = User.objects.get_by_natural_key(username)
+            # user = User.objects.first() # 查询user表第一条记录，虚构一个认证对象
             return (user, None)
         else:
-            raise exceptions.AuthenticationFailed(_('temp token [%(token_value)s] not validated') % {'token_value':token_value})
+            raise exceptions.AuthenticationFailed(_('temp token [%(token_value)s] is not validated') % {'token_value':token_value})
 
 
 def get_token_value(request, auth_header_prefix='permanent_token'):

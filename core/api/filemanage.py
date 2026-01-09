@@ -4,6 +4,7 @@ import re
 import sys
 import time
 import random
+from traceback import format_exc
 
 from rest_framework.response import Response
 from django.http import FileResponse
@@ -107,11 +108,15 @@ class File(baseview.BaseView):
         #        return Response({'status':-1,'file':filename,'msg':util.safe_decode(_('path is not file'))},status=404)
        
         if args == 'preDownload':
-            
-            token_value = util.my_md5(str(random.randint(1,10000)+time.time()))
-            from_host = util.get_from_host(request)
-            cache.set('temp_token'+'_'+token_value, from_host ,timeout=config.temporary_token_expire_time)
-            return Response({'status':1,'temp_token':token_value})
+            try:
+                token_name = util.my_md5(str(random.randint(1,10000)+time.time()))
+                from_host = util.get_from_host(request)
+                token_value = {'from_host':from_host, 'time': time.time(), 'user':str(request.user)}
+                cache.set('temp_token'+'_'+token_name, token_value ,timeout=config.temporary_token_expire_time)
+                return Response({'status':1,'temp_token':token_name})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1,'msg': util.safe_decode(_('set temp token failed'))})
 
         if args == 'list':
             root_path = request.GET['path']
