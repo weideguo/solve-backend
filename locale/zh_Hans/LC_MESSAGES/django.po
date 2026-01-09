@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-05 14:51+0800\n"
+"POT-Creation-Date: 2026-01-09 14:40+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,40 +18,49 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: auth_new/token_auth.py:37
+#: auth_new/token_auth.py:50
+msgid "permanent token do not work as invoke rule is null"
+msgstr "调用规则为空，该permanent token不生效"
+
+#: auth_new/token_auth.py:57
+msgid "permanent token exceed invoke limit"
+msgstr "permanent token调用次数超过限制"
+
+#: auth_new/token_auth.py:61
+msgid "permanent token is not validated"
+msgstr "permanent token不在生效状态"
+
+#: auth_new/token_auth.py:66
+msgid "permanent token is not in validated date"
+msgstr "permanent token不在有效日期"
+
+#: auth_new/token_auth.py:73
+msgid "Invalid signature."
+msgstr ""
+
+#: auth_new/token_auth.py:90
+msgid "temp token is not in request parameters"
+msgstr "temp token不在请求参数中"
+
+#: auth_new/token_auth.py:101
+#, python-format
+msgid "temp token [%(token_value)s] is not validated"
+msgstr "temp token [%(token_value)s] 不在生效状态"
+
+#: auth_new/token_auth.py:120
 msgid "Invalid Authorization header. No credentials provided."
 msgstr ""
 
-#: auth_new/token_auth.py:40
+#: auth_new/token_auth.py:123
 msgid ""
 "Invalid Authorization header. Credentials string should not contain spaces."
 msgstr ""
 
-#: auth_new/token_auth.py:79
-msgid "permanent token do not work as invoke rule is null"
-msgstr "调用规则为空，该permanent token不生效"
-
-#: auth_new/token_auth.py:86
-msgid "permanent token exceed invoke limit"
-msgstr "permanent token调用次数超过限制"
-
-#: auth_new/token_auth.py:90
-msgid "permanent token is not validated"
-msgstr "permanent token不在生效状态"
-
-#: auth_new/token_auth.py:95
-msgid "permanent token is not in validated date"
-msgstr "permanent token不在有效日期"
-
-#: auth_new/token_auth.py:102
-msgid "Invalid signature."
-msgstr ""
-
-#: auth_new/token_auth.py:153
+#: auth_new/token_auth.py:175
 msgid "no invoke rule match"
 msgstr "没有调用规则匹配"
 
-#: auth_new/token_auth.py:157
+#: auth_new/token_auth.py:179
 msgid "invoke url params not allow"
 msgstr "调用参数检查不通过"
 
@@ -136,38 +145,42 @@ msgstr "快速任务-并行"
 msgid "fast job serial"
 msgstr "快速任务-串行"
 
-#: core/api/filemanage.py:27 core/api/filemanage.py:59 core/api/fileproxy.py:51
-#: core/api/fileproxy.py:67
+#: core/api/filemanage.py:31 core/api/filemanage.py:63
+#: core/api/filemanage.py:161 core/api/fileproxy.py:51 core/api/fileproxy.py:67
 msgid "should not change in path"
 msgstr "路径不能存在.."
 
-#: core/api/filemanage.py:33
+#: core/api/filemanage.py:37
 msgid "path is dir"
 msgstr "路径为文件"
 
-#: core/api/filemanage.py:50 core/api/fileproxy.py:59
+#: core/api/filemanage.py:54 core/api/fileproxy.py:59
 msgid "upload success"
 msgstr "上传成功"
 
-#: core/api/filemanage.py:73
+#: core/api/filemanage.py:77
 msgid "read file failed"
 msgstr "读取文件失败"
 
-#: core/api/filemanage.py:104
-msgid "path is not file"
-msgstr "路径不为文件"
+#: core/api/filemanage.py:119
+msgid "set temp token failed"
+msgstr "设置temp token失败"
 
-#: core/api/filemanage.py:125
+#: core/api/filemanage.py:139
 msgid "path is not dir"
 msgstr "路径不为目录"
 
-#: core/api/filemanage.py:135 core/api/fileproxy.py:131
+#: core/api/filemanage.py:149 core/api/fileproxy.py:131
 msgid "create success"
 msgstr "创建成功"
 
-#: core/api/filemanage.py:138
+#: core/api/filemanage.py:152
 msgid "create failed"
 msgstr "创建失败"
+
+#: core/api/filemanage.py:190
+msgid "path is not file"
+msgstr "路径不为文件"
 
 #: core/api/fileproxy.py:59
 msgid "upload failed tips"
@@ -225,28 +238,28 @@ msgstr "原命令不是select参数但存在选择key"
 msgid "not origin cmd"
 msgstr "原始命令不存在"
 
-#: core/api/targetinfo.py:57
+#: core/api/targetinfo.py:58
 msgid "target not exist"
 msgstr "执行对象不存在"
 
-#: core/api/targetinfo.py:73
+#: core/api/targetinfo.py:74
 #, python-format
 msgid "get info of target [%(target_name)s] field [%(field)s] failed"
 msgstr "执行对象 [%(target_name)s] 字段 [%(field)s] 获取信息失败"
 
-#: core/api/targetinfo.py:149
+#: core/api/targetinfo.py:150
 msgid "close success"
 msgstr "断开成功"
 
-#: core/api/targetinfo.py:151
+#: core/api/targetinfo.py:152
 msgid "close failed"
 msgstr "断开失败"
 
-#: core/api/targetinfo.py:166 core/api/targetinfo.py:170
+#: core/api/targetinfo.py:167 core/api/targetinfo.py:171
 msgid "connect success"
 msgstr "连接成功"
 
-#: core/api/targetinfo.py:172
+#: core/api/targetinfo.py:173
 msgid "connect timeout"
 msgstr "连接超时"
 
