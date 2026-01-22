@@ -10,7 +10,7 @@ if [[ -n ${REDIS_HOST} ]]; then sed -i "s|'127.0.0.1'|'${REDIS_HOST}'|g" ./deplo
 if [[ -n ${REDIS_PORT} ]]; then sed -i "s|6379|${REDIS_PORT}|g" ./deploy.conf;fi
 if [[ -n ${MONGO_URI}  ]]; then sed -i "s|#uri=.*|uri=${MONGO_URI}|g" ./deploy.conf;fi
 if [[ -n ${MONGO_DB}   ]]; then sed -i "s|#db=solve|db=${MONGO_DB}|g" ./deploy.conf;fi
-if [[ -n ${DATA_PATH}  ]]; then sed -i "s|/tmp/|${DATA_PATH}|g" ./deploy.conf;fi
+if [[ -n ${DATA_PATH}  ]]; then sed -i "s|/tmp|${DATA_PATH}|g" ./deploy.conf;fi
 python set_config.py   
 nohup python durable_server.py &
 python manage.py runserver 0.0.0.0:8000
