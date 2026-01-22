@@ -11,3 +11,4 @@ configparser
 requests
 requests-oauthlib
 Jinja2
+django-redis
