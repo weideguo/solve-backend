@@ -33,7 +33,7 @@ def get_session(pre_job_name,redis_manage_client):
         #但不应排除#只后的字符串 如   echo '#' {{session.YYYY}}
         while l:
             if not re.match('^#',l):
-                session_vars=session_vars+re.findall('(?<={{'+config.prefix_session+'\.).*?(?=}})',l)
+                session_vars=session_vars+re.findall(r'(?<={{'+config.prefix_session+r'\.).*?(?=}})',l)
             l=f.readline()     
     
     session_vars = list(set(session_vars))

@@ -39,7 +39,7 @@ def cas_info_parser(cas_info,attrib):
         # <tag attrib>text<child/>...</tag>tail
         try:
             auth_info={}
-            m = re.match('\{.*\}', root.tag)
+            m = re.match(r'\{.*\}', root.tag)
             xmlns=m.group(0) if m else ''
             for a in root:
                 #if a.tag.split(xmlns)[-1] == 'authenticationSuccess':
