@@ -20,7 +20,7 @@ class TestPermanentTokenAuthentication(TestCase):
             username = 'super',
             
             is_validate = 1,
-            validate_date = '2099-04-22 20:00:00',
+            expire_date = '2099-04-22 20:00:00',
             create_date = '2023-04-12 20:00:00',
             max_invoke = 9999,
             

@@ -44,7 +44,7 @@ class PermanentTokenAuthentication(BaseAuthentication):
         invoke_success_count = _permanent_token.invoke_success_count
         
         is_validate          = _permanent_token.is_validate      
-        validate_date        = _permanent_token.validate_date    
+        expire_date        = _permanent_token.expire_date    
         
         if not invoke_rule_ids:
             msg = _('permanent token do not work as invoke rule is null')
@@ -61,8 +61,8 @@ class PermanentTokenAuthentication(BaseAuthentication):
             msg = _('permanent token is not validated')
             raise exceptions.AuthenticationFailed(msg)
         
-        if validate_date:
-            if validate_date <= datetime.datetime.now():
+        if expire_date:
+            if expire_date <= datetime.datetime.now():
                 msg = _('permanent token is not in validated date')
                 raise exceptions.AuthenticationFailed(msg)
         

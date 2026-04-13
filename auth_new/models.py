@@ -42,7 +42,7 @@ class PermanentToken(models.Model):
     invoke_rule_ids = models.CharField(max_length=200, default='')                                # 请求限制规则id列表，“,”分隔，匹配一条规则即可以通过
     
     is_validate = models.IntegerField(default=1)                                                  # 是否生效，0则不生效，1则生效
-    validate_date = models.DateTimeField(blank=True, null=True)                                   # 生效期限，为空则表示永久生效
+    expire_date = models.DateTimeField(blank=True, null=True)                                     # 过期时间，为空则表示永久生效
     create_date = models.DateTimeField(auto_now = True)                                           # 创建时间
     max_invoke = models.IntegerField(default=999999)                                              # 成功调用次数上限
     
