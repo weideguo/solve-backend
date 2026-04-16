@@ -48,8 +48,9 @@ class PermanentToken(models.Model):
     
     invoke_count = models.IntegerField(default=0)                                                 # 全部调用的次数
     invoke_success_count = models.IntegerField(default=0)                                         # 成功调用的次数
-    lastest_date = models.DateTimeField(auto_now = True)                                          # 上一次调用的时间
-    lastest_success_date = models.DateTimeField(auto_now = True)                                  # 上一次成功调用的时间
+    lastest_date = models.DateTimeField(blank=True, null=True)                                    # 上一次调用的时间
+    lastest_success_date = models.DateTimeField(blank=True, null=True)                            # 上一次成功调用的时间
+    # desc = models.CharField(max_length=200, default='')                                         # 简要描述
 
 
 class ApiInvokeRule(models.Model):

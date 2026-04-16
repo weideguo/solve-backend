@@ -6,6 +6,11 @@ import time
 import uuid
 import datetime
 import requests
+import logging
+import string
+import secrets
+from traceback import format_exc
+
 from rest_framework.response import Response
 #from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
@@ -14,13 +19,13 @@ from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 
 from . import baseview,util
-from .models import Account,CASProxyPgt
-from .serializers import UserINFO
+from .models import Account,CASProxyPgt,PermanentToken,ApiInvokeRule
+from .serializers import UserINFO,PermanentTokenINFO,ApiInvokeRuleINFO
 from .wrapper import cas_url
 from .decorators import super_privilege
 
 
-
+MYLOGERROR = logging.getLogger('django.request')
 #jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
 #jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
@@ -245,3 +250,203 @@ class TestProxy(baseview.BaseView):
         # targetService 默认为 service_proxyValidate 的根路径
         #token,msg=get_service_token(service_proxyValidate,targetService=targetService,verify=0)
         return Response(str({'token':token,'msg':msg}))
+
+
+class PermanentTokenCrud(baseview.BaseView):
+    '''
+    PermanentToken的增删改查
+    '''
+    def get(self, request, args=None):
+        if not args:
+            page = request.GET.get('page',1)
+            pagesize = int(request.GET.get('pagesize',16))
+            page_number = PermanentToken.objects.count()
+    
+            start = (int(page) - 1) * pagesize
+            end = int(page) * pagesize
+            
+            try:
+                info = PermanentToken.objects.all().order_by('-id')[start:end]
+                info = PermanentTokenINFO(info, many=True).data 
+                
+                return Response({'status':1,'page': page_number, 'data': info})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour'))})
+
+        if args == 'generate':
+            alphabet = string.ascii_lowercase + string.digits
+            length = 32
+            token_str = ''.join(secrets.choice(alphabet) for i in range(length))
+            try:
+                t = PermanentToken.objects.create(
+                        token=token_str,
+                    )
+                t.save()
+                return Response({'status':1, 'token': token_str})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour'))})
+
+        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })
+
+
+    @super_privilege(msg=util.safe_decode(_('only super user can change token')))
+    def post(self, request, args=None):
+        if args == 'delete':
+            token_str = request.data.get('token', '')
+            token_id = request.data.get('id', '')
+            if not token_str and not token_id:
+                return Response({'status':-1, 'msg': util.safe_decode(_('token or id must privide for delete'))})
+    
+            try:
+                if token_id:
+                    token_id = int(token_id)
+                    count, _d = PermanentToken.objects.filter(id=token_id).delete()
+                    return Response({'status':count, 'id': token_id })
+                else:
+                    count, _d = PermanentToken.objects.filter(token=token_str).delete()
+                    return Response({'status':count, 'token': token_str })
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+
+        if args == 'update':
+            token_id = request.data.get('id', None)
+            if token_id is None:
+                return Response({'status':-1, 'msg': util.safe_decode(_('id must privide for update')) })
+
+            # 字段不传过来则不更新
+            username = request.data.get('username', None)
+            invoke_rule_ids = request.data.get('invoke_rule_ids', None)
+            is_validate = request.data.get('is_validate', None)
+            max_invoke = request.data.get('max_invoke', None)
+            expire_date = request.data.get('expire_date', None)
+            
+            try:
+                update_fields_list = []
+                token = PermanentToken.objects.get(id=token_id)
+                if username is not None:    
+                    token.username = username
+                    update_fields_list.append('username')
+                if invoke_rule_ids is not None:
+                    token.invoke_rule_ids = invoke_rule_ids
+                    update_fields_list.append('invoke_rule_ids')
+                if is_validate is not None:
+                    token.is_validate = is_validate
+                    update_fields_list.append('is_validate')
+                if max_invoke is not None:
+                    token.max_invoke = max_invoke
+                    update_fields_list.append('max_invoke')
+                if expire_date is not None:
+                    token.expire_date = expire_date if expire_date else None
+                update_fields_list.append('expire_date')
+                # 只update需要更改的字段
+                token.save(update_fields=update_fields_list)
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+            
+            return Response({'status':1, 'id': token_id})
+
+        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })
+
+
+class ApiInvokeRuleCrud(baseview.BaseView):
+    '''
+    ApiInvokeRule的增删改查
+    '''
+    def get(self, request, args=None):
+        if not args:
+            page = request.GET.get('page',1)
+            pagesize = int(request.GET.get('pagesize',16))
+            page_number = ApiInvokeRule.objects.count()
+
+            start = (int(page) - 1) * pagesize
+            end = int(page) * pagesize
+
+            try:
+                info = ApiInvokeRule.objects.all().order_by('-id')[start:end]
+                info = ApiInvokeRuleINFO(info, many=True).data 
+                
+                return Response({'status':1,'page': page_number, 'data': info})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+
+        if args == 'idList':
+            try:
+                id_queryset = ApiInvokeRule.objects.values_list('id', flat=True)
+                id_list = list(id_queryset)
+                id_list.sort(reverse=True)
+                return Response({'status':1, 'data': id_list})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour'))})
+
+        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })
+
+
+    @super_privilege(msg=util.safe_decode(_('only super user can change invoke rule')))
+    def post(self, request, args=None):
+        if args == 'create':
+            path = request.data.get('path', None)
+            source = request.data.get('source', None)
+            method = request.data.get('method', None)
+            params = request.data.get('params', None)
+            body = request.data.get('body', None)
+
+            try:
+                r = ApiInvokeRule.objects.create(
+                        path=path,
+                        source=source, 
+                        method=method, 
+                        params=params,
+                        body=body,
+                    )
+                r.save()
+                return Response({'status':1})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+
+        if args == 'update':
+            rule_id = request.data.get('id', None)
+            if rule_id is None:
+                return Response({'status':-1, 'msg': util.safe_decode(_('id must privide for update')) })
+
+            path = request.data.get('path', None)
+            source = request.data.get('source', None)
+            method = request.data.get('method', None)
+            params = request.data.get('params', None)
+            body = request.data.get('body', None)
+
+            try:
+                r = ApiInvokeRule.objects.get(id=rule_id)
+                r.path = path
+                r.source = source
+                r.method = method
+                r.params = params
+                r.body = body
+                r.save()
+    
+                return Response({'status':1})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+
+        if args == 'delete':
+            rule_id = request.data.get('id', None)
+            if rule_id is None:
+                return Response({'status':-1, 'msg': util.safe_decode(_('id must privide for delete')) })
+
+            rule_id = int(rule_id)
+            try:
+                count, _d = ApiInvokeRule.objects.filter(id=rule_id).delete()
+
+                return Response({'status':count, 'id': rule_id})
+            except:
+                MYLOGERROR.error(format_exc())
+                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+
+        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })

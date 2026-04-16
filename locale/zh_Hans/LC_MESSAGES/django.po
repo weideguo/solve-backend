@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-01-09 14:40+0800\n"
+"POT-Creation-Date: 2026-04-16 18:55+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -64,45 +64,76 @@ msgstr "没有调用规则匹配"
 msgid "invoke url params not allow"
 msgstr "调用参数检查不通过"
 
-#: auth_new/views.py:45
+#: auth_new/views.py:50
 msgid "only super user can change password"
 msgstr "只有超级用户可以修改密码"
 
-#: auth_new/views.py:54
+#: auth_new/views.py:59
 msgid "change password success"
 msgstr "密码修改成功"
 
-#: auth_new/views.py:56 auth_new/views.py:104
+#: auth_new/views.py:61 auth_new/views.py:109
 msgid "user not exist"
 msgstr "账号不存在"
 
-#: auth_new/views.py:58
+#: auth_new/views.py:63
 msgid "only super user can add user"
 msgstr "只有超级用户可以增加用户"
 
-#: auth_new/views.py:64
+#: auth_new/views.py:69
 msgid "user exist already"
 msgstr "用户名已经存在"
 
-#: auth_new/views.py:70
+#: auth_new/views.py:75
 msgid "user register success"
 msgstr "用户注册成功"
 
-#: auth_new/views.py:72 core/api/order.py:384
+#: auth_new/views.py:77 core/api/order.py:384
 msgid "only super user can delete"
 msgstr "只有超级用户可以删除"
 
-#: auth_new/views.py:76
+#: auth_new/views.py:81
 msgid "user delete success"
 msgstr "用户删除成功"
 
-#: auth_new/views.py:102
+#: auth_new/views.py:107
 msgid "password error"
 msgstr "密码错误"
 
-#: auth_new/views.py:135
+#: auth_new/views.py:140
 msgid "set cas before used"
 msgstr "必须先在后端设置CAS的地址才能使用"
+
+#: auth_new/views.py:275 auth_new/views.py:289 auth_new/views.py:312
+#: auth_new/views.py:348 auth_new/views.py:375 auth_new/views.py:385
+#: auth_new/views.py:411 auth_new/views.py:436 auth_new/views.py:450
+msgid "unexpect database operation error occour"
+msgstr "未预期的数据库操作错误"
+
+#: auth_new/views.py:291 auth_new/views.py:352 auth_new/views.py:387
+#: auth_new/views.py:452
+msgid "operation not support"
+msgstr "操作不支持"
+
+#: auth_new/views.py:294
+msgid "only super user can change token"
+msgstr "只有超级用户可以修改token"
+
+#: auth_new/views.py:300
+msgid "token or id must privide for delete"
+msgstr "token或id应提交以实现删除"
+
+#: auth_new/views.py:317 auth_new/views.py:416
+msgid "id must privide for update"
+msgstr "id应提交以实现更新"
+
+#: auth_new/views.py:390
+msgid "only super user can change invoke rule"
+msgstr "只有超级用户可以修改调用规则"
+
+#: auth_new/views.py:441
+msgid "id must privide for delete"
+msgstr "id应提交以实现删除"
 
 #: core/api/config.py:31
 msgid "key not exist"
