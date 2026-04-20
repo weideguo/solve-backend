@@ -139,6 +139,8 @@ def request_params_check(invoke_rule_ids, request):
     
     if 'HTTP_X_FORWARDED_FOR' in request.META:
         from_host = str(request.META['HTTP_X_FORWARDED_FOR'])
+    elif 'HTTP_X_REAL_IP' in request.META:
+        from_host = str(request.META['HTTP_X_REAL_IP'])
     else:
         from_host = str(request.META['REMOTE_ADDR'])
         

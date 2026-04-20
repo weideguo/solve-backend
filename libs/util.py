@@ -67,6 +67,8 @@ def getcp(config_file=None):
 def get_from_host(request):
     if 'HTTP_X_FORWARDED_FOR' in request.META:
         from_host = str(request.META['HTTP_X_FORWARDED_FOR'])
+    elif 'HTTP_X_REAL_IP' in request.META:
+        from_host = str(request.META['HTTP_X_REAL_IP'])
     else:
         from_host = str(request.META['REMOTE_ADDR'])
     return from_host
