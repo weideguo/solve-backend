@@ -1,4 +1,4 @@
-# -*- coding: utf-8 -*- 
+# -*- coding: utf-8 -*-
 import re
 import hashlib
 import json
@@ -12,158 +12,207 @@ import secrets
 from traceback import format_exc
 
 from rest_framework.response import Response
-#from rest_framework_simplejwt.settings import api_settings
+
+# from rest_framework_simplejwt.settings import api_settings
 from rest_framework_simplejwt.tokens import RefreshToken
 from django.contrib.auth import authenticate
 from django.shortcuts import redirect
 from django.utils.translation import gettext as _
 
-from . import baseview,util
-from .models import Account,CASProxyPgt,PermanentToken,ApiInvokeRule
-from .serializers import UserINFO,PermanentTokenINFO,ApiInvokeRuleINFO
+from . import baseview, util
+from .models import Account, CASProxyPgt, PermanentToken, ApiInvokeRule
+from .serializers import UserINFO, PermanentTokenINFO, ApiInvokeRuleINFO
 from .wrapper import cas_url
 from .decorators import super_privilege
 
 
-MYLOGERROR = logging.getLogger('django.request')
-#jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
-#jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
+MYLOGERROR = logging.getLogger("django.request")
+# jwt_payload_handler = api_settings.JWT_PAYLOAD_HANDLER
+# jwt_encode_handler = api_settings.JWT_ENCODE_HANDLER
 
 
 class UserInfo(baseview.BaseView):
-    '''
+    """
     用户信息的增删改查
-    '''
+    """
+
     def get(self, request, args=None):
-        page = request.GET.get('page',1)
-        pagesize = int(request.GET.get('pagesize',16))
+        page = request.GET.get("page", 1)
+        pagesize = int(request.GET.get("pagesize", 16))
         page_number = Account.objects.count()
 
         start = (int(page) - 1) * pagesize
         end = int(page) * pagesize
 
         info = Account.objects.all()[start:end]
-        info = UserINFO(info, many=True).data 
-        
-        return Response({'status':1,'page': page_number, 'data': info})
-    
-    @super_privilege(msg=util.safe_decode(_('only super user can change password')))
+        info = UserINFO(info, many=True).data
+
+        return Response({"status": 1, "page": page_number, "data": info})
+
+    @super_privilege(msg=util.safe_decode(_("only super user can change password")))
     def put(self, request, args=None):
-        username = request.data['username']
-        new_password = request.data['new']
+        username = request.data["username"]
+        new_password = request.data["new"]
         try:
             user = Account.objects.get(username__exact=username)
             user.set_password(new_password)
             user.save()
 
-            return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(_('change password success')) })
+            return Response(
+                {
+                    "status": 1,
+                    "data": util.safe_decode(username)
+                    + " "
+                    + util.safe_decode(_("change password success")),
+                }
+            )
         except:
-            return Response({'status':-1,'data':util.safe_decode(username)+' '+util.safe_decode(_('user not exist')) })
+            return Response(
+                {
+                    "status": -1,
+                    "data": util.safe_decode(username)
+                    + " "
+                    + util.safe_decode(_("user not exist")),
+                }
+            )
 
-    @super_privilege(msg=util.safe_decode(_('only super user can add user')))
+    @super_privilege(msg=util.safe_decode(_("only super user can add user")))
     def post(self, request, args=None):
-        username = request.data['username']
-        password = request.data['password']
+        username = request.data["username"]
+        password = request.data["password"]
 
         if Account.objects.filter(username=username):
-            return Response({'status':-1,'msg':util.safe_decode(username)+' '+util.safe_decode(_('user exist already'))})
+            return Response(
+                {
+                    "status": -1,
+                    "msg": util.safe_decode(username)
+                    + " "
+                    + util.safe_decode(_("user exist already")),
+                }
+            )
         else:
-            user = Account.objects.create_user(
-                username=username,
-                password=password)
+            user = Account.objects.create_user(username=username, password=password)
             user.save()
-            return Response({'status':1,'msg':util.safe_decode(username)+' '+util.safe_decode(_('user register success'))})
+            return Response(
+                {
+                    "status": 1,
+                    "msg": util.safe_decode(username)
+                    + " "
+                    + util.safe_decode(_("user register success")),
+                }
+            )
 
-    @super_privilege(msg=util.safe_decode(_('only super user can delete')))
+    @super_privilege(msg=util.safe_decode(_("only super user can delete")))
     def delete(self, request, args=None):
-        username=args
+        username = args
         Account.objects.filter(username=username).delete()
-        return Response({'status':1,'data':util.safe_decode(username)+' '+util.safe_decode(_('user delete success'))})
+        return Response(
+            {
+                "status": 1,
+                "data": util.safe_decode(username)
+                + " "
+                + util.safe_decode(_("user delete success")),
+            }
+        )
+
 
 class LoginAuth(baseview.AnyLogin):
 
-    def post(self, request, args = None):
-        '''
+    def post(self, request, args=None):
+        """
         登录验证
         :return: jwt token
-        '''
-        user = request.data['username']
-        password = request.data['password']
+        """
+        user = request.data["username"]
+        password = request.data["password"]
         permissions = authenticate(username=user, password=password)
-        #print(permissions) 
-        
+        # print(permissions)
+
         if permissions:
-            #token = jwt_encode_handler(jwt_payload_handler(permissions))
+            # token = jwt_encode_handler(jwt_payload_handler(permissions))
             refresh = RefreshToken.for_user(permissions)
             access_token = str(refresh.access_token)
             # refresh_token = str(refresh)
             # refresh_new = RefreshToken(refresh_token)    # 使用refresh_token
-            #使用jwt验证时依旧会查询数据库进行校验 仅对于此情况 并不是jwt的标准
-            #如果需要外部数据库的账号表 可以在查询后再同步到本地
-            #x = {'username': user, 'exp': datetime.datetime.fromtimestamp(time.time()+30000)}
-            #token = jwt_encode_handler(x)
-            return Response({'status':1,'token': access_token})
+            # 使用jwt验证时依旧会查询数据库进行校验 仅对于此情况 并不是jwt的标准
+            # 如果需要外部数据库的账号表 可以在查询后再同步到本地
+            # x = {'username': user, 'exp': datetime.datetime.fromtimestamp(time.time()+30000)}
+            # token = jwt_encode_handler(x)
+            return Response({"status": 1, "token": access_token})
         elif Account.objects.filter(username=user):
-            return Response({'status':-1,'token': '','msg':util.safe_decode(_('password error'))})
+            return Response(
+                {
+                    "status": -1,
+                    "token": "",
+                    "msg": util.safe_decode(_("password error")),
+                }
+            )
         else:
-            return Response({'status':-2,'token': '','msg':util.safe_decode(_('user not exist'))})
-
+            return Response(
+                {
+                    "status": -2,
+                    "token": "",
+                    "msg": util.safe_decode(_("user not exist")),
+                }
+            )
 
 
 ################################################# CAS ####################################################################
-#使用django-mama-cas搭建cas服务验证
+# 使用django-mama-cas搭建cas服务验证
+
 
 def get_cas_user_token(user):
-    #由cas用户名获取jwt
-    #每一次验证创建一个临时账号，重新验证时旧账号即作废
-    tmp_user=user+'_'+uuid.uuid1().hex  
-    password=uuid.uuid1().hex
-    #使用like删除已类似的账号实现剔除废弃的账号
-    Account.objects.filter(username__startswith=user+'_').delete()
-    session_user = Account.objects.create_user(
-        username=tmp_user,
-        password=password)
+    # 由cas用户名获取jwt
+    # 每一次验证创建一个临时账号，重新验证时旧账号即作废
+    tmp_user = user + "_" + uuid.uuid1().hex
+    password = uuid.uuid1().hex
+    # 使用like删除已类似的账号实现剔除废弃的账号
+    Account.objects.filter(username__startswith=user + "_").delete()
+    session_user = Account.objects.create_user(username=tmp_user, password=password)
     session_user.save()
     permissions = authenticate(username=tmp_user, password=password)
-    #token = jwt_encode_handler(jwt_payload_handler(permissions))
+    # token = jwt_encode_handler(jwt_payload_handler(permissions))
     refresh = RefreshToken.for_user(permissions)
     token = str(refresh.access_token)
     return token
 
 
 class AuthCAS(baseview.AnyLogin):
-    '''
+    """
     使用cas系统的登陆
-    '''
-    def get(self, request, args = None):
+    """
+
+    def get(self, request, args=None):
         if not cas_url:
-            return Response({'status':-3,'msg':util.safe_decode(_('set cas before used'))})
+            return Response(
+                {"status": -3, "msg": util.safe_decode(_("set cas before used"))}
+            )
 
-        if args == 'login':
-            '''
+        if args == "login":
+            """
             返回重定向到cas的信息
-            '''
-            service=request.GET['service']
-            cas_login_url='%s/login?service=%s' %(cas_url,service)
+            """
+            service = request.GET["service"]
+            cas_login_url = "%s/login?service=%s" % (cas_url, service)
 
-            #直接返回重定向信息让浏览器跳转到cas
-            #return redirect(cas_login_url)
+            # 直接返回重定向信息让浏览器跳转到cas
+            # return redirect(cas_login_url)
 
-            #window.location = <url>    #js获取返回值后，使用这种方式跳转，不能使用ajax发起请求
-            return Response({'status':1,'cas_login_url':cas_login_url})
+            # window.location = <url>    #js获取返回值后，使用这种方式跳转，不能使用ajax发起请求
+            return Response({"status": 1, "cas_login_url": cas_login_url})
 
-        if args == 'validate' or args == 'serviceValidate' or args == 'proxyValidate':
-            '''
+        if args == "validate" or args == "serviceValidate" or args == "proxyValidate":
+            """
             验证后返回 jwt token给前端
             前后端分离不适合使用cookie/session验证模式
-            
+
             validate         返回text
             serviceValidate  返回xml
                 ticket  前端将从cas系统获取到的ticket
                 service 前端请求cas时的service
                 pgtUrl  可选，用于接受cas回调的接口，由此接口接收PGTID，必须是https
-                        接受的请求如 
-                            'GET 
+                        接受的请求如
+                            'GET
                                 ?pgtId=PGT-1575617661-dIjdNxjsTyPNUx0DIlq0ohHbPIaFrIah
                                 &pgtIou=PGTIOU-1575617661-ZHwypOEaklsvDsszDVrPGDuWnCGHctDh'
 
@@ -171,255 +220,340 @@ class AuthCAS(baseview.AnyLogin):
                 使用cas proxy的登陆验证，用于验证其他app的登陆状态
                 ticket  其他app获取到的proxyTicket
                 service 其他app获取proxyTicket指定的targetService，必须使用https
-            '''
-            ticket=request.GET['ticket']
-            service=request.GET['service']
-            verify=request.GET.get('verify',True)
-            pgtUrl=request.GET.get('pgtUrl')
+            """
+            ticket = request.GET["ticket"]
+            service = request.GET["service"]
+            verify = request.GET.get("verify", True)
+            pgtUrl = request.GET.get("pgtUrl")
 
             if pgtUrl:
                 # 要调用其它连接相同cas的app的接口时使用
-                url='%s/%s?ticket=%s&service=%s&pgtUrl=%s' % (cas_url,args,ticket,service,pgtUrl)
+                url = "%s/%s?ticket=%s&service=%s&pgtUrl=%s" % (
+                    cas_url,
+                    args,
+                    ticket,
+                    service,
+                    pgtUrl,
+                )
             else:
-                url='%s/%s?ticket=%s&service=%s' % (cas_url,args,ticket,service)
-            
-            url=url.replace('#','%23')
-            r=requests.get(url, verify=verify)    
-            
-            flag, user, msg = util.cas_info_parser(r.text,'authenticationSuccess')
+                url = "%s/%s?ticket=%s&service=%s" % (cas_url, args, ticket, service)
 
-            #通过则设置session
+            url = url.replace("#", "%23")
+            r = requests.get(url, verify=verify)
+
+            flag, user, msg = util.cas_info_parser(r.text, "authenticationSuccess")
+
+            # 通过则设置session
             if flag:
-                # 前后端分离不适合使用cookie/session验证模式，使用jwt代替 
-                token=get_cas_user_token(user)
-                return Response({'status':1,'user':user,'token':token,'msg':msg})
+                # 前后端分离不适合使用cookie/session验证模式，使用jwt代替
+                token = get_cas_user_token(user)
+                return Response({"status": 1, "user": user, "token": token, "msg": msg})
             else:
-                return Response({'status':-1,'msg':msg})
+                return Response({"status": -1, "msg": msg})
 
-        if args == 'callback':
-            '''
+        if args == "callback":
+            """
             在作为代理时(即该服务要访问其他app的接口)，用于接收cas的回调
             serviceValidate接口被请求时pgtUrl参数传入该接口作为回调
             获取参数存入数据库，需要为https
-            '''
-            #print(request.GET)
-            pgtId=request.GET.get('pgtId')
-            pgtIou=request.GET.get('pgtIou')
+            """
+            # print(request.GET)
+            pgtId = request.GET.get("pgtId")
+            pgtIou = request.GET.get("pgtIou")
 
             if pgtId and pgtIou:
-                CASProxyPgt.objects.create(pgtIou=pgtIou,pgtId=pgtId)
-                return Response({'status':1})
+                CASProxyPgt.objects.create(pgtIou=pgtIou, pgtId=pgtId)
+                return Response({"status": 1})
             else:
-                return Response({'status':-1})
+                return Response({"status": -1})
 
 
 class LogoutCAS(baseview.BaseView):
-    '''
+    """
     登出 将对应的session清除 需要验证是否已经登陆
-    '''
-    
-    def get(self, request, args = None):
-        #service='http://192.168.59.132:8080/#/about'      #从请求获取前端的信息
-        service=request.GET['service']
+    """
 
-        username=str(request.user)
+    def get(self, request, args=None):
+        # service='http://192.168.59.132:8080/#/about'      #从请求获取前端的信息
+        service = request.GET["service"]
+
+        username = str(request.user)
         Account.objects.filter(username=username).delete()
         # 返回重定向信息让浏览器使用存储的cookie登出cas，cas清理自己的cookies，然后再由cas返回至自己的登陆页面
-        #return redirect('%s/logout?service=%s' %(cas_url,service))
-        
-        #window.location = <url>    #js获取返回值后，使用这种方式跳转，不能使用ajax发起请求
-        if cas_url:
-            return Response({'status':1, 'user':username, 'cas_logout_url':'%s/logout?service=%s' % (cas_url,service)})
-        else:
-            return Response({'status':1, 'user':username})
+        # return redirect('%s/logout?service=%s' %(cas_url,service))
 
+        # window.location = <url>    #js获取返回值后，使用这种方式跳转，不能使用ajax发起请求
+        if cas_url:
+            return Response(
+                {
+                    "status": 1,
+                    "user": username,
+                    "cas_logout_url": "%s/logout?service=%s" % (cas_url, service),
+                }
+            )
+        else:
+            return Response({"status": 1, "user": username})
 
 
 class TestProxy(baseview.BaseView):
-    '''
+    """
     测试作为代理获取其他app的token
     即登陆该app之后，要访问其他app的接口，双方使用同一个cas且设置代理，则可以使用当前登陆的账号信息（不是通过保存账号密码）直接连接其他app，而不需要再次登陆
     要求登陆该app时serviceValidate接口附加参数pgtUrl
-    '''
-    def get(self, request, args = None):
+    """
+
+    def get(self, request, args=None):
         from auth_new.wrapper import get_service_token
-        #https://192.168.59.132:9000/api/v1/cas/proxyValidate  需要访问的其他app的proxyValidate接口，不是该app的接口
-        service_proxyValidate='https://192.168.59.132:9000/api/v1/cas/proxyValidate'
-        token,msg=get_service_token(service_proxyValidate,verify=False)
+
+        # https://192.168.59.132:9000/api/v1/cas/proxyValidate  需要访问的其他app的proxyValidate接口，不是该app的接口
+        service_proxyValidate = "https://192.168.59.132:9000/api/v1/cas/proxyValidate"
+        token, msg = get_service_token(service_proxyValidate, verify=False)
         # verify是否验证https的证书
         # targetService 默认为 service_proxyValidate 的根路径
-        #token,msg=get_service_token(service_proxyValidate,targetService=targetService,verify=0)
-        return Response(str({'token':token,'msg':msg}))
+        # token,msg=get_service_token(service_proxyValidate,targetService=targetService,verify=0)
+        return Response(str({"token": token, "msg": msg}))
 
 
 class PermanentTokenCrud(baseview.BaseView):
-    '''
+    """
     PermanentToken的增删改查
-    '''
+    """
+
     def get(self, request, args=None):
         if not args:
-            page = request.GET.get('page',1)
-            pagesize = int(request.GET.get('pagesize',16))
+            page = request.GET.get("page", 1)
+            pagesize = int(request.GET.get("pagesize", 16))
             page_number = PermanentToken.objects.count()
-    
+
             start = (int(page) - 1) * pagesize
             end = int(page) * pagesize
-            
+
             try:
-                info = PermanentToken.objects.all().order_by('-id')[start:end]
-                info = PermanentTokenINFO(info, many=True).data 
-                
-                return Response({'status':1,'page': page_number, 'data': info})
+                info = PermanentToken.objects.all().order_by("-id")[start:end]
+                info = PermanentTokenINFO(info, many=True).data
+
+                return Response({"status": 1, "page": page_number, "data": info})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour'))})
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        if args == 'generate':
+        if args == "generate":
             alphabet = string.ascii_lowercase + string.digits
             length = 32
-            token_str = ''.join(secrets.choice(alphabet) for i in range(length))
+            token_str = "".join(secrets.choice(alphabet) for i in range(length))
             try:
                 t = PermanentToken.objects.create(
-                        token=token_str,
-                    )
+                    token=token_str,
+                )
                 t.save()
-                return Response({'status':1, 'token': token_str})
+                return Response({"status": 1, "token": token_str})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour'))})
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })
+        return Response(
+            {"status": -1, "msg": util.safe_decode(_("operation not support"))}
+        )
 
-
-    @super_privilege(msg=util.safe_decode(_('only super user can change token')))
+    @super_privilege(msg=util.safe_decode(_("only super user can change token")))
     def post(self, request, args=None):
-        if args == 'delete':
-            token_str = request.data.get('token', '')
-            token_id = request.data.get('id', '')
+        if args == "delete":
+            token_str = request.data.get("token", "")
+            token_id = request.data.get("id", "")
             if not token_str and not token_id:
-                return Response({'status':-1, 'msg': util.safe_decode(_('token or id must privide for delete'))})
-    
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("token or id must privide for delete")
+                        ),
+                    }
+                )
+
             try:
                 if token_id:
                     token_id = int(token_id)
                     count, _d = PermanentToken.objects.filter(id=token_id).delete()
-                    return Response({'status':count, 'id': token_id })
+                    return Response({"status": count, "id": token_id})
                 else:
                     count, _d = PermanentToken.objects.filter(token=token_str).delete()
-                    return Response({'status':count, 'token': token_str })
+                    return Response({"status": count, "token": token_str})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        if args == 'update':
-            token_id = request.data.get('id', None)
+        if args == "update":
+            token_id = request.data.get("id", None)
             if token_id is None:
-                return Response({'status':-1, 'msg': util.safe_decode(_('id must privide for update')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(_("id must privide for update")),
+                    }
+                )
 
             # 字段不传过来则不更新
-            username = request.data.get('username', None)
-            invoke_rule_ids = request.data.get('invoke_rule_ids', None)
-            is_validate = request.data.get('is_validate', None)
-            max_invoke = request.data.get('max_invoke', None)
-            expire_date = request.data.get('expire_date', None)
-            
+            username = request.data.get("username", None)
+            invoke_rule_ids = request.data.get("invoke_rule_ids", None)
+            is_validate = request.data.get("is_validate", None)
+            max_invoke = request.data.get("max_invoke", None)
+            expire_date = request.data.get("expire_date", None)
+
             try:
                 update_fields_list = []
                 token = PermanentToken.objects.get(id=token_id)
-                if username is not None:    
+                if username is not None:
                     token.username = username
-                    update_fields_list.append('username')
+                    update_fields_list.append("username")
                 if invoke_rule_ids is not None:
                     token.invoke_rule_ids = invoke_rule_ids
-                    update_fields_list.append('invoke_rule_ids')
+                    update_fields_list.append("invoke_rule_ids")
                 if is_validate is not None:
                     token.is_validate = is_validate
-                    update_fields_list.append('is_validate')
+                    update_fields_list.append("is_validate")
                 if max_invoke is not None:
                     token.max_invoke = max_invoke
-                    update_fields_list.append('max_invoke')
+                    update_fields_list.append("max_invoke")
                 if expire_date is not None:
                     token.expire_date = expire_date if expire_date else None
-                update_fields_list.append('expire_date')
+                update_fields_list.append("expire_date")
                 # 只update需要更改的字段
                 token.save(update_fields=update_fields_list)
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
-            
-            return Response({'status':1, 'id': token_id})
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })
+            return Response({"status": 1, "id": token_id})
+
+        return Response(
+            {"status": -1, "msg": util.safe_decode(_("operation not support"))}
+        )
 
 
 class ApiInvokeRuleCrud(baseview.BaseView):
-    '''
+    """
     ApiInvokeRule的增删改查
-    '''
+    """
+
     def get(self, request, args=None):
         if not args:
-            page = request.GET.get('page',1)
-            pagesize = int(request.GET.get('pagesize',16))
+            page = request.GET.get("page", 1)
+            pagesize = int(request.GET.get("pagesize", 16))
             page_number = ApiInvokeRule.objects.count()
 
             start = (int(page) - 1) * pagesize
             end = int(page) * pagesize
 
             try:
-                info = ApiInvokeRule.objects.all().order_by('-id')[start:end]
-                info = ApiInvokeRuleINFO(info, many=True).data 
-                
-                return Response({'status':1,'page': page_number, 'data': info})
+                info = ApiInvokeRule.objects.all().order_by("-id")[start:end]
+                info = ApiInvokeRuleINFO(info, many=True).data
+
+                return Response({"status": 1, "page": page_number, "data": info})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        if args == 'idList':
+        if args == "idList":
             try:
-                id_queryset = ApiInvokeRule.objects.values_list('id', flat=True)
+                id_queryset = ApiInvokeRule.objects.values_list("id", flat=True)
                 id_list = list(id_queryset)
                 id_list.sort(reverse=True)
-                return Response({'status':1, 'data': id_list})
+                return Response({"status": 1, "data": id_list})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour'))})
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })
+        return Response(
+            {"status": -1, "msg": util.safe_decode(_("operation not support"))}
+        )
 
-
-    @super_privilege(msg=util.safe_decode(_('only super user can change invoke rule')))
+    @super_privilege(msg=util.safe_decode(_("only super user can change invoke rule")))
     def post(self, request, args=None):
-        if args == 'create':
-            path = request.data.get('path', None)
-            source = request.data.get('source', None)
-            method = request.data.get('method', None)
-            params = request.data.get('params', None)
-            body = request.data.get('body', None)
+        if args == "create":
+            path = request.data.get("path", None)
+            source = request.data.get("source", None)
+            method = request.data.get("method", None)
+            params = request.data.get("params", None)
+            body = request.data.get("body", None)
 
             try:
                 r = ApiInvokeRule.objects.create(
-                        path=path,
-                        source=source, 
-                        method=method, 
-                        params=params,
-                        body=body,
-                    )
+                    path=path,
+                    source=source,
+                    method=method,
+                    params=params,
+                    body=body,
+                )
                 r.save()
-                return Response({'status':1})
+                return Response({"status": 1})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        if args == 'update':
-            rule_id = request.data.get('id', None)
+        if args == "update":
+            rule_id = request.data.get("id", None)
             if rule_id is None:
-                return Response({'status':-1, 'msg': util.safe_decode(_('id must privide for update')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(_("id must privide for update")),
+                    }
+                )
 
-            path = request.data.get('path', None)
-            source = request.data.get('source', None)
-            method = request.data.get('method', None)
-            params = request.data.get('params', None)
-            body = request.data.get('body', None)
+            path = request.data.get("path", None)
+            source = request.data.get("source", None)
+            method = request.data.get("method", None)
+            params = request.data.get("params", None)
+            body = request.data.get("body", None)
 
             try:
                 r = ApiInvokeRule.objects.get(id=rule_id)
@@ -429,24 +563,45 @@ class ApiInvokeRuleCrud(baseview.BaseView):
                 r.params = params
                 r.body = body
                 r.save()
-    
-                return Response({'status':1})
+
+                return Response({"status": 1})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        if args == 'delete':
-            rule_id = request.data.get('id', None)
+        if args == "delete":
+            rule_id = request.data.get("id", None)
             if rule_id is None:
-                return Response({'status':-1, 'msg': util.safe_decode(_('id must privide for delete')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(_("id must privide for delete")),
+                    }
+                )
 
             rule_id = int(rule_id)
             try:
                 count, _d = ApiInvokeRule.objects.filter(id=rule_id).delete()
 
-                return Response({'status':count, 'id': rule_id})
+                return Response({"status": count, "id": rule_id})
             except:
                 MYLOGERROR.error(format_exc())
-                return Response({'status':-1, 'msg': util.safe_decode(_('unexpect database operation error occour')) })
+                return Response(
+                    {
+                        "status": -1,
+                        "msg": util.safe_decode(
+                            _("unexpect database operation error occour")
+                        ),
+                    }
+                )
 
-        return Response({'status':-1, 'msg': util.safe_decode(_('operation not support')) })
+        return Response(
+            {"status": -1, "msg": util.safe_decode(_("operation not support"))}
+        )

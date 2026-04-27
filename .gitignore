@@ -115,3 +115,4 @@ core/migrations/
 *_initial.py
 nohup.out
 deploy.conf
+sftp-config.json
