@@ -1,38 +1,41 @@
-# solve-backend Dockfile
-# Version 1.0
+FROM python:3.13.13-slim-bookworm
 
-# Base images 
-FROM python:3.13
-LABEL maintainer="wdg(https://github.com/weideguo)"
+# 设置时区和编码环境变量
+ENV TZ=Asia/Shanghai \
+    LC_ALL=C.UTF-8 \
+    LANG=C.UTF-8 \
+    # 禁用 PIP 进度条
+    PIP_PROGRESS_BAR=off \
+    # 设置非交互模式，避免安装时的交互提示
+    DEBIAN_FRONTEND=noninteractive
+
+WORKDIR /data/solve-backend
 
 ARG INDEX_URL="https://pypi.org/simple/"
 ARG TRUSTED_HOST="pypi.org"
 
-ENV INDEX_URL=${INDEX_URL}
-ENV TRUSTED_HOST=${TRUSTED_HOST}
+RUN ln -fs /usr/share/zoneinfo/Asia/Shanghai /etc/localtime && \
+    echo "Asia/Shanghai" > /etc/timezone
 
-ENV REDIS_HOST=127.0.0.1
-ENV REDIS_PORT=6379
-#ENV REDIS_PASSWORD=xxx
-#ENV LC_ALL=en_US.UTF-8
+COPY requirements3.13.txt ./
+RUN pip install --no-cache-dir \
+    -r requirements3.13.txt \
+    --index-url ${INDEX_URL} \
+    --trusted-host ${TRUSTED_HOST} \
+    || echo "install complete"
 
-#EXPOSE 8000:8000
+COPY . .
 
-RUN rm /etc/localtime && ln -s /usr/share/zoneinfo/Asia/Shanghai /etc/localtime
-RUN mkdir -p /data/solve-backend
+RUN cp deploy.conf.sample deploy.conf && \
+    mv db.sqlite3.demo db.sqlite3
 
-ADD ./  /data/solve-backend/
+RUN chmod 755 docker-entrypoint.sh && \
+    ln -s /data/solve-backend/docker-entrypoint.sh /usr/local/bin/docker-entrypoint.sh
 
-WORKDIR /data/solve-backend
-RUN chmod 755 docker-entrypoint.sh
-RUN cp docker-entrypoint.sh /usr/local/bin/
-RUN mv db.sqlite3.demo db.sqlite3
-RUN cp deploy.conf.sample deploy.conf
+ENV REDIS_HOST=127.0.0.1 \
+    REDIS_PORT=6379
+    # REDIS_PASSWORD=xxx
 
-# 需要关闭进度条，否则出现安装失败？
-ENV PIP_PROGRESS_BAR=off
-#RUN pip install -r requirements.txt ; echo "skip DEPRECATION info"
-RUN pip install -r requirements3.13.txt  --index-url ${INDEX_URL} --trusted-host ${TRUSTED_HOST} ; echo "skip DEPRECATION info"
+EXPOSE 8000
 
-#ENTRYPOINT ["docker-entrypoint.sh"]
 CMD ["docker-entrypoint.sh"]
