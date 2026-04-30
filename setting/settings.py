@@ -220,19 +220,23 @@ LOGGING = {
         },
         "error": {
             "level": "ERROR",
-            "class": "logging.handlers.RotatingFileHandler",
+            "class": "logging.handlers.TimedRotatingFileHandler",
             "filename": "logs/error.log",
-            "maxBytes": 1024 * 1024 * 10,
-            "backupCount": 10,
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 100,
             "formatter": "standard",
+            "encoding": "utf-8",
         },
         "default": {
             "level": "INFO",
-            "class": "logging.handlers.RotatingFileHandler",
-            "filename": "logs/info.log",  # 日志输出文件
-            "maxBytes": 1024 * 1024 * 10,  # 文件大小
-            "backupCount": 100,  # 备份份数
-            "formatter": "simple",  # 日志格式
+            "class": "logging.handlers.TimedRotatingFileHandler",
+            "filename": "logs/info.log",
+            "when": "midnight",
+            "interval": 1,
+            "backupCount": 100,
+            "formatter": "simple",
+            "encoding": "utf-8",
         },
     },
     "loggers": {
