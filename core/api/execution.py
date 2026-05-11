@@ -92,6 +92,7 @@ class Session(baseview.BaseView):
             """
             tmpl_key = redis_manage_client.hget(pre_job_name, config.prefix_exec_tmpl)
             playbook = redis_manage_client.hget(tmpl_key, "playbook")
+            target_type = redis_manage_client.hget(tmpl_key, "target_type")
 
             playbook_describe = get_playbook_describe(playbook)
 
@@ -132,6 +133,7 @@ class Session(baseview.BaseView):
                     "session": sesion_list,
                     "pause": pause_line,
                     "target_constrict": target_constrict,
+                    "target_type": target_type,
                 }
             )
 
