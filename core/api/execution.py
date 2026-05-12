@@ -127,6 +127,12 @@ class Session(baseview.BaseView):
                 playbook_describe["target"] if "target" in playbook_describe else []
             )
 
+            target_type = (
+                playbook_describe["target_type"]
+                if "target_type" in playbook_describe
+                else target_type
+            )
+
             return Response(
                 {
                     "status": 1,
