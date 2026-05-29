@@ -3,7 +3,10 @@
 # from django.urls import include
 from django.urls import path, re_path
 from django.conf.urls import include
+from django.conf import settings
+from django.conf.urls.static import static
 from rest_framework.urlpatterns import format_suffix_patterns
+from drf_spectacular.views import SpectacularAPIView, SpectacularSwaggerView
 
 from core.api.order import Order
 from core.api.execution import (
@@ -24,7 +27,6 @@ from core.api.filemanage import File, FileDownload
 
 from core.api.test import Test
 
-
 # 使用"/"结尾可以避免后续扩展时要改前端的请求
 urlpatterns = [
     re_path(r"^api/v1/home/(.*)", Home.as_view(), name="home"),
@@ -35,7 +37,9 @@ urlpatterns = [
         r"^api/v1/executionInfo/(.*)", ExecutionInfo.as_view(), name="executionInfo"
     ),
     re_path(r"^api/v1/execution/(.*)", Execution.as_view(), name="execution"),
-    re_path(r"^api/v1/session/(.*)", Session.as_view(), name="session"),
+    path(
+        r"api/v1/session/<path:args>", Session.as_view(), name="session"
+    ),  # 这个路由写法更推荐
     re_path(r"^api/v1/global/(.*)", Golbal.as_view(), name="global"),
     re_path(r"^api/v1/fast/(.*)", FastExecution.as_view(), name="fast"),
     re_path(r"^api/v1/pauseRun/(.*)", pauseRun.as_view(), name="pauseRun"),
@@ -43,9 +47,21 @@ urlpatterns = [
     re_path(r"^api/v1/fileDownload", FileDownload.as_view(), name="fileDownload"),
     re_path(r"^api/v1/config/", Config.as_view(), name="config"),
     re_path(r"^api/v1/", include(("auth_new.urls", "auth"), namespace="auth")),
-    re_path(r"^api/v1/test/(.*)", Test.as_view()),  # 用于测试 正式部署请务必删除
+    # re_path(r"^api/v1/test/(.*)", Test.as_view()),  # 用于测试 正式部署请务必删除
 ]
 urlpatterns = format_suffix_patterns(urlpatterns)
+
+# 只有在debug模式才显示
+if settings.DEBUG:
+    urlpatterns += [
+        path("api/schema/", SpectacularAPIView.as_view(), name="schema"),
+        path(
+            "api/docs/",
+            SpectacularSwaggerView.as_view(url_name="schema"),
+            name="swagger-ui",
+        ),
+    ]
+    urlpatterns += static(settings.STATIC_URL, document_root=settings.STATIC_ROOT)
 
 # 异常页面 没有明确设置则回复django的对应的默认页面
 from libs.exception import page_not_found, inner_error

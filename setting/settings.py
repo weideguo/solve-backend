@@ -75,6 +75,8 @@ INSTALLED_APPS = [
     "django.contrib.contenttypes",
     "django.contrib.staticfiles",
     "rest_framework",
+    "drf_spectacular",
+    "drf_spectacular_sidecar",
     "auth_new",
     "core",
 ]
@@ -175,6 +177,8 @@ USE_TZ = False
 
 STATIC_URL = "/static/"
 
+STATIC_ROOT = os.path.join(BASE_DIR, "staticfiles")
+
 REST_FRAMEWORK = {
     "DEFAULT_PERMISSION_CLASSES": ("rest_framework.permissions.IsAuthenticated",),
     "DEFAULT_AUTHENTICATION_CLASSES": (
@@ -187,6 +191,8 @@ REST_FRAMEWORK = {
     ),
     # 访问频率设置  ('s', 'sec', 'm', 'min', 'h', 'hour', 'd', 'day')
     "DEFAULT_THROTTLE_RATES": {"anylogin": "10/m"},
+    "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
+    "URL_FORMAT_OVERRIDE": None,  # 移除 ?format=json
 }
 
 # JWT_AUTH = {
@@ -252,6 +258,13 @@ LOGGING = {
             "propagate": True,
         },
     },
+}
+
+SPECTACULAR_SETTINGS = {
+    "TITLE": "solve-backend API",
+    "DESCRIPTION": "API 接口文档和调试工具",
+    "VERSION": "0.19.0",
+    "SWAGGER_UI_DIST": "SIDECAR",  # 使用内置 UI
 }
 
 ##############

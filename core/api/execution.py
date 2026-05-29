@@ -13,6 +13,8 @@ from jinja2 import Template
 from rest_framework.response import Response
 from django.conf import settings
 from django.utils.translation import gettext as _
+from drf_spectacular.utils import extend_schema, OpenApiParameter
+from drf_spectacular.types import OpenApiTypes
 
 from auth_new import baseview
 from libs import util
@@ -72,13 +74,43 @@ def set_debug_run(job_info, redis_send_client):
 
 
 class Session(baseview.BaseView):
-
+    @extend_schema(
+        summary="获取 Playbook 的 Session 参数",
+        description="根据传入的 filter 参数，从 Redis 中获取对应的 session 信息。如果路径包含 'extend'，则获取更完善的 session 数据。",
+        parameters=[
+            OpenApiParameter(
+                name="args",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="扩展参数，传入 'extend' 可获取更完善的数据",
+                enum=["base", "extend"],
+                required=False,
+            ),
+            OpenApiParameter(
+                name="filter",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="用于过滤 session 的可执行任务名",
+                required=True,
+            ),
+        ],
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "status": {"type": "integer", "example": 1},
+                },
+                "additionalProperties": True,
+                "required": ["status"],
+            },
+        },
+    )
     def get(self, request, args=None):
         redis_manage_client = redis_single["redis_manage"]
 
         pre_job_name = request.GET["filter"]
 
-        if not args:
+        if args == "base":
             """
             获取playbook的session参数
             """
@@ -143,11 +175,51 @@ class Session(baseview.BaseView):
                 }
             )
 
+    @extend_schema(
+        summary="提交 session 参数",
+        description="向 Redis 中提交或更新指定的 session 参数数据",
+        parameters=[
+            OpenApiParameter(
+                name="args",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.PATH,
+                description="base为正常session，temp为执行时临时用的session",
+                enum=["base", "temp"],
+            ),
+            OpenApiParameter(
+                name="filter",
+                type=OpenApiTypes.STR,
+                location=OpenApiParameter.QUERY,
+                description="用于过滤 session 的可执行任务名，为args为base时则需要",
+                required=False,
+            ),
+        ],
+        request={
+            "application/json": {
+                "type": "object",
+                "properties": {
+                    "key1": {"type": "string", "description": "示例字段1"},
+                    "key2": {"type": "integer", "description": "示例字段2"},
+                },
+                "example": {"key1": "value1", "key2": "value2"},
+            }
+        },
+        responses={
+            200: {
+                "type": "object",
+                "properties": {
+                    "status": {"type": "integer", "example": 1},
+                },
+                "additionalProperties": True,
+                "required": ["status"],
+            },
+        },
+    )
     def post(self, request, args=None):
         """
         提交session参数
         """
-        if not args:
+        if args == "base":
             redis_manage_client = redis_single["redis_manage"]
 
             filter = request.GET["filter"]
