@@ -15,7 +15,8 @@ from core.api.execution import (
     Execution,
     ExecutionInfo,
     FastExecution,
-    pauseRun,
+    PauseRun,
+    HostExecution,
 )
 from core.api.targetinfo import Target, Host
 from core.api.config import Config
@@ -42,7 +43,8 @@ urlpatterns = [
     ),  # 这个路由写法更推荐
     re_path(r"^api/v1/global/(.*)", Golbal.as_view(), name="global"),
     re_path(r"^api/v1/fast/(.*)", FastExecution.as_view(), name="fast"),
-    re_path(r"^api/v1/pauseRun/(.*)", pauseRun.as_view(), name="pauseRun"),
+    re_path(r"^api/v1/pauseRun/(.*)", PauseRun.as_view(), name="pauseRun"),
+    path(r"api/v1/hostExecution", HostExecution.as_view(), name="hostExecution"),
     re_path(r"^api/v1/file/(.*)", File.as_view(), name="file"),
     re_path(r"^api/v1/fileDownload", FileDownload.as_view(), name="fileDownload"),
     re_path(r"^api/v1/config/", Config.as_view(), name="config"),

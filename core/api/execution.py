@@ -694,7 +694,7 @@ class FastExecution(baseview.BaseView):
         return Response({"status": 1, "data": job_name})
 
 
-class pauseRun(baseview.BaseView):
+class PauseRun(baseview.BaseView):
     """
     阻塞任务的操作 停止阻塞 继续 中止
     """
@@ -747,3 +747,98 @@ class pauseRun(baseview.BaseView):
         redis_send_client.expire(block_key, config.tmp_config_expire_sec)
 
         return Response({"status": 1})
+
+
+class HostExecution(baseview.BaseView):
+    """
+    对主机执行命令，执行的命令支持跨行
+    """
+
+    def post(self, request, args=None):
+        data = request.data
+        host = data["host"]
+        cmd = data["cmd"]
+        timeout = int(data.get("timeout", 1800))  # 最大执行时间超过 30*60 秒则超过
+        comment = data.get("comment", "").strip()
+
+        user = str(request.user)
+
+        redis_send_client = redis_single["redis_send"]
+        redis_tmp_client = redis_single["redis_tmp"]
+        redis_job_client = redis_single["redis_job"]
+        redis_log_client = redis_single["redis_log"]
+
+        job_info = {}
+
+        # 构造一个执行对象，用于存储执行的命令
+        target_uuid = uuid.uuid1().hex
+        target_name = config.prefix_temp + host + config.spliter + target_uuid
+        redis_tmp_client.hmset(target_name, {"_1": cmd})
+        redis_tmp_client.expire(target_name, config.tmp_config_expire_sec)
+
+        job_info["target"] = target_name
+        job_info["number"] = 1
+        job_info["comment"] = comment or _("host execution job")
+
+        # 构造一个playbook
+        playbook_file = os.path.join(
+            playbook_temp, config.prefix_temp + uuid.uuid1().hex
+        )
+        _path = os.path.dirname(playbook_file)
+        if not os.path.exists(_path):
+            os.makedirs(_path)
+
+        # playbook只有两行
+        playbook_all = f"[{host}]" + "\n{{_1}}\n"
+        with open(playbook_file, "w") as f:
+            f.write(playbook_all)
+
+        job_info["playbook"] = playbook_file
+        job_info["user"] = user
+        job_info["begin_time"] = time.time()
+        job_info["target_type"] = "temp"
+        job_info["job_type"] = "temp"
+
+        job_id = uuid.uuid1().hex
+        job_name = config.prefix_job + job_id
+
+        redis_job_client.hmset(job_name, job_info)
+        redis_send_client.rpush(config.key_job_list, job_name)
+
+        data = {}
+        data["job_name"] = job_name
+        data["is_finish"] = 0
+
+        # 通过这种方式获取 target_log_name 太容易出错
+        # _job_log = redis_log_client.hgetall(config.prefix_log, job_name)
+        # job_log = json.loads(_job_log["log"])
+        # target_log_name = job_log[0][1]
+
+        target_log_name = config.prefix_log_target + target_uuid
+
+        _timeout = 0
+        time_begin = time.time()
+        # playbook只有两行，因此日志也只有两行
+        while timeout and _timeout < timeout:
+            # 最后一行
+            _cmd_log_names = redis_log_client.lrange(target_log_name, 0, 2)
+            if _cmd_log_names and _cmd_log_names[-1]:
+                exit_code = redis_log_client.hget(_cmd_log_names[-1], "exit_code")
+                # 存在退出码，第一行异常退出、已经执行到第二行
+                if exit_code and (
+                    (len(_cmd_log_names) == 1 and str(exit_code) != "0")
+                    or len(_cmd_log_names) == 2
+                ):
+                    data.update(redis_log_client.hgetall(_cmd_log_names[-1]))
+                    if len(_cmd_log_names) == 2:
+                        data["is_finish"] = 1
+
+                    break
+
+            time.sleep(0.2)
+            _timeout = time.time() - time_begin
+
+        is_timeout = 1 if _timeout > timeout else 0
+        data["is_timeout"] = is_timeout
+
+        return Response({"status": 1, "data": data})

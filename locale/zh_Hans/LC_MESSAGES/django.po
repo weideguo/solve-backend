@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PACKAGE VERSION\n"
 "Report-Msgid-Bugs-To: \n"
-"POT-Creation-Date: 2026-04-16 18:55+0800\n"
+"POT-Creation-Date: 2026-06-01 17:35+0800\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -18,310 +18,314 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Plural-Forms: nplurals=1; plural=0;\n"
 
-#: auth_new/token_auth.py:50
+#: auth_new/token_auth.py:55
 msgid "permanent token do not work as invoke rule is null"
 msgstr "调用规则为空，该permanent token不生效"
 
-#: auth_new/token_auth.py:57
+#: auth_new/token_auth.py:62
 msgid "permanent token exceed invoke limit"
 msgstr "permanent token调用次数超过限制"
 
-#: auth_new/token_auth.py:61
+#: auth_new/token_auth.py:66
 msgid "permanent token is not validated"
 msgstr "permanent token不在生效状态"
 
-#: auth_new/token_auth.py:66
+#: auth_new/token_auth.py:71
 msgid "permanent token is not in validated date"
 msgstr "permanent token不在有效日期"
 
-#: auth_new/token_auth.py:73
+#: auth_new/token_auth.py:78
 msgid "Invalid signature."
 msgstr ""
 
-#: auth_new/token_auth.py:90
+#: auth_new/token_auth.py:100
 msgid "temp token is not in request parameters"
 msgstr "temp token不在请求参数中"
 
-#: auth_new/token_auth.py:101
+#: auth_new/token_auth.py:113
 #, python-format
 msgid "temp token [%(token_value)s] is not validated"
 msgstr "temp token [%(token_value)s] 不在生效状态"
 
-#: auth_new/token_auth.py:120
+#: auth_new/token_auth.py:134
 msgid "Invalid Authorization header. No credentials provided."
 msgstr ""
 
-#: auth_new/token_auth.py:123
+#: auth_new/token_auth.py:138
 msgid ""
 "Invalid Authorization header. Credentials string should not contain spaces."
 msgstr ""
 
-#: auth_new/token_auth.py:175
+#: auth_new/token_auth.py:231
 msgid "no invoke rule match"
 msgstr "没有调用规则匹配"
 
-#: auth_new/token_auth.py:179
+#: auth_new/token_auth.py:235
 msgid "invoke url params not allow"
 msgstr "调用参数检查不通过"
 
-#: auth_new/views.py:50
+#: auth_new/views.py:52
 msgid "only super user can change password"
 msgstr "只有超级用户可以修改密码"
 
-#: auth_new/views.py:59
+#: auth_new/views.py:66
 msgid "change password success"
 msgstr "密码修改成功"
 
-#: auth_new/views.py:61 auth_new/views.py:109
+#: auth_new/views.py:75 auth_new/views.py:155
 msgid "user not exist"
 msgstr "账号不存在"
 
-#: auth_new/views.py:63
+#: auth_new/views.py:79
 msgid "only super user can add user"
 msgstr "只有超级用户可以增加用户"
 
-#: auth_new/views.py:69
+#: auth_new/views.py:90
 msgid "user exist already"
 msgstr "用户名已经存在"
 
-#: auth_new/views.py:75
+#: auth_new/views.py:101
 msgid "user register success"
 msgstr "用户注册成功"
 
-#: auth_new/views.py:77 core/api/order.py:384
+#: auth_new/views.py:105 core/api/order.py:458
 msgid "only super user can delete"
 msgstr "只有超级用户可以删除"
 
-#: auth_new/views.py:81
+#: auth_new/views.py:114
 msgid "user delete success"
 msgstr "用户删除成功"
 
-#: auth_new/views.py:107
+#: auth_new/views.py:147
 msgid "password error"
 msgstr "密码错误"
 
-#: auth_new/views.py:140
+#: auth_new/views.py:188
 msgid "set cas before used"
 msgstr "必须先在后端设置CAS的地址才能使用"
 
-#: auth_new/views.py:275 auth_new/views.py:289 auth_new/views.py:312
-#: auth_new/views.py:348 auth_new/views.py:375 auth_new/views.py:385
-#: auth_new/views.py:411 auth_new/views.py:436 auth_new/views.py:450
+#: auth_new/views.py:342 auth_new/views.py:363 auth_new/views.py:401
+#: auth_new/views.py:449 auth_new/views.py:486 auth_new/views.py:503
+#: auth_new/views.py:537 auth_new/views.py:574 auth_new/views.py:600
 msgid "unexpect database operation error occour"
 msgstr "未预期的数据库操作错误"
 
-#: auth_new/views.py:291 auth_new/views.py:352 auth_new/views.py:387
-#: auth_new/views.py:452
+#: auth_new/views.py:369 auth_new/views.py:457 auth_new/views.py:509
+#: auth_new/views.py:606
 msgid "operation not support"
 msgstr "操作不支持"
 
-#: auth_new/views.py:294
+#: auth_new/views.py:372
 msgid "only super user can change token"
 msgstr "只有超级用户可以修改token"
 
-#: auth_new/views.py:300
+#: auth_new/views.py:382
 msgid "token or id must privide for delete"
 msgstr "token或id应提交以实现删除"
 
-#: auth_new/views.py:317 auth_new/views.py:416
+#: auth_new/views.py:412 auth_new/views.py:548
 msgid "id must privide for update"
 msgstr "id应提交以实现更新"
 
-#: auth_new/views.py:390
+#: auth_new/views.py:512
 msgid "only super user can change invoke rule"
 msgstr "只有超级用户可以修改调用规则"
 
-#: auth_new/views.py:441
+#: auth_new/views.py:585
 msgid "id must privide for delete"
 msgstr "id应提交以实现删除"
 
-#: core/api/config.py:31
+#: core/api/config.py:34
 msgid "key not exist"
 msgstr "key不存在"
 
-#: core/api/config.py:44
+#: core/api/config.py:53
 msgid "redis key type error"
 msgstr "key在redis中的存储类型错误"
 
-#: core/api/config.py:64
+#: core/api/config.py:75
 msgid "not commit empty info"
 msgstr "提交信息不能为空"
 
-#: core/api/config.py:92
+#: core/api/config.py:113
 msgid "type constrict"
 msgstr "type必须为string list set hash之一"
 
-#: core/api/config.py:102
+#: core/api/config.py:124
 msgid "type not match"
 msgstr "type类型不匹配"
 
-#: core/api/execution.py:147 core/api/execution.py:168
+#: core/api/execution.py:242 core/api/execution.py:268
 msgid "should not commit empty data"
 msgstr "空数据不必提交"
 
-#: core/api/execution.py:413
+#: core/api/execution.py:559
 msgid "commit date attr error"
 msgstr "提交的数据必须包含以下属性： spliter、parallel、exeinfo、playbook"
 
-#: core/api/execution.py:455
+#: core/api/execution.py:611
 #, python-format
 msgid "error in line %d"
 msgstr "第 %d 行配置信息错误！"
 
-#: core/api/execution.py:495
+#: core/api/execution.py:659
 msgid "fast job parallel"
 msgstr "快速任务-并行"
 
-#: core/api/execution.py:512
+#: core/api/execution.py:676
 msgid "fast job serial"
 msgstr "快速任务-串行"
 
-#: core/api/filemanage.py:31 core/api/filemanage.py:63
-#: core/api/filemanage.py:161 core/api/fileproxy.py:51 core/api/fileproxy.py:67
+#: core/api/execution.py:781
+msgid "host execution job"
+msgstr "主机执行"
+
+#: core/api/filemanage.py:37 core/api/filemanage.py:74
+#: core/api/filemanage.py:176 core/api/fileproxy.py:56 core/api/fileproxy.py:78
 msgid "should not change in path"
 msgstr "路径不能存在.."
 
-#: core/api/filemanage.py:37
+#: core/api/filemanage.py:45
 msgid "path is dir"
 msgstr "路径为文件"
 
-#: core/api/filemanage.py:54 core/api/fileproxy.py:59
+#: core/api/filemanage.py:62 core/api/fileproxy.py:66
 msgid "upload success"
 msgstr "上传成功"
 
-#: core/api/filemanage.py:77
+#: core/api/filemanage.py:100
 msgid "read file failed"
 msgstr "读取文件失败"
 
-#: core/api/filemanage.py:119
+#: core/api/filemanage.py:122
 msgid "set temp token failed"
 msgstr "设置temp token失败"
 
-#: core/api/filemanage.py:139
+#: core/api/filemanage.py:149
 msgid "path is not dir"
 msgstr "路径不为目录"
 
-#: core/api/filemanage.py:149 core/api/fileproxy.py:131
+#: core/api/filemanage.py:160 core/api/fileproxy.py:148
 msgid "create success"
 msgstr "创建成功"
 
-#: core/api/filemanage.py:152
+#: core/api/filemanage.py:163
 msgid "create failed"
 msgstr "创建失败"
 
-#: core/api/filemanage.py:190
+#: core/api/filemanage.py:218
 msgid "path is not file"
 msgstr "路径不为文件"
 
-#: core/api/fileproxy.py:59
+#: core/api/fileproxy.py:66
 msgid "upload failed tips"
 msgstr "上传出现错误，请查看日志"
 
-#: core/api/fileproxy.py:78
+#: core/api/fileproxy.py:91
 msgid "read success"
 msgstr "读取成功"
 
-#: core/api/fileproxy.py:78
+#: core/api/fileproxy.py:91
 msgid "read failed tips"
 msgstr "读取失败，请查看日志"
 
-#: core/api/fileproxy.py:107 core/api/fileproxy.py:110
+#: core/api/fileproxy.py:124 core/api/fileproxy.py:128
 msgid "download success"
 msgstr "下载成功"
 
-#: core/api/fileproxy.py:107
+#: core/api/fileproxy.py:124
 msgid "parse result failed tips"
 msgstr "解析返回失败，请查看日志"
 
-#: core/api/fileproxy.py:110
+#: core/api/fileproxy.py:128
 msgid "download failed tips"
 msgstr "下载失败，请查看日志"
 
-#: core/api/fileproxy.py:121
+#: core/api/fileproxy.py:138
 msgid "list success"
 msgstr "查看成功"
 
-#: core/api/fileproxy.py:121
+#: core/api/fileproxy.py:138
 msgid "list failed tips"
 msgstr "查看失败，请查看日志"
 
-#: core/api/fileproxy.py:131
+#: core/api/fileproxy.py:148
 msgid "create failed tips"
 msgstr "创建失败，请查看日志"
 
-#: core/api/home.py:107
+#: core/api/home.py:124
 msgid "request url not implemented"
 msgstr ""
 
-#: core/api/order.py:188
+#: core/api/order.py:219
 msgid "get log info failed"
 msgstr "获取日志信息失败"
 
-#: core/api/order.py:292
+#: core/api/order.py:352
 msgid "abort alread exist"
 msgstr "已经存在中止操作"
 
-#: core/api/order.py:333
+#: core/api/order.py:405
 msgid "not select error"
 msgstr "原命令不是select参数但存在选择key"
 
-#: core/api/order.py:335
+#: core/api/order.py:407
 msgid "not origin cmd"
 msgstr "原始命令不存在"
 
-#: core/api/targetinfo.py:58
+#: core/api/targetinfo.py:63
 msgid "target not exist"
 msgstr "执行对象不存在"
 
-#: core/api/targetinfo.py:74
+#: core/api/targetinfo.py:85
 #, python-format
 msgid "get info of target [%(target_name)s] field [%(field)s] failed"
 msgstr "执行对象 [%(target_name)s] 字段 [%(field)s] 获取信息失败"
 
-#: core/api/targetinfo.py:150
+#: core/api/targetinfo.py:178
 msgid "close success"
 msgstr "断开成功"
 
-#: core/api/targetinfo.py:152
+#: core/api/targetinfo.py:184
 msgid "close failed"
 msgstr "断开失败"
 
-#: core/api/targetinfo.py:167 core/api/targetinfo.py:171
+#: core/api/targetinfo.py:206 core/api/targetinfo.py:212
 msgid "connect success"
 msgstr "连接成功"
 
-#: core/api/targetinfo.py:173
+#: core/api/targetinfo.py:216
 msgid "connect timeout"
 msgstr "连接超时"
 
-#: core/api/test.py:19
+#: core/api/test.py:21
 msgid "what you want to translate"
 msgstr ""
 
-#: libs/wrapper.py:178
+#: libs/wrapper.py:202
 msgid "name attribute must exist"
 msgstr "name 字段必须存在"
 
-#: libs/wrapper.py:184
+#: libs/wrapper.py:210
 msgid "modified target not exist"
 msgstr "修改的对象不存在，请刷新后再试!"
 
-#: libs/wrapper.py:186
+#: libs/wrapper.py:216
 msgid "change to target already exist"
 msgstr "对象名已经存在，不能修改为此!"
 
-#: libs/wrapper.py:193
+#: libs/wrapper.py:225
 msgid "modify success"
 msgstr "修改成功"
 
-#: libs/wrapper.py:197
+#: libs/wrapper.py:229
 msgid "add info exist"
 msgstr "添加的信息已经存在，不能再插入!"
 
-#: libs/wrapper.py:200
+#: libs/wrapper.py:232
 msgid "add success"
 msgstr "添加成功!"
 
-#: libs/wrapper.py:202
+#: libs/wrapper.py:234
 msgid "add info null"
 msgstr "添加信息至少存在一个属性!"
