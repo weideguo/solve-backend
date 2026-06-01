@@ -1,9 +1,9 @@
-asgiref==3.8.1
+asgiref==3.11.1
 attrs==26.1.0
 certifi==2025.1.31
 charset-normalizer==3.4.1
 configparser==7.2.0
-Django==5.2
+Django==6.0.5
 django-cors-headers==4.7.0
 django-environ==0.12.0
 django-filter==25.1
