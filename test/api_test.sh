@@ -92,7 +92,29 @@ curl "http://127.0.0.1:8000/api/v1/session/extend?filter=exec:%E6%B5%8B%E8%AF%95
 curl "http://127.0.0.1:8000/api/v1/execution/?filter=eweas123124" -H "Authorization:Bearer ${xx}" -X POST -d "name=server_db12334987sd&a=daf&b=af"
 curl "http://127.0.0.1:8000/api/v1/execution/?filter=exec:%E8%8E%B7%E5%8F%96%E5%86%85%E7%BD%91ip&debug=1" -H "Authorization:Bearer ${xx}" -X POST -d ""
 
-curl "http://127.0.0.1:8000/api/v1/hostExecution" -H "Authorization:Bearer ${xx}" -X POST -d "host=192.168.245.128&cmd=echo 111\nsleep 3\echo 222"
+curl "http://127.0.0.1:8000/api/v1/hostExecution" -H "Authorization:Bearer ${xx}" -X POST -d "host=192.168.245.128&cmd=echo 111"
+
+
+cat >request.json << EOF
+{
+  "host": "192.168.245.128",
+  "cmd": "echo 111\nsleep 3\necho 222"
+}
+EOF
+
+cat >request.json << EOF
+{
+  "host": "192.168.245.128",
+  "cmd": ["echo 1\necho 2","echo 11\necho 22","echo 111\necho 222"]
+}
+EOF
+
+curl "http://127.0.0.1:8000/api/v1/hostExecution" \
+  -H "Authorization:Bearer ${xx}" \
+  -H "Content-Type:application/json" \
+  -H "Accept:application/json" \
+  -d @request.json
+
 
 curl "http://127.0.0.1:8000/api/v1/session/?filter=exec:%E6%89%A7%E8%A1%8Cshell" -H "Authorization:Bearer ${xx}" -d "cmd=ls -altr /root"
 

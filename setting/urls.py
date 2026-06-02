@@ -51,7 +51,9 @@ urlpatterns = [
     re_path(r"^api/v1/", include(("auth_new.urls", "auth"), namespace="auth")),
     # re_path(r"^api/v1/test/(.*)", Test.as_view()),  # 用于测试 正式部署请务必删除
 ]
-urlpatterns = format_suffix_patterns(urlpatterns)
+# DRF 会自动为每个 URL 模式附加上格式后缀的匹配规则
+# .../.json 强制返回 JSON 格式的数据
+# urlpatterns = format_suffix_patterns(urlpatterns)
 
 # 只有在debug模式才显示
 if settings.DEBUG:

@@ -750,10 +750,18 @@ class PauseRun(baseview.BaseView):
 
 
 class HostExecution(baseview.BaseView):
-    """
-    对主机执行命令，执行的命令支持跨行
-    """
 
+    @extend_schema(
+        summary="对主机执行命令，执行的命令支持跨行",
+        description="",
+        parameters=[],
+        request={
+            "application/json": {
+                "type": "object",
+                "example": {"host": "10.0.0.1", "cmd": "echo 1"},
+            }
+        },
+    )
     def post(self, request, args=None):
         data = request.data
         host = data["host"]
@@ -773,7 +781,22 @@ class HostExecution(baseview.BaseView):
         # 构造一个执行对象，用于存储执行的命令
         target_uuid = uuid.uuid1().hex
         target_name = config.prefix_temp + host + config.spliter + target_uuid
-        redis_tmp_client.hmset(target_name, {"_1": cmd})
+        if isinstance(cmd, str):
+            redis_tmp_client.hmset(target_name, {"_1": cmd})
+            # playbook只有两行
+            playbook_all = f"[{host}]" + "\n{{_1}}\n"
+        elif isinstance(cmd, list):
+            timeout = 0  # 当cmd 为list的时候，全部后台执行，因此设置超时时间为0
+            playbook_all = f"[{host}]\n"
+            i = 1
+            for _cmd in cmd:
+                redis_tmp_client.hmset(target_name, {f"_{i}": _cmd})
+                playbook_all += "{{" + f"_{i}" + "}}\n"
+                i += 1
+
+        else:
+            return Response({"status": 1, "msg": _("cmd field must be str or list")})
+
         redis_tmp_client.expire(target_name, config.tmp_config_expire_sec)
 
         job_info["target"] = target_name
@@ -788,8 +811,6 @@ class HostExecution(baseview.BaseView):
         if not os.path.exists(_path):
             os.makedirs(_path)
 
-        # playbook只有两行
-        playbook_all = f"[{host}]" + "\n{{_1}}\n"
         with open(playbook_file, "w") as f:
             f.write(playbook_all)
 

@@ -17,9 +17,9 @@ class MyMiddleware(MiddlewareMixin):
     def process_exception(self, request, exception):
         if isinstance(exception, ConnectionError):
             return HttpResponse("redis connection failed", status=500)
-        elif isinstance(exception, MultiValueDictKeyError):
+        elif isinstance(exception, MultiValueDictKeyError) or isinstance(exception, KeyError):
             MYLOGERROR.error(format_exc())
-            return HttpResponse("paramster error", status=400)
+            return HttpResponse("parameters error", status=400)
         else:
             MYLOGERROR.error(format_exc())
             return HttpResponse("unknow error, please check server log", status=500)

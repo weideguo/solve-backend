@@ -192,7 +192,6 @@ REST_FRAMEWORK = {
     # 访问频率设置  ('s', 'sec', 'm', 'min', 'h', 'hour', 'd', 'day')
     "DEFAULT_THROTTLE_RATES": {"anylogin": "10/m"},
     "DEFAULT_SCHEMA_CLASS": "drf_spectacular.openapi.AutoSchema",
-    "URL_FORMAT_OVERRIDE": None,  # 移除 ?format=json
 }
 
 # JWT_AUTH = {
